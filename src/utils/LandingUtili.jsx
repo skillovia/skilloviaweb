@@ -7,7 +7,7 @@ import Loader from '../componets/Loader'
 const LandingUtili = ({children}) => {
   return (
     <div>
-      <Loader />
+      {/* <Loader /> */}
         <Header/>
       {children}
       <Banner />

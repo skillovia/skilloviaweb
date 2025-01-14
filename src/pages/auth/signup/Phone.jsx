@@ -29,7 +29,7 @@ const Phone = () => {
               Input your phone number
               </label>
               <input
-                type="email"
+                type="number"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 bg-[#f0f6e6] focus:ring-green-400 focus:outline-none"

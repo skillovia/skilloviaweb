@@ -41,7 +41,7 @@ const FAQSection = () => {
 
   return (
     <LandingUtili>
-<Loader />
+{/* <Loader /> */}
  
     <div className="min-h-screen bg-[#F6FCEB] lg:p-6 lg:pt-[10rem] px-4 pt-[6rem]">
       <div className="max-w-3xl mx-auto">
