@@ -6,7 +6,7 @@ import Loader from '../../../componets/Loader'
 const UserLayout = ({children}) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F6FCEB]">
-      <Loader />
+      {/* <Loader /> */}
       <UserHeader />
       <div className="flex flex-1 relative">
         {/* Sidebar wrapper -  */}

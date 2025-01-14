@@ -29,7 +29,7 @@ const HomeHeader = () => {
           <img
             src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1735327571/SkilSpark%20%286%29/WHT_Horiz._Logo_2x_mwst8n.png"
             alt="Logo"
-            className="w-[200px] h-[50px] object-contain"
+            className="w-[100px] lg:w-[200px] lg:h-[50px] object-contain"
           />
         </div>
 

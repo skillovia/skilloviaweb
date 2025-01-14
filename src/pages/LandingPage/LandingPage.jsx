@@ -12,7 +12,7 @@ const LandingPage = () => {
   return (
 
     <>
-<Loader />
+{/* <Loader /> */}
     <HomeLayout>
 
  

@@ -8,7 +8,7 @@ import Loader from '../componets/Loader'
 const HomeLayout = ({children}) => {
   return (
     <div>
-      <Loader />
+      {/* <Loader /> */}
         <HomeHeader/>
       {children}
       <Banner />

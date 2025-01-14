@@ -29,7 +29,7 @@ const Header = () => {
           <img
             src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1735327781/WHT_Horiz._Logo_bbkq77.png"
             alt="Logo"
-            className="w-[200px] h-[50px] object-contain"
+              className="w-[100px] lg:w-[200px] lg:h-[50px] object-contain"
           />
         </div>
 

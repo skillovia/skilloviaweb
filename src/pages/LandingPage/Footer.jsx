@@ -2,53 +2,72 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <div className="bg-off min-h-48 lg:px-[4rem] px-3 pt-8 mb-4">
- 
-
- 
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            {/* Logo and copyright */}
-            <div className="mb-6 md:mb-0">
-              <div className="flex items-center gap-2">
-              <img src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1735327781/WHT_Horiz._Logo_bbkq77.png"
-              className=' w-[150px] lg:w-[200px] h-[50px]  object-contain' alt="" />
-              </div>
-              <p className="text-[12px] text-gray-600">© 2024 Present. All rights reserved.</p>
+    <div className="bg-off lg:px-[4rem]">
+      <div className="container mx-auto py-12">
+        {/* Top Section with Logo and Links */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-6">
+          {/* Logo Section */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-1">
+            <div className="space-y-4">
+              <img
+                src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1735327781/WHT_Horiz._Logo_bbkq77.png"
+                className="lg:w-[180px] w-[100px] h-auto object-contain"
+                alt="Logo"
+              />
+              <p className="text-sm text-gray-600 mt-4 max-w-xs">
+                Join our community and stay updated with the latest news and updates.
+              </p>
             </div>
+          </div>
 
-            {/* Footer links */}
-            <div className="grid grid-cols-3 gap-8 text-sm">
-              <div>
-                <h3 className="font-semibold mb-2">Pages</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">About</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Blog</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Contact</a></li>
-                </ul>
-              </div>
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h3 className="text-base font-semibold">Quick Links</h3>
+            <nav className="flex flex-col space-y-2">
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">About Us</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Our Services</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Blog</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Contact</a>
+            </nav>
+          </div>
 
-              <div>
-                <h3 className="font-semibold mb-2">Support</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">FAQs</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Terms of Service</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Privacy Policy</a></li>
-                </ul>
-              </div>
+          {/* Support */}
+          <div className="space-y-4">
+            <h3 className="text-base font-semibold">Support</h3>
+            <nav className="flex flex-col space-y-2">
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Help Center</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">FAQs</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Privacy Policy</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Terms of Service</a>
+            </nav>
+          </div>
 
-              <div>
-                <h3 className="font-semibold mb-2">Follow us</h3>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Facebook</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">Twitter</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-gray-900">LinkedIn</a></li>
-                </ul>
-              </div>
+          {/* Connect */}
+          <div className="space-y-4">
+            <h3 className="text-base font-semibold">Connect</h3>
+            <nav className="flex flex-col space-y-2">
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Twitter</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Facebook</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Instagram</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">LinkedIn</a>
+            </nav>
+          </div>
+        </div>
+
+        {/* Bottom Section with Copyright */}
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row justify-between items-center px-6 space-y-4 md:space-y-0">
+            <p className="text-sm text-gray-600">
+              © 2024 Present. All rights reserved.
+            </p>
+            <div className="flex space-x-6">
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Accessibility</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Cookie Policy</a>
+              <a href="#" className="text-sm text-gray-600 hover:text-gray-900">Legal Notice</a>
             </div>
           </div>
         </div>
-     
+      </div>
     </div>
   );
 };

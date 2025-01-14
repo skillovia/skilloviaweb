@@ -41,233 +41,164 @@ import ChatMobile from "./pages/User-Dashboard/Chat/MessageMobile/ChatMobile";
 import ChatMobileDetails from "./pages/User-Dashboard/Chat/MessageMobile/ChatMobileDetails";
 import PasswordReset from "./pages/User-Dashboard/Settings/General/Security/PasswordRest";
 import ExploreList from "./pages/User-Dashboard/Explore/ExploreList";
-
-
-
-
-
-
-
-
-
-
+import ProtectedRoute from "./Hooks/ProtectedRoutes";
+import Search from "./pages/Search/Search";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage/>,
   },
- 
-
   {
     path: "/ex",
     element: <ExamplePage/>,
   },
-
   {
     path: "/contact",
     element: <ContactForm/>,
   },
-
   {
     path: "/faqs",
     element: <FAQSection/>,
   },
-
-
   {
     path: "/blog",
     element: <Blog/>,
   },
- 
-
-
   {
     path: "/blog-details",
     element: <BlogDetail/>,
   },
-//  ===== auth ======= //
-
-{
-  path: "/login",
-  element: <LoginPage/>,
-},
-
-
-{
-  path: "/signup",
-  element: <Phone/>,
-},
-
-
-{
-  path: "/s",
-  element: <SignUp/>,
-},
-
-
-{
-  path: "/otp",
-  element: <Otp/>,
-},
-
-
-//  ===== auth ======= //
-
-
-
-
-//  ===== user ======= //
-
-{
-  path: "/user",
-  element: <User/>,
-},
-
-// ====explore====
-
-{
-  path: "/explore",
-  element: <ExploreSection/>,
-},
-
-{
-  path: "/explore-list",
-  element: <ExploreList/>,
-},
-
-
-//  ===== settings======= //
-{
-  path: "/settings",
-  element: <Settings/>,
-},
-
-{
-  path: "/settings/profile",
-  element: <Profile/>,
-},
-
-
-{
-  path: "/settings/skills",
-  element: <MySkillsPage/>,
-},
-
-{
-  path: "/settings/skill/add",
-  element: <AddSkill/>,
-},
-
-{
-  path: "/settings/skills-details",
-  element: <SkillDetails/>,
-},
-
-{
-  path: "/settings/kyc",
-  element: <KYCPage/>,
-},
-
-{
-  path: "/settings/kyc/identification",
-  element: <Identification/>,
-},
-
-{
-  path: "/settings/kyc/bill",
-  element: <UtilityBill/>,
-},
-
-{
-  path: "/settings/payment",
-  element: <Payment/>,
-},
-
-{
-  path: "/settings/password",
-  element: <PasswordReset/>,
-},
-
-{
-  path: "/settings/devices",
-  element: <LinkedDevices/>,
-},
-
-{
-  path: "/settings/notify",
-  element: <NotificationSettings/>,
-},
-
-{
-  path: "/settings/security",
-  element: <Security/>,
-},
-
-// ====chat ===
-
-{
-  path: "/messages",
-  element: <Message/>,
-},
+  {
+    path: "/login",
+    element: <LoginPage/>,
+  },
+  {
+    path: "/signup",
+    element: <Phone/>,
+  },
+  {
+    path: "/s",
+    element: <SignUp/>,
+  },
+  {
+    path: "/otp",
+    element: <Otp/>,
+  },
+  
+  // Protected Routes
+  {
+    path: "/user",
+    element: <ProtectedRoute><User/></ProtectedRoute>,
+  },
+  {
+    path: "/explore",
+    element: <ProtectedRoute><ExploreSection/></ProtectedRoute>,
+  },
+  {
+    path: "/explore-list",
+    element: <ProtectedRoute><ExploreList/></ProtectedRoute>,
+  },
+  {
+    path: "/settings",
+    element: <ProtectedRoute><Settings/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/profile",
+    element: <ProtectedRoute><Profile/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/skills",
+    element: <ProtectedRoute><MySkillsPage/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/skill/add",
+    element: <ProtectedRoute><AddSkill/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/skills-details",
+    element: <ProtectedRoute><SkillDetails/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/kyc",
+    element: <ProtectedRoute><KYCPage/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/kyc/identification",
+    element: <ProtectedRoute><Identification/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/kyc/bill",
+    element: <ProtectedRoute><UtilityBill/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/payment",
+    element: <ProtectedRoute><Payment/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/password",
+    element: <ProtectedRoute><PasswordReset/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/devices",
+    element: <ProtectedRoute><LinkedDevices/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/notify",
+    element: <ProtectedRoute><NotificationSettings/></ProtectedRoute>,
+  },
+  {
+    path: "/settings/security",
+    element: <ProtectedRoute><Security/></ProtectedRoute>,
+  },
+  {
+    path: "/messages",
+    element: <ProtectedRoute><Message/></ProtectedRoute>,
+  },
+  {
+    path: "/chat-details",
+    element: <ProtectedRoute><ChatMobileDetails/></ProtectedRoute>,
+  },
+  {
+    path: "/bookings",
+    element: <ProtectedRoute><Bookings/></ProtectedRoute>,
+  },
+  {
+    path: "/book-profile",
+    element: <ProtectedRoute><BookProfile/></ProtectedRoute>,
+  },
+  {
+    path: "/book-service",
+    element: <ProtectedRoute><BookService/></ProtectedRoute>,
+  },
+  {
+    path: "/book-form",
+    element: <ProtectedRoute><BookingForm/></ProtectedRoute>,
+  },
+  {
+    path: "/outward-progress",
+    element: <ProtectedRoute><OutwardProgress/></ProtectedRoute>,
+  },
+  {
+    path: "/outward-details",
+    element: <ProtectedRoute><OutwardDetails/></ProtectedRoute>,
+  },
+  {
+    path: "/inward-details",
+    element: <ProtectedRoute><InwardDetails/></ProtectedRoute>,
+  },
+  {
+    path: "/community",
+    element: <ProtectedRoute><Community/></ProtectedRoute>,
+  },
 
 
-{
-  path: "/messages",
-  element: <ChatMobile/>,
-},
+  {
+    path: "/search",
+    element: <ProtectedRoute><Search/></ProtectedRoute>,
+  },
 
-{
-  path: "/chat-details",
-  element: <ChatMobileDetails/>,
-},
-
-// bookings ===
-
-{
-  path: "/bookings",
-  element: <Bookings/>,
-},
-
-{
-  path: "/book-profile",
-  element: <BookProfile/>,
-},
-
-
-{
-  path: "/book-service",
-  element: <BookService/>,
-},
-
-{
-  path: "/book-form",
-  element: <BookingForm/>,
-},
-
-{
-  path: "/outward-progress",
-  element: <OutwardProgress/>,
-},
-
-{
-  path: "/outward-details",
-  element: <OutwardDetails/>,
-},
-
-{
-  path: "/inward-details",
-  element: <InwardDetails/>,
-},
-
-// ====community
-{
-  path: "/community",
-  element: <Community/>,
-},
 ]);
-
-
 
 export default function App() {
   return (
