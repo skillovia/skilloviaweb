@@ -13,7 +13,7 @@ import BlogDetail from "./pages/blog/BlogDetails";
 import LoginPage from "./pages/auth/login/Login";
 import Phone from "./pages/auth/signup/Phone";
 import Otp from "./pages/auth/signup/Otp";
-import SignUp from "./pages/auth/signup/S";
+import SignUp from "./pages/auth/signup/GoogleAuth";
 import User from "./pages/User-Dashboard/UserLayout/User";
 import Settings from "./pages/User-Dashboard/Settings/Settings";
 import Message from "./pages/User-Dashboard/Chat/Message";
@@ -43,6 +43,12 @@ import PasswordReset from "./pages/User-Dashboard/Settings/General/Security/Pass
 import ExploreList from "./pages/User-Dashboard/Explore/ExploreList";
 import ProtectedRoute from "./Hooks/ProtectedRoutes";
 import Search from "./pages/Search/Search";
+import { UserProfileProvider } from "./context/UserProfileContex";
+import ExploreProfiles from "./pages/User-Dashboard/Explore/ExploreProfiles";
+import AddBillingScreen from "./pages/User-Dashboard/Settings/General/PaymentSettings/Billing/AddBilling";
+import AddWithdrawal from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/AddWithdrawal";
+import WithdrawalManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/WithdrawalManagment";
+import BillingManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Billing/BillingManagment";
 
 const router = createBrowserRouter([
   {
@@ -78,7 +84,7 @@ const router = createBrowserRouter([
     element: <Phone/>,
   },
   {
-    path: "/s",
+    path: "/google-auth",
     element: <SignUp/>,
   },
   {
@@ -99,6 +105,13 @@ const router = createBrowserRouter([
     path: "/explore-list",
     element: <ProtectedRoute><ExploreList/></ProtectedRoute>,
   },
+
+
+  {
+    path: "/explore-profile",
+    element: <ProtectedRoute><ExploreProfiles/></ProtectedRoute>,
+  },
+
   {
     path: "/settings",
     element: <ProtectedRoute><Settings/></ProtectedRoute>,
@@ -198,12 +211,37 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><Search/></ProtectedRoute>,
   },
 
+  // payment
+
+  {
+    path: "/add-bills",
+    element: <ProtectedRoute><AddBillingScreen/></ProtectedRoute>,
+  }, 
+
+  {
+    path: "/bills",
+    element: <ProtectedRoute><BillingManagement/></ProtectedRoute>,
+  },
+  
+  
+  {
+    path: "/add-withdrawal",
+    element: <ProtectedRoute><AddWithdrawal/></ProtectedRoute>,
+  },  
+  
+  
+  {
+    path: "/get-paid",
+    element: <ProtectedRoute><WithdrawalManagement/></ProtectedRoute>,
+  }, 
+
 ]);
 
 export default function App() {
   return (
     <React.StrictMode>
       <RouterProvider router={router} />
+   
     </React.StrictMode>
   );
 }

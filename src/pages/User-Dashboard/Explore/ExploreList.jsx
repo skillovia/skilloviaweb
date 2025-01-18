@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import BackButton from '../../../componets/Back';
 import UserLayout from '../UserLayout/UserLayout';
+import { Link } from 'react-router-dom';
+import FollowButton from '../../../componets/FollowBtn';
 
 const ExploreList = () => {
   const suggestions = [
@@ -29,11 +31,13 @@ const ExploreList = () => {
           <div key={person.id} className="flex items-center justify-between border border-gray bg-input p-4 rounded-lg">
             <div className="flex items-center gap-3">
               {person.image ? (
+                <Link to ="/explore-profile">
                 <img
                   src={person.image}
                   alt={person.name}
                   className="w-12 h-12 rounded-full object-cover"
                 />
+                </Link>
               ) : (
                 <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500 text-lg">
@@ -46,9 +50,7 @@ const ExploreList = () => {
                 <p className="text-sm text-gray-600">{person.username}</p>
               </div>
             </div>
-            <button className="px-4 py-1.5 border border-gray-300 rounded-full hover:bg-gray-50 text-sm">
-              Follow
-            </button>
+           <FollowButton />
           </div>
         ))}
       </div>
