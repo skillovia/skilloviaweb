@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 const Verify = () => {
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    const decodedToken = JSON.parse(localStorage.getItem('decodedToken'));
+    const user_id = decodedToken?.id;
+    
+    if (!user_id) {
+      throw new Error('User ID not found in token');
+    }
+
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      throw new Error('Access token not found');
+    }
+
+    setEmail(decodedToken?.email || 'your email');
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto px-4 mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Email Verification Card */}
@@ -12,7 +30,7 @@ const Verify = () => {
       >
         <h2 className="text-xl font-semibold mb-2">Please verify your email</h2>
         <p className="text-teal-100 mb-4">
-          We sent a confirmation email to example@gmail.com, please visit your 
+          We sent a confirmation email to {email}, please visit your 
           email to review and activate your account
         </p>
         <div className="flex items-center text-teal-100 hover:text-white">
@@ -38,4 +56,5 @@ const Verify = () => {
     </div>
   );
 };
+
 export default Verify;

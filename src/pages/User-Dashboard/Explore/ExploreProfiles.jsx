@@ -1,8 +1,9 @@
 import { ArrowLeft, Star } from 'lucide-react';
-import UserLayout from '../../UserLayout/UserLayout';
+
 import { Link } from 'react-router-dom';
-import BackButton from '../../../../componets/Back';
-import FollowButton from '../../../../componets/FollowBtn';
+import BackButton from '../../../componets/Back';
+import UserLayout from '../UserLayout/UserLayout';
+import FollowButton from '../../../componets/FollowBtn';
 
 
 const BookProfile = () => {

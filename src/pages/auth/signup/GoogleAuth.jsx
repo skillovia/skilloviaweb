@@ -1,6 +1,6 @@
-import React from 'react';
+import { FcGoogle } from "react-icons/fc";
 
-const SignUp = () => {
+const GoogleAuth = () => {
   const handleGoogleAuth = () => {
     // Window features for the popup
     const width = 500;
@@ -19,7 +19,7 @@ const SignUp = () => {
 
     // Open the popup and store the reference
     const authWindow = window.open(
-      `https://testapi.humanserve.net/api/auth/google`,
+      `https://testapi.humanserve.net/api/auth/google?redirectUrl=${encodeURIComponent(window.location.origin + '/explore')}`,
       'Google Authentication',
       windowFeatures
     );
@@ -41,7 +41,8 @@ const SignUp = () => {
           authWindow.close();
           // Handle successful authentication
           console.log('Authentication successful');
-          // You can trigger a callback or state update here
+          // Redirect to the explore page
+          window.location.href = '/explore';
         }
       } catch (error) {
         // Catch cross-origin errors
@@ -55,13 +56,12 @@ const SignUp = () => {
   };
 
   return (
-    <div className="bg-red-500 w-full h-screen flex justify-center items-center">
-      
-      <button onClick={handleGoogleAuth}>
-            Sign up with Google
-          </button>
+    <div className="">
+      <button className="w-full bg-white text-gray-700 py-2 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none" onClick={handleGoogleAuth}>
+        <FcGoogle size={30} /> Sign up with Google
+      </button>
     </div>
   );
 };
 
-export default SignUp;
+export default GoogleAuth;

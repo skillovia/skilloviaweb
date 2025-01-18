@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Facebook, Apple, Loader2 } from 'lucide-react';
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import Slider from '../Slider';
 
 const LoginPage = () => {
@@ -11,13 +12,63 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const decodeAndStoreToken = (accessToken, refreshToken) => {
+    try {
+      const decodedToken = jwtDecode(accessToken);
+      
+      // Store both tokens
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('decodedToken', JSON.stringify(decodedToken));
+      
+      return decodedToken;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      setError('Invalid token received');
+      return null;
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/get/refreshtokenweb`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        const decodedToken = decodeAndStoreToken(data.data.accessToken, data.data.refreshToken);
+        return decodedToken ? data.data.accessToken : null;
+      } else {
+        throw new Error('Failed to refresh token');
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      // Clear all stored tokens on refresh failure
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('decodedToken');
+      return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await fetch('https://testapi.humanserve.net/api/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,23 +77,61 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
+      console.log(data);
 
       if (data.status === 'success') {
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
+        const decodedToken = decodeAndStoreToken(
+          data.data.accessToken,
+          data.data.refreshToken
+        );
         
-        // Navigate to explore page
-        navigate('/explore');
+        if (decodedToken) {
+          navigate('/explore');
+        }
       } else {
         setError('Invalid credentials. Please try again.');
       }
     } catch (err) {
       setError('Something went wrong. Please try again later.');
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const checkAndRefreshToken = async () => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      try {
+        const decoded = jwtDecode(accessToken);
+        const currentTime = Date.now() / 1000;
+        
+        // Refresh token if it expires in less than 5 minutes (300 seconds)
+        if (decoded.exp - currentTime < 300) {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      } catch (error) {
+        console.error('Error checking token:', error);
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await checkAndRefreshToken();
+      if (isValid) {
+        navigate('/explore');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   return (
     <div className="flex min-h-screen bg-gray-50 md:p-8 p-4 bg-[#f6fceb]">
