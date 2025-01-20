@@ -1,99 +1,170 @@
-import { ChevronLeft, Edit, Star } from 'lucide-react';
-import React from 'react'
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Edit, Loader2, Star } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import UserLayout from '../../../UserLayout/UserLayout';
 import BackButton from '../../../../../componets/Back';
 
 const SkillDetails = () => {
-    return (
-        <UserLayout>
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [skill, setSkill] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchSkillDetails = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills/user/all`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch skills');
+        }
+
+        const data = await response.json();
+        const foundSkill = data.data.find(skill => skill.id === parseInt(id));
         
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Header */}
-          <header className="flex items-center justify-between mb-6">
-           <BackButton label='Dog Walking' />
-            <button className="px-4 py-2 text-white bg-red-600 rounded-md">
-              Delete skill
-            </button>
-          </header>
-    
-          {/* Image Gallery */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="aspect-square rounded-lg overflow-hidden">
+        if (!foundSkill) {
+          throw new Error('Skill not found');
+        }
+
+        setSkill(foundSkill);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchSkillDetails();
+    }
+  }, [id]);
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this skill?')) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete skill');
+        }
+
+        navigate('/settings/skills');
+      } catch (err) {
+        alert('Error deleting skill: ' + err.message);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <UserLayout>
+      <div className="flex justify-center items-center h-64">
+             <Loader2 className="animate-spin w-12 h-12 text-secondary" />
+           </div>
+       </UserLayout>
+    );
+  }
+
+  if (error || !skill) {
+    return (
+      <UserLayout>
+        <div className="max-w-4xl mx-auto px-4 text-red-500">
+          Error: {error || 'Skill not found'}
+        </div>
+      </UserLayout>
+    );
+  }
+
+  // Prepare thumbnails array from skill data
+  const thumbnails = [
+    skill.thumbnail01,
+    skill.thumbnail02,
+    skill.thumbnail03,
+    skill.thumbnail04
+  ].filter(Boolean);
+
+  return (
+    <UserLayout>
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-6">
+          <BackButton label={skill.skill_type} />
+     
+        </header>
+
+        {/* Image Gallery */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {thumbnails.map((thumbnail, index) => (
+            <div key={index} className="aspect-square rounded-lg overflow-hidden">
               <img
-                src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1733911582/958d3c3fcfaf510ff7bda481f103d10e_zqshfn.jpg"
-                alt="Dog walking in forest"
+                src={`https://${thumbnail}`}
+                alt={`${skill.skill_type} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="aspect-square rounded-lg overflow-hidden">
-              <img
-                src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1736675545/49bb166c64fe8b5ed4a14b52d7fa0540_godgpk.jpg"
-                alt="Person with dog"
-                className="w-full h-full object-cover"
-              />
+          ))}
+   
+        </div>
+
+        {/* Service Info */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <h2 className="font-medium">{skill.skill_type}</h2>
+              <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                {skill.approval_status}
+              </span>
             </div>
-            <div className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-8 h-8 mx-auto mb-2 text-gray-400">Add</div>
-                <span className="text-gray-500">Add</span>
-              </div>
-            </div>
-          </div>
-    
-          {/* Service Info */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-medium">Dog walking</h2>
+            <Link to={`/settings/skills/edit/${skill.id}`}>
               <Edit className="w-4 h-4 text-gray-500" />
-            </div>
-            <div className="flex items-center gap-1 mb-2">
-              <span className="text-sm text-gray-600">Experience level: Expert</span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((n) => (
-                  <Star key={n} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                ))}
-                <Star className="w-4 h-4 text-gray-300" />
-              </div>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Hey there! I&apos;m a dedicated dog lover ready to take your furry friend on exciting walks. With a genuine passion for pets and a commitment to their well-being, I&apos;ll ensure your pets the exercise and care they deserve. I may not be a designer, but I bring enthusiasm and...
-            </p>
-            
-            {/* Hourly Rate */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2">Hourly rate</h3>
-              <p className="text-gray-600">£20 - 2 spark tokens</p>
-            </div>
+            </Link>
           </div>
-    
-          {/* Reviews */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-medium">Reviews (120)</h2>
-              <button className="text-secondary text-sm">See all</button>
-            </div>
-            {[1, 2].map((n) => (
-              <div key={n} className="mb-4 p-4 bg-input border border-gray rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium">Winifred Stamm</span>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4].map((star) => (
-                      <Star key={star} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-600">
-                  Iure voluptatem dicta necessitatibus cupiditate ut. In nulla consequatur voluptatibus voluptatem fugiat non voluptas dicta. Animi commodi delectus sapiente Accusantus...
-                </p>
-              </div>
-            ))}
+          <div className="flex items-center gap-1 mb-2">
+            <span className="text-sm text-gray-600">
+              Experience level: {skill.experience_level}
+            </span>
+          </div>
+          <p className="text-gray-600 mb-4">
+            {skill.description || 'No description provided'}
+          </p>
+          
+          {/* Hourly Rate */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-medium mb-2">Hourly rate</h3>
+            <p className="text-gray-600">
+              £{skill.hourly_rate}
+              {skill.spark_token && ` - ${skill.spark_token} spark tokens`}
+            </p>
           </div>
         </div>
-        </UserLayout>
-      );
-}
 
-export default SkillDetails
+        {/* Reviews Section - Placeholder */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-medium">Reviews (0)</h2>
+            <button className="text-secondary text-sm">See all</button>
+          </div>
+          <div className="text-center py-8 text-gray-500">
+            No reviews yet
+          </div>
+        </div>
+      </div>
+    </UserLayout>
+  );
+};
 
-
+export default SkillDetails;

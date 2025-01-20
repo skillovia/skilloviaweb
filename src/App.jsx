@@ -49,6 +49,7 @@ import AddBillingScreen from "./pages/User-Dashboard/Settings/General/PaymentSet
 import AddWithdrawal from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/AddWithdrawal";
 import WithdrawalManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/WithdrawalManagment";
 import BillingManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Billing/BillingManagment";
+import EditSkillPage from "./pages/User-Dashboard/Settings/Myskillovia/MySkills/EditSkill";
 
 const router = createBrowserRouter([
   {
@@ -129,9 +130,15 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><AddSkill/></ProtectedRoute>,
   },
   {
-    path: "/settings/skills-details",
+    path: "/settings/skills/:id",
     element: <ProtectedRoute><SkillDetails/></ProtectedRoute>,
   },
+
+  {
+    path: "/settings/skills/edit/:id",
+    element: <ProtectedRoute><EditSkillPage/></ProtectedRoute>,
+  },
+
   {
     path: "/settings/kyc",
     element: <ProtectedRoute><KYCPage/></ProtectedRoute>,
