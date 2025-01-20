@@ -1,33 +1,92 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import UserLayout from '../../../../UserLayout/UserLayout';
-import BackButton from '../../../../../../componets/Back';
+import { ChevronLeft } from 'lucide-react';
 
 const skills = [
+  
   "Electrical Services",
   "Laundry",
   "Fast Foods",
   "Food Bowls",
   "Make up",
   "Grocery Shopping",
-  "Fashion Designer"
-];
+  "Fashion Designer",
+  // Home services
+  "House Cleaning",
+  "Deep Cleaning",
+  "Carpet Cleaning",
+  "Gutter Cleaning",
+  "Pressure Washing",
+  "Pool Cleaning and Maintenance",
+  "Garage Organization",
+  "Decluttering Services",
+  "Chimney Sweeping",
+  "Upholstery Cleaning",
+  "Tiling (Floor/Wall)",
+  "Drywall Installation and Repair",
+  "Kitchen Remodeling",
+  "Bathroom Remodeling",
+  "Flooring Installation",
+  "HVAC Repairs and Installation",
+  "Cabinet Installation",
+  "Home Theater Setup",
+  "Smart Home Installation",
+  "Insulation Installation",
+  "Lawn Mowing",
+  "Landscaping",
+  "Tree Trimming and Removal",
+  "Garden Maintenance",
+  "Fence Repair and Installation",
+  "Deck Maintenance and Repairs",
+  "Power Washing",
+  "Pest Control Services",
+  "Snow Removal",
+  "Sprinkler System Installation and Repair",
+  "Plumbing",
+  "Electrical Repairs",
+  "Handyman Services",
+  "Pool Cleaning",
+  "Roofing Repairs",
+  "Painting (Interior/Exterior)"
+].sort();
 
 const experienceLevels = [
   { title: "Beginner", description: "I'm learning basics and exploring" },
   { title: "Intermediate", description: "I have some experience in the past" },
-  { title: "Expert", description: "I've done thi for years" }
+  { title: "Expert", description: "I've done this for years" }
 ];
+
+const MAX_FILES = 4;
+
+const CustomBackButton = ({ onClick, label }) => (
+  <button 
+    onClick={onClick} 
+    className="flex items-center text-gray-600 hover:text-gray-800"
+  >
+    <ChevronLeft className="w-5 h-5" />
+    <span className="ml-1">{label}</span>
+  </button>
+);
 
 export default function AddSkill() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     skill: '',
     experienceLevel: '',
     description: '',
-    hourlyRate: '5.00'
+    hourlyRate: '5.00',
+    thumbnails: []
   });
+  const [previewUrls, setPreviewUrls] = useState([]);
+
+  const filteredSkills = skills.filter(skill =>
+    skill.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSkillSelect = (skill) => {
     setFormData(prev => ({ ...prev, skill }));
@@ -42,20 +101,106 @@ export default function AddSkill() {
   };
 
   const handleBack = () => {
-    setStep(prev => prev - 1);
+    if (step === 1) {
+      navigate('/settings/skills');
+    } else {
+      setStep(prev => prev - 1);
+    }
   };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > MAX_FILES) {
+      setError(`Maximum ${MAX_FILES} images allowed`);
+      return;
+    }
+    
+    const invalidFiles = files.filter(file => !file.type.startsWith('image/'));
+    if (invalidFiles.length > 0) {
+      setError('Only image files are allowed');
+      return;
+    }
+
+    const urls = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    
+    setError(null);
+    setFormData(prev => ({ ...prev, thumbnails: files }));
+  };
+
+  const removeImage = (index) => {
+    const newThumbnails = [...formData.thumbnails];
+    const newPreviewUrls = [...previewUrls];
+    
+    URL.revokeObjectURL(newPreviewUrls[index]);
+    
+    newThumbnails.splice(index, 1);
+    newPreviewUrls.splice(index, 1);
+    
+    setFormData(prev => ({ ...prev, thumbnails: newThumbnails }));
+    setPreviewUrls(newPreviewUrls);
+  };
+
+  const renderImagePreviews = () => (
+    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+      {previewUrls.map((url, index) => (
+        <div key={index} className="relative">
+          <img
+            src={url}
+            alt={`Preview ${index + 1}`}
+            className="w-full h-32 object-cover rounded-lg"
+          />
+          <button
+            onClick={() => removeImage(index)}
+            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 
   const handleSubmit = async () => {
     try {
-      // Add your API call here to submit the form data
-      // For example:
-      // await axios.post('/api/skills', formData);
+      setIsLoading(true);
+      setError(null);
+
+      if (!formData.skill || !formData.experienceLevel || !formData.description || !formData.hourlyRate) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('skill_type', formData.skill);
+      formDataToSend.append('experience_level', formData.experienceLevel.toLowerCase());
+      formDataToSend.append('hourly_rate', formData.hourlyRate);
+      formDataToSend.append('description', formData.description);
       
-      // Navigate to settings page after successful submission
+      formData.thumbnails.forEach((file) => {
+        formDataToSend.append('thumbnails', file);
+      });
+
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: formDataToSend
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add skill');
+      }
+
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      
       navigate('/settings/skills');
     } catch (error) {
       console.error('Error submitting form:', error);
-      // Add error handling as needed
+      setError(error.message || 'Failed to add skill. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,13 +210,13 @@ export default function AddSkill() {
         return (
           <div className="w-full">
             <div className="flex items-center mb-4">
-              <button onClick={handleBack} className="p-2">
-                <BackButton label='Add skill'/>
-              </button>
-              
+              <CustomBackButton onClick={handleBack} label="Back to Skills" />
               <button
                 onClick={handleNext}
-                className="ml-auto bg-primary text-secondary font-medium px-4 py-3 rounded-full text-sm"
+                disabled={!formData.skill}
+                className={`ml-auto bg-primary text-secondary font-medium px-4 py-3 rounded-full text-sm ${
+                  !formData.skill ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Next, Experience level
               </button>
@@ -80,12 +225,14 @@ export default function AddSkill() {
               <input
                 type="text"
                 placeholder="Search skills"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full p-3 rounded-lg bg-input border-gray border"
               />
             </div>
             <h3 className="mb-4 text-lg font-medium">Select your skill</h3>
-            <div className="space-y-2">
-              {skills.map((skill) => (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {filteredSkills.map((skill) => (
                 <div
                   key={skill}
                   onClick={() => handleSkillSelect(skill)}
@@ -103,6 +250,11 @@ export default function AddSkill() {
                   </div>
                 </div>
               ))}
+              {filteredSkills.length === 0 && (
+                <div className="text-center py-4 text-gray-500">
+                  No skills found matching your search
+                </div>
+              )}
             </div>
           </div>
         );
@@ -111,13 +263,13 @@ export default function AddSkill() {
         return (
           <div className="w-full">
             <div className="flex items-center mb-4">
-              <button onClick={handleBack} className="p-2">
-                <BackButton label='Select Experince'/>
-              </button>
-              
+              <CustomBackButton onClick={handleBack} label="Select Skill" />
               <button
                 onClick={handleNext}
-                className="ml-auto bg-primary text-secondary font-medium px-4 py-3 rounded-full text-sm"
+                disabled={!formData.experienceLevel}
+                className={`ml-auto bg-primary text-secondary font-medium px-4 py-3 rounded-full text-sm ${
+                  !formData.experienceLevel ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Next, Description
               </button>
@@ -153,13 +305,13 @@ export default function AddSkill() {
         return (
           <div className="w-full">
             <div className="flex items-center mb-4">
-              <button onClick={handleBack} className="p-2">
-                <BackButton label='Add a Description' />
-              </button>
-            
+              <CustomBackButton onClick={handleBack} label="Experience Level" />
               <button
                 onClick={handleNext}
-                className="ml-auto bg-primary px-4 py-2 text-secondary rounded-full text-sm"
+                disabled={!formData.description}
+                className={`ml-auto bg-primary px-4 py-2 text-secondary rounded-full text-sm ${
+                  !formData.description ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Next, Hourly rate
               </button>
@@ -169,7 +321,7 @@ export default function AddSkill() {
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Enter a description..."
-              className="w-full h-40 p-4 rounded-lg border border-gray bg-input resize-none"
+              className="w-full h-40 p-4 rounded-lg border border-gray bg-input resize-none mb-4"
             />
           </div>
         );
@@ -178,18 +330,18 @@ export default function AddSkill() {
         return (
           <div className="w-full">
             <div className="flex items-center mb-4">
-              <button onClick={handleBack} className="p-2">
-                <BackButton label='Set your rate' />
-              </button>
-           
+              <CustomBackButton onClick={handleBack} label="Description" />
               <button
-                onClick={handleSubmit}
-                className="ml-auto bg-primary text-secondary px-4 py-2 rounded-full text-sm"
+                onClick={handleNext}
+                disabled={!formData.hourlyRate}
+                className={`ml-auto bg-primary text-secondary px-4 py-2 rounded-full text-sm ${
+                  !formData.hourlyRate ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                Done
+                Next, Add Images
               </button>
             </div>
-            <h3 className="mb-4 text-lg font-medium">Set your hourly/token rate.</h3>
+            <h3 className="mb-4 text-lg font-medium">Set your hourly/token rate</h3>
             <div className="relative">
               <input
                 type="number"
@@ -203,6 +355,46 @@ export default function AddSkill() {
             </div>
             <div className="mt-2 text-sm text-gray-500">
               2.5 Spark tokens
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="w-full">
+            <div className="flex items-center mb-4">
+              <CustomBackButton onClick={handleBack} label="Hourly Rate" />
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className={`ml-auto bg-primary text-secondary px-4 py-2 rounded-full text-sm ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isLoading ? 'Saving...' : 'Complete'}
+              </button>
+            </div>
+            <h3 className="mb-4 text-lg font-medium">Add skill images</h3>
+            <div className="mt-4">
+              <h4 className="text-lg font-medium mb-2">Upload Thumbnails (Max {MAX_FILES} images)</h4>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full p-2 border border-gray rounded-lg"
+              />
+              {formData.thumbnails.length > 0 && (
+                <div className="mt-2 text-sm text-gray-500">
+                  Selected {formData.thumbnails.length} of {MAX_FILES} images
+                </div>
+              )}
+              {renderImagePreviews()}
+              {error && (
+                <div className="mt-2 text-sm text-red-500">
+                  {error}
+                </div>
+              )}
             </div>
           </div>
         );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaPlus } from 'react-icons/fa';
 import { IoMdSettings } from 'react-icons/io';
 import UserLayout from './UserLayout';
 import SlidingPockets from './CashToken';
@@ -204,7 +204,7 @@ const ProfileCard = () => {
           </div>
         </div>
 
-        <div className="flex gap-4 text-sm">
+        <div className="flex gap-8 text-sm">
           <div>
             <div className="font-semibold">1.2k</div>
             <div className="text-gray-500">followers</div>
@@ -213,6 +213,13 @@ const ProfileCard = () => {
             <div className="font-semibold">404</div>
             <div className="text-gray-500">following</div>
           </div>
+          <Link
+      to="/settings/skill/add"
+      className="flex items-center px-4 py-2 border border-secondary text-secondary rounded-full hover:bg-secondary hover:text-white  transition-colors duration-200"
+    >
+      <FaPlus className="mr-2 text-lg" />
+      Add Skill
+    </Link>
         </div>
 
         <SlidingPockets />
