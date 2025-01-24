@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Loader, Loader2 } from 'lucide-react';
 import UserLayout from '../../../../User-Dashboard/UserLayout/UserLayout';
 import BackButton from '../../../../../componets/Back';
 
@@ -11,6 +11,7 @@ const EditSkillPage = () => {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletingImageIndex, setDeletingImageIndex] = useState(null);
   
   const [formData, setFormData] = useState({
     skill_type: '',
@@ -129,22 +130,82 @@ const EditSkillPage = () => {
     }
   };
 
-  const handleDeleteImage = (index) => {
-    console.log('Deleting image at index:', index);
-    setFormData(prev => {
-      const newThumbnails = [...prev.thumbnails];
-      newThumbnails[index] = null;
-      return {
-        ...prev,
-        thumbnails: newThumbnails
+  const handleDeleteImage = async (index) => {
+    if (!window.confirm('Are you sure you want to delete this image?')) {
+      return;
+    }
+  
+    setDeletingImageIndex(index);
+    try {
+      console.log('Deleting image at index:', index);
+      
+      const thumbnailKey = {
+        0: 'thumbnail01',
+        1: 'thumbnail02',
+        2: 'thumbnail03',
+        3: 'thumbnail04'
+      }[index];
+  
+      const requestBody = {
+        key: thumbnailKey
       };
-    });
-    
-    setFileObjects(prev => {
-      const newFiles = [...prev];
-      newFiles[index] = null;
-      return newFiles;
-    });
+  
+      console.log('Delete request details:', {
+        url: `${import.meta.env.VITE_BASE_URL}/skills/photo/${id}`,
+        requestBody
+      });
+  
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills/photo/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+  
+      console.log('Server response status:', response.status);
+      
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Server response:', responseData);
+      } catch (e) {
+        console.log('Could not parse response as JSON:', e);
+      }
+  
+      if (!response.ok) {
+        throw new Error(responseData?.message || 'Failed to delete image');
+      }
+  
+      console.log('Image deleted successfully');
+  
+      setFormData(prev => {
+        const newThumbnails = [...prev.thumbnails];
+        newThumbnails[index] = null;
+        return {
+          ...prev,
+          thumbnails: newThumbnails
+        };
+      });
+      
+      setFileObjects(prev => {
+        const newFiles = [...prev];
+        newFiles[index] = null;
+        return newFiles;
+      });
+  
+    } catch (err) {
+      console.error('Error deleting image:', {
+        error: err,
+        message: err.message,
+        index: index,
+        skillId: id
+      });
+      alert(`Error deleting image: ${err.message}`);
+    } finally {
+      setDeletingImageIndex(null);
+    }
   };
 
   const handleDelete = async () => {
@@ -183,21 +244,17 @@ const EditSkillPage = () => {
     try {
       const formDataObj = new FormData();
       
-      // Add basic form fields
       formDataObj.append('skill_type', formData.skill_type);
       formDataObj.append('experience_level', formData.experience_level);
       formDataObj.append('hourly_rate', formData.hourly_rate);
       formDataObj.append('description', formData.description);
   
-      // Handle thumbnails - use 'thumbnails' as the field name for files
       fileObjects.forEach((file, index) => {
         if (file) {
-          // Use just 'thumbnails' instead of 'thumbnail01', etc.
           formDataObj.append('thumbnails', file);
         }
       });
   
-      // Debug log
       console.log('Sending FormData with entries:');
       for (let pair of formDataObj.entries()) {
         console.log(pair[0], ':', pair[1] instanceof File ? `File: ${pair[1].name}` : pair[1]);
@@ -228,6 +285,7 @@ const EditSkillPage = () => {
       setSubmitting(false);
     }
   };
+
   if (loading) {
     return (
       <UserLayout>
@@ -266,7 +324,7 @@ const EditSkillPage = () => {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[0, 1, 2, 3].map((index) => (
               <div key={index} className="aspect-square relative group">
                 <label className="block w-full h-full cursor-pointer">
@@ -285,20 +343,25 @@ const EditSkillPage = () => {
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover rounded-lg"
                       />
+                      {/* Delete button positioned absolutely on top right */}
+                      <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDeleteImage(index);
+                      }}
+                      className="absolute z-50 top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors disabled:bg-red-400"
+                      disabled={deletingImageIndex === index}
+                    >
+                      {deletingImageIndex === index ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-5 h-5" />
+                      )}
+                    </button>
+                      {/* Upload overlay */}
                       <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                        <div className="flex gap-2">
-                          <Upload className="w-8 h-8 text-white" />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleDeleteImage(index);
-                            }}
-                            className="p-2 hover:bg-red-500 rounded-full"
-                          >
-                            <Trash2 className="w-6 h-6 text-white" />
-                          </button>
-                        </div>
+                        <Upload className="w-8 h-8 text-white" />
                       </div>
                     </>
                   ) : (
@@ -381,6 +444,8 @@ const EditSkillPage = () => {
             </div>
           </div>
 
+   
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"
@@ -392,7 +457,7 @@ const EditSkillPage = () => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50"
+              className="px-4 py-2 text-secondary font-semibold bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50"
               disabled={submitting}
             >
               {submitting ? 'Saving...' : 'Save Changes'}

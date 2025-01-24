@@ -4,6 +4,9 @@ import { Loader2, Trash2 } from 'lucide-react';
 
 import UserLayout from '../../../../UserLayout/UserLayout';
 import BackButton from '../../../../../../componets/Back';
+import EmptyState from '../../../../../../componets/EmptyState';
+import { IoBriefcaseOutline } from 'react-icons/io5';
+import { TbCreditCardRefund } from "react-icons/tb";
 
 const BillingManagement = () => {
   const navigate = useNavigate();
@@ -121,7 +124,17 @@ const BillingManagement = () => {
           ) : error ? (
             <p className="text-red-500 text-center py-4">{error}</p>
           ) : billingMethods.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No billing methods found</p>
+
+               <div className="min flex items-center justify-center  rounded-lg shadow-sm">
+     <EmptyState
+    title='No Billing method found'
+    description='Click the button below to add one'
+   icon={() => (
+    <TbCreditCardRefund  className='text-[4rem] text-text' />
+  )}
+
+     />
+   </div>
           ) : (
             billingMethods.map((method) => (
               <BillingMethodCard

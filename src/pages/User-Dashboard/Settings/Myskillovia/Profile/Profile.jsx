@@ -47,6 +47,8 @@ const Profile = () => {
         });
 
         const data = await response.json();
+        console.log(data);
+        
         if (data.status === 'success') {
           setFormData(prev => ({
             ...prev,
@@ -272,7 +274,7 @@ const Profile = () => {
           <>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
-                <BackButton label='Set your rate' />
+                <BackButton label='Edit profile' />
               </div>
               <button 
                 onClick={handleSubmit}
@@ -417,7 +419,7 @@ const Profile = () => {
                         <input
                           type="text"
                           name="city"
-                          value={formData.city}
+                          value={formData.location}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="Your city"
@@ -429,31 +431,20 @@ const Profile = () => {
                         <input
                           type="text"
                           name="streetAddress"
-                          value={formData.streetAddress}
+                          value={formData.street}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="St. Address"
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm text-gray-600 mb-1">Apt/Suite</label>
-                        <input
-                          type="text"
-                          name="aptSuite"
-                          value={formData.aptSuite}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
-                          placeholder="Apartment or suite number"
-                        />
-                      </div>
-
+               
                       <div>
                         <label className="block text-sm text-gray-600 mb-1">ZIP/Postal Code</label>
                         <input
                           type="text"
                           name="zipCode"
-                          value={formData.zipCode}
+                          value={formData.zip_code}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="ZIP code"

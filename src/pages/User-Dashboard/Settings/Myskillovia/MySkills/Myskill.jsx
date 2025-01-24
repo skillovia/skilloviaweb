@@ -4,6 +4,8 @@ import UserLayout from '../../../UserLayout/UserLayout';
 import BackButton from '../../../../../componets/Back';
 import { Link } from 'react-router-dom';
 import { HiOutlineExternalLink } from "react-icons/hi";
+import { IoBriefcaseOutline } from "react-icons/io5";
+import EmptyState from '../../../../../componets/EmptyState';
 
 const MySkillsPage = () => {
   const [skills, setSkills] = useState([]);
@@ -119,9 +121,16 @@ const MySkillsPage = () => {
         ))}
 
         {skills.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            No skills found. Add your first skill by clicking the button above.
-          </div>
+     <div className="min-h-[400px] flex items-center justify-center  rounded-lg shadow-sm">
+     <EmptyState
+   title= 'No Skills Added Yet'
+   description= 'Start adding your professional skills to showcase your expertise.'
+   icon={() => (
+    <IoBriefcaseOutline className='text-[4rem] text-text' />
+  )}
+
+     />
+   </div>
         )}
       </div>
     </UserLayout>

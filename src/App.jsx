@@ -50,6 +50,9 @@ import AddWithdrawal from "./pages/User-Dashboard/Settings/General/PaymentSettin
 import WithdrawalManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/WithdrawalManagment";
 import BillingManagement from "./pages/User-Dashboard/Settings/General/PaymentSettings/Billing/BillingManagment";
 import EditSkillPage from "./pages/User-Dashboard/Settings/Myskillovia/MySkills/EditSkill";
+import PersonalDetails from "./pages/auth/signup/PersonalDetails";
+import Success from "./componets/Success";
+import Invite from "./pages/User-Dashboard/Settings/Myskillovia/MySkills/Invite/Invite";
 
 const router = createBrowserRouter([
   {
@@ -60,6 +63,12 @@ const router = createBrowserRouter([
     path: "/ex",
     element: <ExamplePage/>,
   },
+
+  {
+    path: "/success",
+    element: <Success/>,
+  },
+
   {
     path: "/contact",
     element: <ContactForm/>,
@@ -85,14 +94,21 @@ const router = createBrowserRouter([
     element: <Phone/>,
   },
   {
-    path: "/google-auth",
-    element: <SignUp/>,
-  },
-  {
     path: "/otp",
     element: <Otp/>,
   },
   
+  {
+    path: "/personal-details",
+    element: <PersonalDetails/>,
+  },
+  
+
+  {
+    path: "/google-auth",
+    element: <SignUp/>,
+  },
+
   // Protected Routes
   {
     path: "/user",
@@ -166,6 +182,11 @@ const router = createBrowserRouter([
   {
     path: "/settings/notify",
     element: <ProtectedRoute><NotificationSettings/></ProtectedRoute>,
+  }, 
+  
+  {
+    path: "settings/invite",
+    element: <ProtectedRoute><Invite/></ProtectedRoute>,
   },
   {
     path: "/settings/security",

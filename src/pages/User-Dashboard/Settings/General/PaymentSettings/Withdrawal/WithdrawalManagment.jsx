@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Trash2, Loader2 } from 'lucide-react';
 import UserLayout from '../../../../UserLayout/UserLayout';
 import BackButton from '../../../../../../componets/Back';
+import EmptyState from '../../../../../../componets/EmptyState';
+import { TbCreditCardRefund } from 'react-icons/tb';
 
 
 const Modal = ({ isOpen, onClose, children, title }) => {
@@ -168,42 +170,108 @@ const WithdrawalManagement = () => {
   );
 
   return (
-    <UserLayout>
-      <div className="max-w-4xl mx-auto">
-        <div className="p-4">
-          <BackButton label="withdrawal" />
+    // <UserLayout>
+    //   <div className="max-w-4xl mx-auto">
+    //     <div className="p-4">
+    //       <BackButton label="withdrawal" />
           
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="animate-spin w-12 h-12 text-gray-400" />
-            </div>
-          ) : error ? (
-            <p className="text-red-500 text-center py-4">{error}</p>
-          ) : (
-            <div className="space-y- mt-4">
-              {withdrawalMethods.map((method) => (
-                <WithdrawalMethodCard
-                  key={method.id}
-                  id={method.id}
-                  bank={method.bank_name}
-                  accountNumber={method.account_number}
-                  name={method.account_name}
-                />
-              ))}
+    //       {loading ? (
+    //         <div className="flex justify-center items-center h-64">
+    //           <Loader2 className="animate-spin w-12 h-12 text-gray-400" />
+    //         </div>
+    //       ) : error ? (
+    //         <p className="text-red-500 text-center py-4">{error}</p>
+
+    //       ): withdrawalMethods.length === 0 ? (
+    //         <div className="min flex items-center justify-center  rounded-lg shadow-sm">
+    //         <EmptyState
+    //       title= 'No Skills Added Yet'
+    //       description= 'Start adding your professional skills to showcase your expertise.'
+    //       icon={() => (
+    //        <TbCreditCardRefund  className='text-[4rem] text-text' />
+    //      )}
+       
+    //         />
+    //       </div>
+    //       ): (
+          
+    //         <div className="space-y- mt-4">
+    //           {withdrawalMethods.map((method) => (
+    //             <WithdrawalMethodCard
+    //               key={method.id}
+    //               id={method.id}
+    //               bank={method.bank_name}
+    //               accountNumber={method.account_number}
+    //               name={method.account_name}
+    //             />
+    //           ))}
               
+    //           <button
+    //             onClick={() => navigate('/add-withdrawal')}
+    //             className="w-full md:w-auto py-3 px-6 bg-primary text-secondary rounded-full 
+    //                        font-semibold hover:bg-opacity-90 transition-colors  text-[14px] duration-200"
+    //           >
+    //             Add a New Withdrawal Method
+    //           </button>
+    //         </div>
+    //       )}
+    //     </div>
+    //     <DeleteConfirmationModal />
+    //   </div>
+    // </UserLayout>
+
+
+
+      <UserLayout>
+        <div className="max-w-4xl mx-auto">
+          <div className="p-4">
+            <BackButton label="withdrawal" />
+            
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="animate-spin w-12 h-12 text-gray-400" />
+              </div>
+            ) : error ? (
+              <p className="text-red-500 text-center py-4">{error}</p>
+            ) : withdrawalMethods.length === 0 ? (
+              <div className="min flex items-center justify-center rounded-lg shadow-sm">
+                <EmptyState
+                  title='No withdrawal method found'
+                  description='Click the button below to add one'
+                  icon={() => (
+                    <TbCreditCardRefund className='text-[4rem] text-text' />
+                  )}
+                />
+              </div>
+            ) : (
+              <div className="space-y-4 mt-4"> {/* Fixed the space-y- class */}
+                {withdrawalMethods.map((method) => (
+                  <WithdrawalMethodCard
+                    key={method.id}
+                    id={method.id}
+                    bank={method.bank_name}
+                    accountNumber={method.account_number}
+                    name={method.account_name}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Move the button outside the conditional rendering */}
+            <div className="mt-4">
               <button
                 onClick={() => navigate('/add-withdrawal')}
                 className="w-full md:w-auto py-3 px-6 bg-primary text-secondary rounded-full 
-                           font-semibold hover:bg-opacity-90 transition-colors  text-[14px] duration-200"
+                         font-semibold hover:bg-opacity-90 transition-colors text-[14px] duration-200"
               >
                 Add a New Withdrawal Method
               </button>
             </div>
-          )}
+          </div>
+          <DeleteConfirmationModal />
         </div>
-        <DeleteConfirmationModal />
-      </div>
-    </UserLayout>
+      </UserLayout>
+    
   );
 };
 

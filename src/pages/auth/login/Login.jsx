@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Slider from '../Slider';
+import GoogleAuth from '../signup/GoogleAuth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -198,7 +199,7 @@ const LoginPage = () => {
               <Facebook size={20} />
               Continue with Facebook
             </button>
-
+{/* 
             <button
               type="button"
               disabled={isLoading}
@@ -206,7 +207,9 @@ const LoginPage = () => {
             >
               <FcGoogle size={30} />
               Continue with Google
-            </button>
+            </button> */}
+            
+            <GoogleAuth />
 
             <button
               type="button"
