@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { HiCurrencyPound, HiSparkles } from 'react-icons/hi';
 
-const SlidingPockets = () => {
+const SlidingPockets = ({cash_balance,
+  spark_token_balance
+  }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const pockets = [
     {
       title: 'Cash balance',
-      amount: '3,000.00',
+      amount: cash_balance,
       icon: <HiCurrencyPound className="text-secondary" />,
       bgColor: 'bg-primary'
     },
     {
       title: 'Spark tokens',
-      amount: '50',
+      amount: 
+      spark_token_balance,
       icon: <HiSparkles className="text-black/40" />,
       bgColor: 'bg-book'
     }

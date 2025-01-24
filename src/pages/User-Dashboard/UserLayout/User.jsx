@@ -4,13 +4,24 @@ import { IoMdSettings } from 'react-icons/io';
 import UserLayout from './UserLayout';
 import SlidingPockets from './CashToken';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
+import Bio from './Bio';
+import BackButton from '../../../componets/Back';
+import { HiOutlineExternalLink } from 'react-icons/hi';
+import { IoBriefcaseOutline } from 'react-icons/io5';
+import EmptyState from '../../../componets/EmptyState';
 
 const ProfileCard = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const [skills, setSkills] = useState([]);
+
+
+
+
 
   // Helper function to ensure URL starts with https://
   const ensureHttps = (url) => {
@@ -122,6 +133,32 @@ const ProfileCard = () => {
     fetchProfile();
   }, []);
 
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills/user/all`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch skills');
+        }
+
+        const data = await response.json();
+        setSkills(data.data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, []);
+
   const StarRating = ({ rating }) => {
     return (
       <div className="flex gap-1">
@@ -177,7 +214,7 @@ const ProfileCard = () => {
         <div className="flex items-center gap-4">
           <div className="relative group">
             <img 
-              src={profileData.photourl || '/default-avatar.png'}
+              src={profileData.photourl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s'}
               alt="Profile" 
               className="w-12 h-12 rounded-full object-cover"
               onError={(e) => {
@@ -206,11 +243,12 @@ const ProfileCard = () => {
 
         <div className="flex gap-8 text-sm">
           <div>
-            <div className="font-semibold">1.2k</div>
+            <div className="font-semibold">{profileData.
+total_followers}</div>
             <div className="text-gray-500">followers</div>
           </div>
           <div>
-            <div className="font-semibold">404</div>
+            <div className="font-semibold">{profileData.total_following}</div>
             <div className="text-gray-500">following</div>
           </div>
           <Link
@@ -222,34 +260,73 @@ const ProfileCard = () => {
     </Link>
         </div>
 
-        <SlidingPockets />
+        <SlidingPockets  cash_balance ={profileData.cash_balance} 
+spark_token_balance={profileData.
+spark_token_balance
+}/>
 
         <div>
-          <div className="font-semibold mb-2">Bio</div>
-          <p className="text-sm text-gray-600">
-            {profileData.bio || "No bio available"}
-          </p>
+
+      
+
+          <Bio initialBio={ profileData.bio || "No bio available"} location={profileData.location || "No location available"} street={profileData.street || "No street available"} zip_code={profileData.zip_code || "No zip code available"} />
+
         </div>
+{/* skill */}
+<div className="max-w-4xl mx-auto px-4">
+    
 
-        <div>
-          <div className="font-semibold mb-2">Skills</div>
-          <div className="space-y-3">
-            {profileData.skills?.map((skill, index) => (
-              <div key={index} className="bg-input border border-gray rounded-lg p-3">
-                <div className="flex justify-between items-center mb-1">
-                  <div className="text-sm font-medium">{skill.skill_type}</div>
-                  <StarRating rating={parseInt(skill.hourly_rate) || 0} />
-                </div>
-                <div className="text-xs text-gray-500">
-                  Experience level: {skill.experience_level}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {skill.description}
-                </div>
+        {/* Skills List */}
+        {skills.map((skill) => (
+          <div key={skill.id} className="mb-4 p-4 bg-input border border-gray rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <h2 className="font-medium">{skill.skill_type}</h2>
+             
               </div>
-            ))}
+              <Link to={`/settings/skills/${skill.id}`}>
+              <span><HiOutlineExternalLink className='text-[1.5rem] text-secondary' /></span>
+        
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-1 mb-2">
+              <span className="text-sm text-gray-600">
+                Experience level: {skill.experience_level}
+              </span>
+            </div>
+
+            <p className="text-gray-600 mb-4 text-[13px]">
+              {skill.description || 'No description provided'}
+            </p>
+
+            {/* Hourly Rate */}
+            <div className="">
+              <h3 className="text-sm font-medium mb-2">Hourly rate</h3>
+              <p className="text-gray-600">
+                £{skill.hourly_rate}
+                {skill.spark_token && ` - ${skill.spark_token} spark tokens`}
+              </p>
+            </div>
+
+            {/* Thumbnails */}
+        
           </div>
-        </div>
+        ))}
+
+        {skills.length === 0 && (
+     <div className=" flex items-center justify-center  rounded-lg shadow-sm">
+     <EmptyState
+   title= 'No Skills Added Yet'
+   description= 'Start adding your professional skills to showcase your expertise.'
+   icon={() => (
+    <IoBriefcaseOutline className='text-[4rem] text-text' />
+  )}
+
+     />
+   </div>
+        )}
+      </div>
       </div>
     </UserLayout>
   );

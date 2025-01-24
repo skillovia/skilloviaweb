@@ -43,7 +43,6 @@ const UserHeader = () => {
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
-
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -91,12 +90,6 @@ const UserHeader = () => {
     },
   ];
 
-  if (loading) {
-    return     <div className="flex justify-center items-center  inset-0 bg-white   h-screen  z-50">
-    <Loader2 className="animate-spin w-12 h-12 text-secondary" />
-  </div>
-  }
-
   if (error) {
     return (
       <div className="h-16 bg-red-100 flex items-center justify-center text-red-500">
@@ -135,11 +128,13 @@ const UserHeader = () => {
         <div className="flex items-center gap-4">
           {/* Location */}
           <div className="hidden sm:flex items-center gap-2 text-gray-700">
-            <MapPin className="h-5 w-5" />
+            <MapPin className="h-5 w-5 text-secondary" />
             <section className="block">
-              <span className="block text-[12px]">Location</span>
-              <span className="text-sm truncate max-w-[100px] sm:max-w-none">
-                3329 Joyce St
+              <p className="font-semibold capitalize leading-[12px] text-secondary text-[14px] block">
+                {profileData?.location || "Not set"}
+              </p>
+              <span className="text-[12px] text-secondary truncate max-w-[100px] capitalize sm:max-w-none">
+                {profileData?.street || "Not set"} {profileData?.zip_code || "Not set"}
               </span>
             </section>
           </div>
@@ -163,15 +158,21 @@ const UserHeader = () => {
             )}
           </div>
 
-          {/* Profile */}
+          {/* Profile - Updated section */}
           <div className="relative">
             <Link to="/user" className="flex space-x-2">
-              <div className="h-8 w-8 rounded-full bg-gray-200 border-2 border-white cursor-pointer">
-                <img
-                  src={profileData?.photourl || "/default-avatar.png"}
-                  alt="Profile"
-                  className="h-full w-full rounded-full object-cover"
-                />
+              <div className="h-8 w-8 rounded-full bg-gray-200 border-2 border-white cursor-pointer relative">
+                {loading ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="animate-spin w-4 h-4 text-secondary" />
+                  </div>
+                ) : (
+                  <img
+                    src={profileData?.photourl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"}
+                    alt="Profile"
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                )}
               </div>
               <span className="pt-2"></span>
             </Link>
