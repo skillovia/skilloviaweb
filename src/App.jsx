@@ -53,6 +53,10 @@ import EditSkillPage from "./pages/User-Dashboard/Settings/Myskillovia/MySkills/
 import PersonalDetails from "./pages/auth/signup/PersonalDetails";
 import Success from "./componets/Success";
 import Invite from "./pages/User-Dashboard/Settings/Myskillovia/MySkills/Invite/Invite";
+import NearByDetails from "./pages/User-Dashboard/Explore/NearByDetails";
+import Following from "./pages/Followers/Following";
+import Followers from "./pages/Followers/Followers";
+import ForgotPassword from "./pages/auth/ForgotPsw";
 
 const router = createBrowserRouter([
   {
@@ -90,6 +94,11 @@ const router = createBrowserRouter([
     element: <LoginPage/>,
   },
   {
+    path: "/forgot-psw",
+    element: <ForgotPassword/>,
+  },
+
+  {
     path: "/signup",
     element: <Phone/>,
   },
@@ -114,9 +123,10 @@ const router = createBrowserRouter([
     path: "/user",
     element: <ProtectedRoute><User/></ProtectedRoute>,
   },
+  
   {
     path: "/explore",
-    element: <ProtectedRoute><ExploreSection/></ProtectedRoute>,
+    element:<ProtectedRoute><ExploreSection/></ProtectedRoute>,
   },
   {
     path: "/explore-list",
@@ -197,7 +207,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><Message/></ProtectedRoute>,
   },
   {
-    path: "/chat-details",
+    path: "/chat/:userId",
     element: <ProtectedRoute><ChatMobileDetails/></ProtectedRoute>,
   },
   {
@@ -261,6 +271,23 @@ const router = createBrowserRouter([
   {
     path: "/get-paid",
     element: <ProtectedRoute><WithdrawalManagement/></ProtectedRoute>,
+  }, 
+
+
+    
+  {
+    path:"/user-profile/:id",
+    element: <ProtectedRoute><NearByDetails/></ProtectedRoute>,
+  }, 
+
+  {
+    path:"/following",
+    element: <ProtectedRoute><Following/></ProtectedRoute>,
+  }, 
+
+  {
+    path:"/followers",
+    element: <ProtectedRoute><Followers/></ProtectedRoute>,
   }, 
 
 ]);

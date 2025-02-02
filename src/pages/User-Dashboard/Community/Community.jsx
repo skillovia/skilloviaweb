@@ -5,7 +5,7 @@ const Community = () => {
   return (
     <UserLayout>
 
-    <div className='flex justify-center items-center h-scregen'>
+    <div className='flex justify-center items-center h-scregen max-w-4xl mx-auto'>
       <h2>Comming soon........</h2>
     </div>
     </UserLayout>

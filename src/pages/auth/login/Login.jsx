@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Facebook, Apple, Loader2 } from 'lucide-react';
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Slider from '../Slider';
 import GoogleAuth from '../signup/GoogleAuth';
@@ -85,6 +85,9 @@ const LoginPage = () => {
           data.data.accessToken,
           data.data.refreshToken
         );
+
+        console.log(decodedToken);
+        
         
         if (decodedToken) {
           navigate('/explore');
@@ -188,6 +191,7 @@ const LoginPage = () => {
                 'Verify'
               )}
             </button>
+            <Link to="/forgot-psw" className='block text-secondary font-semibold'>Forgot password ?</Link>
 
             <div className="text-center text-gray-500">Or</div>
 
