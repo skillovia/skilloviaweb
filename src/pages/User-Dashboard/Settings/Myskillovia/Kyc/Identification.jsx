@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Upload } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Upload, Trash2 } from 'lucide-react';
 import UserLayout from '../../../UserLayout/UserLayout';
 import BackButton from '../../../../../componets/Back';
 
@@ -11,6 +11,16 @@ const formatIdType = (type) => {
     'International passport': 'international-passport'
   };
   return typeMap[type] || '';
+};
+
+// Helper function to convert API format to display format
+const formatDisplayType = (type) => {
+  const displayMap = {
+    'residence-permit': 'Residence permit',
+    'driving-license': 'Driving license',
+    'international-passport': 'International passport'
+  };
+  return displayMap[type] || type;
 };
 
 // Modal Component
@@ -52,8 +62,53 @@ const Identification = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fetchingDocs, setFetchingDocs] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [identityDocs, setIdentityDocs] = useState([]);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    fetchIdentityDocs();
+  }, []);
+
+  const fetchIdentityDocs = async () => {
+    try {
+      setFetchingDocs(true);
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token not found');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/settings/kyc/get/identity`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch identity documents');
+      }
+
+      const data = await response.json();
+      const formattedDocs = data.data.map(doc => ({
+        id: doc.id,
+        fileUrl: doc.document_url,
+        type: doc.kyc_id_type,
+        createdAt: doc.created_at,
+        approvalStatus: doc.approval_status,
+        kycMethod: doc.kyc_method
+      }));
+      
+      setIdentityDocs(formattedDocs);
+    } catch (err) {
+      console.error('Error fetching identity documents:', err);
+      setError(err.message);
+    } finally {
+      setFetchingDocs(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -63,8 +118,38 @@ const Identification = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      setDeleting(true);
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token not found');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/settings/kyc/delete/identity/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete identity document');
+      }
+
+      await fetchIdentityDocs();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error deleting identity document:', err);
+      setError(err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    // Validation
     if (!selectedType) {
       setError('Please select an ID type');
       return;
@@ -88,15 +173,14 @@ const Identification = () => {
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/settings/kyc/upload/identity`,
-
-
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`
           },
           body: formData
-        });
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -104,14 +188,26 @@ const Identification = () => {
       }
 
       setSuccess(true);
-      // Clear form after successful upload
       setFile(null);
       setSelectedType('');
+      await fetchIdentityDocs();
     } catch (err) {
       console.error('Error uploading ID:', err);
       setError(err.message || 'Failed to upload ID. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+    switch (status) {
+      case 'approved':
+        return `${baseClasses} bg-green-100 text-green-800`;
+      case 'rejected':
+        return `${baseClasses} bg-red-100 text-red-800`;
+      default:
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
     }
   };
 
@@ -124,8 +220,7 @@ const Identification = () => {
             <BackButton label='Kyc' />
           </div>
           <button
-            className={`bg-primary text-secondary font-semibold px-4 py-2 rounded-full ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-500'
-              }`}
+            className={`bg-primary text-secondary font-semibold px-4 py-2 rounded-full ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-500'}`}
             onClick={handleSubmit}
             disabled={loading}
           >
@@ -143,7 +238,7 @@ const Identification = () => {
         {/* Success message */}
         {success && (
           <div className="mb-4 p-3 bg-green-100 text-green-600 rounded-md">
-            ID document uploaded successfully!
+            Operation completed successfully!
           </div>
         )}
 
@@ -182,6 +277,57 @@ const Identification = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Existing Documents Section */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Uploaded Identity Documents</h2>
+          {fetchingDocs ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {identityDocs.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-4">
+                    <img
+                    src={` https://${doc.fileUrl}`  }
+                   
+                      alt="Identity Document"
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                    <div>
+                      <div className="font-medium">{formatDisplayType(doc.type)}</div>
+                      <div className="text-sm text-gray-500">
+                        Uploaded on {new Date(doc.createdAt).toLocaleDateString()}
+                      </div>
+                      <div className="mt-1">
+                        <span className={getStatusBadgeClass(doc.approvalStatus)}>
+                          {doc.approvalStatus.charAt(0).toUpperCase() + doc.approvalStatus.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(doc.id)}
+                    disabled={deleting}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+              {identityDocs.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No identity documents uploaded yet
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ID Type Selection Modal */}

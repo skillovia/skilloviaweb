@@ -1,82 +1,136 @@
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ChatMobile = () => {
-  const [messages] = useState([
-    {
-      id: 1,
-      name: 'Schowalter LLC',
-      message: 'You: Thank you...',
-      time: '11:37am',
-      link: "chat-details",
-      avatar: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1736675545/49bb166c64fe8b5ed4a14b52d7fa0540_godgpk.jpg'
-    },
-    {
-      id: 2,
-      name: 'Wuckert - Price',
-      message: 'Soluta natus quispiam omnis...',
-      time: '11:37am',
-      link: "chat-details",
-      avatar: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1732127824/ba7f483bdba74da74c4b90318ac19403_cjqfe2.jpg'
-    },
-    {
-      id: 3,
-      name: 'Johnston and Sons',
-      message: 'Doloremque fugiat maxime r...',
-      time: '11:37am',
-      link: "chat-details",
-      avatar: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1736675548/958d3c3fcfaf510ff7bda481f103d10e_1_tl3nmj.jpg'
-    },
-    {
-      id: 4,
-      name: 'Treutel Group',
-      message: 'Pariatur perferendis corpora...',
-      time: '11:37am',
-      link: "chat-details",
-      avatar: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1732326507/9d48ce83863147361d369d469dcf3993_yaemuc.jpg'
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        
+        if (!accessToken) {
+          throw new Error('No access token found');
+        }
+
+        const response = await fetch('https://testapi.humanserve.net/api/message/chat/history/users', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+
+        const data = await response.json();
+        console.log(data);
+        
+        
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          const formattedUsers = data.data.map(user => ({
+            id: user.user_id,
+            name: user.name,
+            message: user.
+            lastmessage || 'Recent..',
+            time: formatTime(user.lastmessagetime
+            ) || '1 mins',
+            unreadCount: user.
+            unreadmessagecount
+             || 0,
+            photoUrl: user.photourl 
+              ? `https://${user.photourl}`
+              : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'
+          }));
+          setUsers(formattedUsers);
+        }
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching users:', err);
+        if (err.message.includes('token')) {
+          navigate('/login');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [navigate]);
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return null;
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', { 
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true 
+    }).toLowerCase();
+  };
+
+  const handleUserClick = (user) => {
+    navigate(`/chat/${user.id}`, {
+      state: {
+        userId: user.id,
+        userName: user.name,
+        userPhoto: user.photoUrl
+      }
+    });
+  };
 
   return (
-    <div className="block lg:hidden">
-      {/* Chat List */}
-      <div>
-        <div className="px-4">
-          <div className="relative hidden">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search messages"
-              className="w-full pl-10 pr-4 py-2 border rounded-full bg-input border-gray focus:outline-none focus:border-green-500"
-            />
+    <div className="block lg:hidden ">
+      <div className="h-screen overflow-y-auto">
+        {loading && (
+          <div className="p-4 text-center">
+            Loading...
           </div>
-        </div>
+        )}
+        
+        {error && (
+          <div className="p-4 text-center text-red-500">
+            Error: {error}
+          </div>
+        )}
 
-        <div className="overflow-y-auto">
-          {messages.map((chat) => (
-            <Link 
-              to={`/${chat.link}`} 
-              key={chat.id}
-              className="block"
-            >
-              <div className="flex items-center p-4 hover:bg-gray-50 cursor-pointer">
-                <img
-                  src={chat.avatar}
-                  alt={chat.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div className="ml-4 flex-1">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">{chat.name}</h3>
-                    <span className="text-sm text-gray-500">{chat.time}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 truncate">{chat.message}</p>
+        {!loading && !error && users.map((user) => (
+          <div
+            key={user.id}
+            onClick={() => handleUserClick(user)}
+            className="flex items-center p-4 border-b border-gray cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+          >
+            <img
+              src={user.photoUrl}
+              alt={user.name}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div className="ml-4 flex-1">
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium text-gray-900">
+                  {user.name}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">
+                    {user.time}
+                  </span>
+                  {user.unreadCount > 0 && (
+                    <span className="bg-green-500 text-white text-sm font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {user.unreadCount}
+                    </span>
+                  )}
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
+              <p className="text-sm text-gray-500 truncate mt-1">
+                {user.message}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import BackButton from '../../../../../componets/Back';
 const UtilityBill = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fetchingBills, setFetchingBills] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [utilityBills, setUtilityBills] = useState([]);
@@ -17,12 +18,12 @@ const UtilityBill = () => {
 
   const fetchUtilityBills = async () => {
     try {
+      setFetchingBills(true);
       const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) throw new Error('Access token not found');
 
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/kyc/get/utility`,
-        
+        `${import.meta.env.VITE_BASE_URL}/settings/kyc/get/utility`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`
@@ -35,10 +36,21 @@ const UtilityBill = () => {
       }
 
       const data = await response.json();
-      setUtilityBills(data);
+      const formattedBills = data.data.map(bill => ({
+        id: bill.id,
+        fileUrl: bill.document_url,
+        fileName: bill.kyc_id_type,
+        createdAt: bill.created_at,
+        approvalStatus: bill.approval_status,
+        kycMethod: bill.kyc_method
+      }));
+      
+      setUtilityBills(formattedBills);
     } catch (err) {
       console.error('Error fetching utility bills:', err);
       setError(err.message);
+    } finally {
+      setFetchingBills(false);
     }
   };
 
@@ -57,7 +69,7 @@ const UtilityBill = () => {
       if (!accessToken) throw new Error('Access token not found');
 
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/kyc/delete/utility/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/settings/kyc/delete/utility/${id}`,
         {
           method: 'DELETE',
           headers: {
@@ -125,6 +137,18 @@ const UtilityBill = () => {
     }
   };
 
+  const getStatusBadgeClass = (status) => {
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+    switch (status) {
+      case 'approved':
+        return `${baseClasses} bg-green-100 text-green-800`;
+      case 'rejected':
+        return `${baseClasses} bg-red-100 text-red-800`;
+      default:
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
+    }
+  };
+
   return (
     <UserLayout>
       <div className="max-w-4xl mx-auto lg:p-6 px-4">
@@ -188,40 +212,51 @@ const UtilityBill = () => {
         {/* Existing Bills Section */}
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-4">Uploaded Utility Bills</h2>
-          <div className="space-y-4">
-            {utilityBills.map((bill) => (
-              <div
-                key={bill.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={bill.fileUrl}
-                    alt="Utility Bill"
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                  <div>
-                    <div className="font-medium">{bill.fileName}</div>
-                    <div className="text-sm text-gray-500">
-                      Uploaded on {new Date(bill.createdAt).toLocaleDateString()}
+          {fetchingBills ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {utilityBills.map((bill) => (
+                <div
+                  key={bill.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={` https://${bill.fileUrl}`  }
+                      alt="Utility Bill"
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                    <div>
+                      <div className="font-medium">{bill.fileName}</div>
+                      <div className="text-sm text-gray-500">
+                        Uploaded on {new Date(bill.createdAt).toLocaleDateString()}
+                      </div>
+                      <div className="mt-1">
+                        <span className={getStatusBadgeClass(bill.approvalStatus)}>
+                          {bill.approvalStatus.charAt(0).toUpperCase() + bill.approvalStatus.slice(1)}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => handleDelete(bill.id)}
+                    disabled={deleting}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleDelete(bill.id)}
-                  disabled={deleting}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-full"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            ))}
-            {utilityBills.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                No utility bills uploaded yet
-              </div>
-            )}
-          </div>
+              ))}
+              {utilityBills.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No utility bills uploaded yet
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </UserLayout>

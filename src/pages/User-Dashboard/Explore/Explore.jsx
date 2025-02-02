@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import UserLayout from '../UserLayout/UserLayout';
 import Verify from '../Verify/Verify';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 
 const categories = [
   { id: '1', name: 'DIY', image: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1732441112/Image_1_byedwn.png' },
@@ -12,16 +12,58 @@ const categories = [
   { id: '5', name: 'Photography', image: 'https://res.cloudinary.com/dmhvsyzch/image/upload/v1732441115/Image_sfljtt.png' },
 ];
 
-const people = [
-  { id: '1', name: 'Sophia Johnson', username: '@sophiaJJ', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
-  { id: '2', name: 'Emily Davis', username: '@davis', image: 'https://randomuser.me/api/portraits/women/2.jpg' },
-  { id: '3', name: 'Oliver Smith', username: '@oliverSmith', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
-  { id: '4', name: 'Ava Brown', username: '@avaBrown', image: 'https://randomuser.me/api/portraits/women/3.jpg' },
-  { id: '5', name: 'Noah Wilson', username: '@WilsonNoah', image: 'https://randomuser.me/api/portraits/men/2.jpg' },
-  { id: '6', name: 'Emma Martinez', username: '@emmaMtz', image: 'https://randomuser.me/api/portraits/women/4.jpg' },
-];
-
 const ExploreSection = () => {
+  const [nearbyPeople, setNearbyPeople] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchNearbyPeople = async () => {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        // Get coordinates from decoded token in localStorage
+        const decodedToken = JSON.parse(localStorage.getItem('decodedToken'));
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!decodedToken || !accessToken) {
+          throw new Error('Authentication required');
+        }
+
+        const { lat, lon } = decodedToken;
+        
+        // Updated URL structure to match the API endpoint
+        const response = await fetch(`https://testapi.humanserve.net/api/users/people/nearby/38.7945952/-106.5348379`, {
+        // const response = await fetch(`https://testapi.humanserve.net/api/users/people/nearby/${lat}/${lon}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+          // Removed body since it's a GET request and coordinates are in the URL
+        });
+
+        const data = await response.json();
+        console.log(data);
+        
+
+        if (data.status === 'success') {
+          setNearbyPeople(data.data);
+        } else {
+          throw new Error(data.message || 'Failed to fetch nearby people');
+        }
+      } catch (err) {
+        console.error('Error fetching nearby people:', err);
+        setError('Unable to load nearby people. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNearbyPeople();
+  }, []);
+
   return (
     <UserLayout>
       <Verify />
@@ -60,33 +102,48 @@ const ExploreSection = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">People nearby</h2>
-        
           </div>
-          <div className="flex gap-8 overflow-x-auto pb-4">
-            {people.map(person => (
-              <Link 
-                key={person.id} 
-                // to={`/profile/${person.id}`}
-                to="/book-profile"
-                className="flex flex-col items-center flex-shrink-0 hover:opacity-90 transition-opacity"
-              >
-                <div className="w-24 h-24 mb-2 overflow-hidden rounded-full">
-                  <img
-                    src={person.image}
-                    alt={person.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="text-sm text-center text-gray-800 whitespace-nowrap">
-                  {person.name}
-                </p>
-              </Link>
-            ))}
-          </div>
+          
+          {isLoading && (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="animate-spin w-8 h-8 text-gray-500" />
+            </div>
+          )}
+
+          {error && (
+            <div className="text-red-500 text-center py-4">
+              {error}
+            </div>
+          )}
+
+          {!isLoading && !error && (
+            <div className="flex gap-8 overflow-x-auto pb-4">
+    {nearbyPeople.map((person) => (
+  <Link 
+    key={person.id} 
+    to={`/user-profile/${person.id}`} // Pass user ID in the URL
+    className="flex flex-col items-center flex-shrink-0 hover:opacity-90 transition-opacity"
+  >
+    <div className="w-24 h-24 mb-2 overflow-hidden rounded-full">
+      <img
+        src={person.photourl ? `https://${person.photourl}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
+        alt={person.firstname}
+        className="w-full h-full object-cover"
+      />
+    </div>
+    <p className="text-sm text-center flex space-x-2 text-gray-800 whitespace-nowrap">
+      <span>{person.firstname}</span>
+      <span>{person.lastname}</span>
+    </p>
+  </Link>
+))}
+
+            </div>
+          )}
         </div>
       </div>
     </UserLayout>
   );
 };
 
-export default ExploreSection;
+export default ExploreSection

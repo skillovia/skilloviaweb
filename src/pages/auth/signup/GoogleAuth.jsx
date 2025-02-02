@@ -17,6 +17,8 @@ const GoogleAuth = () => {
       const { data } = event;
       if (data?.status === 'success') {
         console.log('Authentication successful:', data);
+        console.log(data.data.accessToken);
+        
         localStorage.setItem('accessToken', data.data.accessToken);
         localStorage.setItem('refreshToken', data.data.refreshToken);
         navigate('/explore');
@@ -39,7 +41,8 @@ const GoogleAuth = () => {
       const top = window.screenY + (window.outerHeight - height) / 2;
 
       const popup = window.open(
-        `${import.meta.env.VITE_BASE_URL}/auth/google`,
+        // `https://dreamsimuapi.vercel.app/api/google`,
+        `https://testapi.humanserve.net/api/auth/google`,
         'Google Login',
         `width=${width},height=${height},left=${left},top=${top}`
       );
