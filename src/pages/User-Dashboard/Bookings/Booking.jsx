@@ -1,67 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import UserLayout from '../UserLayout/UserLayout';
+import { Loader2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 
-const BookingCard = ({ title, description, date, status, id, link }) => (
-  <Link 
-    to={link}
-    className="block bg-input border border-gray p-4 rounded-lg mb-4 cursor-pointer hover:bg-gray-50 transition-colors"
-  >
-    <div className="flex items-start gap-4">
-      <div className="rounded-lg flex items-center justify-center">
-        <img 
-          src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1736676897/cfa21e3a40d7c9b2264ad825ec570dbf_bf6ebf.jpg"
-          alt="AC Unit Icon"
-          className="w-24 h-24 rounded-lg"
-        />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-medium text-gray-900">{title}</h3>
-        <p className="text-[12px] text-gray-600 mt-1">{description}</p>
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-sm text-gray-500">{date}</span>
-          <span className="px-2 py-1 text-xs rounded-lg bg-primary text-secondary">
-            {status}
-          </span>
+const BookingCard = ({ id, title, description, date, status, location, fileUrl, type }) => {
+  return (
+    <div className="block bg-input border border-gray p-4 rounded-lg mb-4 hover:bg-gray-50 transition-colors">
+      <div className="flex items-start gap-4">
+        <div className="rounded-lg flex items-center justify-center">
+          <img
+            src={`https://${fileUrl}`}
+            alt="Booking"
+            className="w-28 h-28 rounded-lg object-cover"
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <h3 className="font-medium text-gray-900 text-[12px] lg:text-[20px]">{title}</h3>
+            <div className="flex gap-2">
+              <Link 
+                to={type === 'outward' ? `/outward-progress/${id}` : `/inward-details/${id}`}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={`${type.charAt(0).toUpperCase() + type.slice(1)} Booking Details`}
+              >
+                {type === 'outward' ? (
+                  <ArrowUpRight className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <ArrowDownLeft className="w-4 h-4 text-gray-600" />
+                )}
+              </Link>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{date}</p>
+          <div className="flex items-center gap-4 mt-2">
+            <span className={`px-2 py-1 text-xs rounded-lg ${
+              status === 'accepted' 
+                ? 'bg-green-100 text-green-800'
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
-  </Link>
-);
+  );
+};
 
 const Bookings = () => {
   const [activeTab, setActiveTab] = useState('inward');
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const inwardBookings = [
-    {
-      id: 'in-1',
-      title: "AC Unit Repair",
-      description: "This is a booking description for this particular card. You can click on this card to view this in extension.",
-      date: "23 Sept, 2022 - 12:39 AM",
-      status: "Active",
-      link: "/inward-details"
-    },
-   
-    
-  ];
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError(null);
+      const accessToken = localStorage.getItem('accessToken');
 
-  const outwardBookings = [
-    {
-      id: 'out-1',
-      title: "Window Cleaning",
-      description: "Regular maintenance window cleaning service.",
-      date: "24 Sept, 2022 - 2:00 PM",
-      status: "Active",
-      link: "/outward-progress"
-    }
-  ];
+      const apiUrl = activeTab === 'outward'
+        ? 'https://testapi.humanserve.net/api/bookings/get/user/outward'
+        : 'https://testapi.humanserve.net/api/bookings/get/user/inward';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch bookings');
+        }
+
+        const data = await response.json();
+        console.log(data.data);
+        
+        setBookings(data.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [activeTab]); 
 
   const TabButton = ({ id, label }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`pb-2 font-medium border-b-2 transition-colors ${
+      className={`pb-2 font-medium border-b-2 border-gray transition-colors ${
         activeTab === id
-          ? 'text-secondary border-secondary border-b-4'
+          ? 'text-secondary border-secondary border-b-4 '
           : 'text-gray-400 border-transparent hover:text-gray-600'
       }`}
     >
@@ -71,37 +105,48 @@ const Bookings = () => {
 
   return (
     <UserLayout>
-      <div className="max-w-4xl mx-auto px-4">
-        <h2 className="text-xl font-semibold mb-6">Bookings</h2>
-        
-        <div className="flex gap-8 mb-6">
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <h2 className="text-2xl font-semibold mb-6">Bookings</h2>
+
+        <div className="flex gap-8 mb-6 border-b border-b-secondary">
           <TabButton id="inward" label="Inward Bookings" />
           <TabButton id="outward" label="Outward Bookings" />
         </div>
 
         <div>
-          {activeTab === 'inward' && inwardBookings.map((booking) => (
-            <BookingCard
-              key={booking.id}
-              id={booking.id}
-              title={booking.title}
-              description={booking.description}
-              date={booking.date}
-              status={booking.status}
-              link={booking.link}
-            />
-          ))}
-          {activeTab === 'outward' && outwardBookings.map((booking) => (
-            <BookingCard
-              key={booking.id}
-              id={booking.id}
-              title={booking.title}
-              description={booking.description}
-              date={booking.date}
-              status={booking.status}
-              link={booking.link}
-            />
-          ))}
+          {loading && (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="animate-spin w-12 h-12 text-secondary" />
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-8 text-red-500">
+              Error loading bookings: {error}
+            </div>
+          )}
+
+          {!loading && !error && bookings.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No {activeTab} bookings found
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            bookings.map((booking) => (
+              <BookingCard
+                key={booking.id}
+                id={booking.id}
+                title={booking.title}
+                description={booking.description}
+                date={booking.booking_date}
+                status={booking.status}
+                location={booking.booking_location}
+                fileUrl={booking.file_url}
+                type={activeTab}
+              />
+            ))}
         </div>
       </div>
     </UserLayout>

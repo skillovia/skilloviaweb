@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Search, Send, Loader2 } from 'lucide-react';
 import UserLayout from '../UserLayout/UserLayout';
 import ChatMobile from './MessageMobile/ChatMobile';
@@ -11,6 +11,12 @@ const MessagingInterface = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [error, setError] = useState(null);
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
+  const pollingInterval = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Get sender ID from stored decoded token
   const getSenderId = () => {
@@ -20,6 +26,66 @@ const MessagingInterface = () => {
     } catch (error) {
       console.error('Error getting sender ID:', error);
       return null;
+    }
+  };
+
+  const markMessagesAsRead = async (messages) => {
+    const currentUserId = getSenderId();
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) return;
+
+    const unreadMessages = messages.filter(msg => 
+      msg.sender_id !== currentUserId && !msg.mark_as_read
+    );
+
+    for (const msg of unreadMessages) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message/markasread/${msg.id}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to mark message as read:', msg.id);
+        }
+      } catch (error) {
+        console.error('Error marking message as read:', error);
+      }
+    }
+  };
+
+  const fetchNewMessages = async () => {
+    if (!selectedChat?.userId) return;
+    
+    try {
+      const senderId = getSenderId();
+      if (!senderId) return;
+
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token not found');
+
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message/${senderId}/${selectedChat.userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch messages');
+
+      const data = await response.json();
+      if (data.data && (!selectedChat.messages || data.data.length > selectedChat.messages.length)) {
+        setSelectedChat(prev => ({
+          ...prev,
+          messages: data.data
+        }));
+        markMessagesAsRead(data.data);
+        scrollToBottom();
+      }
+    } catch (err) {
+      console.error('Error fetching new messages:', err);
     }
   };
 
@@ -68,7 +134,33 @@ const MessagingInterface = () => {
     };
 
     fetchUsers();
+
+    // Cleanup any existing polling interval
+    return () => {
+      if (pollingInterval.current) {
+        clearInterval(pollingInterval.current);
+      }
+    };
   }, []);
+
+  // Set up polling when a chat is selected
+  useEffect(() => {
+    if (selectedChat?.userId) {
+      // Initial fetch and scroll
+      fetchNewMessages();
+      scrollToBottom();
+      
+      // Set up polling
+      pollingInterval.current = setInterval(fetchNewMessages, 3000);
+
+      // Cleanup
+      return () => {
+        if (pollingInterval.current) {
+          clearInterval(pollingInterval.current);
+        }
+      };
+    }
+  }, [selectedChat?.userId]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return null;
@@ -108,6 +200,8 @@ const MessagingInterface = () => {
         userId,
         messages: data.data || []
       });
+      markMessagesAsRead(data.data || []);
+      scrollToBottom();
     } catch (error) {
       console.error('Error fetching chat history:', error);
       setError(error.message);
@@ -154,6 +248,7 @@ const MessagingInterface = () => {
         messages: [...prev.messages, data.data]
       }));
       setNewMessage('');
+      scrollToBottom();
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message);
@@ -204,8 +299,18 @@ const MessagingInterface = () => {
                   <div className="ml-4 flex-1">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">{chat.name}</h3>
-                      <span className="text-sm text-gray-500">{chat.time}</span>
+                      <span className="block">
+
+                      <p className="text-sm text-gray-500">{chat.time}</p>
+                      {chat.unreadCount > 0 && (
+                    <span className="bg-green-500  text-white text-sm font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {chat.unreadCount}
+                    </span>
+                  )}
+                      </span>
+
                     </div>
+                
                     <p className="text-sm text-gray-500 truncate">{chat.message}</p>
                   </div>
                 </div>
@@ -259,6 +364,7 @@ const MessagingInterface = () => {
                     </div>
                   ))
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Message Input */}
