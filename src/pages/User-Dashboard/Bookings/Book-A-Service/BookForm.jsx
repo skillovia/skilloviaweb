@@ -1,52 +1,109 @@
-import { ArrowLeft, Upload } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
-import React, { useState } from 'react';
+import { Upload } from 'lucide-react';
+import { useLocation,  useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import UserLayout from '../../UserLayout/UserLayout';
 import BackButton from '../../../../componets/Back';
 
 const BookingForm = () => {
   const location = useLocation();
+  const history = useNavigate();
   const { user, skill } = location.state || {};
+
+  const user_id = user.id;
+  console.log(user_id);
+  
   
   const [formData, setFormData] = useState({
     description: '',
     location: '',
     date: '',
     image: null,
-    paymentMethod: ''
   });
 
-  // Calculate charges
-  const serviceCharge = skill ? parseFloat(skill.hourly_rate) * 0.1 : 0; // 10% service charge
-  const totalAmount = skill ? parseFloat(skill.hourly_rate) + serviceCharge : 0;
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        image: file
+        image: file,
       }));
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = () => {
-    // Here you can handle the form submission
-    console.log({
-      ...formData,
-      skillType: skill?.skill_type,
-      provider: user,
-      totalAmount
-    });
+  const handleSubmit = async () => {
+    if (!formData.description || !formData.location || !formData.date) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      throw new Error("Access token not found");
+    }
+
+    setLoading(true);
+
+    const bookingData = new FormData();
+    bookingData.append("skills_id", skill.skill_id);
+    bookingData.append("booked_user_id", user_id);
+    bookingData.append("title", `Booking for ${skill.skill_type}`);
+    bookingData.append("description", formData.description);
+    bookingData.append("booking_location", formData.location);
+    bookingData.append("booking_date", formData.date);
+    if (formData.image) {
+      bookingData.append("file", formData.image);
+    }
+
+    try {
+      const response = await fetch("https://testapi.humanserve.net/api/bookings", {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: bookingData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setSuccess(true);
+       
+        setFormData({ description: '', location: '', date: '', image: null });
+        setImagePreview(null);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        history('/bookings');
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, history]);
 
   if (!user || !skill) {
     return (
@@ -63,14 +120,23 @@ const BookingForm = () => {
       <div className="max-w-4xl mx-auto px-4 rounded-lg">
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-6">
-            <BackButton label='Book service' />
-            <button 
+            <BackButton label="Book service" />
+            <button
               onClick={handleSubmit}
-              className="ml-auto px-6 font-semibold py-2 bg-primary text-secondary rounded-full hover:bg-green-500"
+              disabled={loading}
+              className={`ml-auto px-6 font-semibold py-2 rounded-full ${
+                loading ? "bg-gray-400" : "bg-primary hover:bg-green-500 text-secondary"
+              }`}
             >
-              Next
+              {loading ? "Booking..." : "Book"}
             </button>
           </div>
+
+          {success && (
+            <div className="mb-4 text-center text-green-500">
+              Booking successfully created!
+            </div>
+          )}
 
           <div className="space-y-6">
             <div>
@@ -119,13 +185,13 @@ const BookingForm = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">Upload Image</label>
-              <div 
+              <div
                 onClick={() => document.getElementById('imageUpload').click()}
                 className="bg-input border border-gray rounded-lg p-8 text-center cursor-pointer"
               >
                 <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                 <p className="text-sm text-gray-600">
-                  {formData.image ? formData.image.name : 'Click to upload image'}
+                  {formData.image ? formData.image.name : "Click to upload image"}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">SVG, PNG, or JPG</p>
                 <input
@@ -136,55 +202,11 @@ const BookingForm = () => {
                   className="hidden"
                 />
               </div>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-4">Summary</h3>
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="font-medium">{skill.skill_type}</p>
-                  <p className="text-sm text-gray-600">
-                    {formData.date ? new Date(formData.date).toLocaleDateString() : 'Date not selected'}
-                  </p>
+              {imagePreview && (
+                <div className="mt-4">
+                  <img src={imagePreview} alt="Preview" className="max-w-full h-auto rounded-lg" />
                 </div>
-                <p className="font-medium">${skill.hourly_rate}</p>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <p>Service charge</p>
-                <p>${serviceCharge.toFixed(2)}</p>
-              </div>
-              <div className="flex justify-between items-center font-medium">
-                <p>Total</p>
-                <p>${totalAmount.toFixed(2)}</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-4">Payment method</h3>
-              <div className="space-y-4">
-                <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="paymentMethod"
-                    value="card"
-                    checked={formData.paymentMethod === 'card'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4" 
-                  />
-                  <span>Debit/Credit Card</span>
-                </label>
-                <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="paymentMethod"
-                    value="barter"
-                    checked={formData.paymentMethod === 'barter'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4" 
-                  />
-                  <span>Barter service</span>
-                </label>
-              </div>
+              )}
             </div>
           </div>
         </div>

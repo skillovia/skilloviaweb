@@ -85,7 +85,7 @@ const ChatMobile = () => {
 
   return (
     <div className="block lg:hidden ">
-      <div className="h-screen overflow-y-auto">
+      <div className=" overflow-y-auto">
         {loading && (
           <div className="p-4 text-center">
             Loading...

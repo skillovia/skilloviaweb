@@ -37,6 +37,8 @@ const NearByDetails = () => {
         }
 
         const data = await response.json();
+        console.log(data);
+        
         setProfile(data.data);
       } catch (err) {
         console.error('Error fetching user profile:', err);
@@ -154,7 +156,7 @@ const NearByDetails = () => {
     <Link
       to="/book-service"
       state={{ 
-        user: {
+        user: {id,
           firstname,
           lastname,
           email,
