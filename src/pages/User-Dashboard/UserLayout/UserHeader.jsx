@@ -127,7 +127,7 @@ const UserHeader = () => {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Location */}
-          <div className="hidden sm:flex items-center gap-2 text-gray-700">
+          <Link to="/settings/profile" className="hidden sm:flex items-center gap-2 text-gray-700">
             <MapPin className="h-5 w-5 text-secondary" />
             <section className="block">
               <p className="font-semibold capitalize leading-[12px] text-secondary text-[14px] block">
@@ -137,7 +137,7 @@ const UserHeader = () => {
                 {profileData?.street || "Not set"} {profileData?.zip_code || "Not set"}
               </span>
             </section>
-          </div>
+          </Link>
 
           {/* Notification Bell */}
           <div className="relative">
