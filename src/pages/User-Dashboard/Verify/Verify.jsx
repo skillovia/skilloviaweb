@@ -36,7 +36,7 @@ const Verify = () => {
     <div className="max-w-4xl mx-auto px-4 mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Email Verification Card */}
       {visibleCards.emailVerification && (
-        <div className="relative">
+        <div className="relative hidden">
           <button
             onClick={() => closeCard('emailVerification')}
             className="absolute top-2 right-2 p-1 rounded-full hover:bg-teal-700 transition-colors"

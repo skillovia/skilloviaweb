@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react';
 import BackButton from "../../../componets/Back";
 import Slider from "../Slider";
 
@@ -20,6 +21,7 @@ const PersonalDetails = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -150,12 +152,12 @@ const PersonalDetails = () => {
               </select>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 relative">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
               <input
-                type="password"
+                type={isPasswordVisible ? 'text' : 'password'}
                 id="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -163,6 +165,13 @@ const PersonalDetails = () => {
                 className="mt-1 w-full p-2 border border-gray bg-input rounded focus:ring-green-500 focus:border-green-500"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                className="absolute inset-y-0 right-0 top-5 pr-3 flex items-center text-sm leading-5"
+              >
+                {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
             <button

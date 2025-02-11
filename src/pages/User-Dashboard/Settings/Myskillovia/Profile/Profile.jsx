@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import UserLayout from '../../../UserLayout/UserLayout';
 import BackButton from '../../../../../componets/Back';
+import ProfilePhotoUpload from './ProfileUpload';
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,6 @@ const Profile = () => {
     website: '',
     city: '',
     streetAddress: '',
-    aptSuite: '',
     zipCode: '',
     openingTime: '00:00',
     closingTime: '00:00',
@@ -24,8 +24,6 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
 
   const userId = localStorage.getItem('decodedToken') 
     ? JSON.parse(localStorage.getItem('decodedToken')).id 
@@ -39,26 +37,26 @@ const Profile = () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/users/profile/${userId}`,
-          
           {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
           }
-        });
+        );
 
         const data = await response.json();
-        console.log(data);
-        
         if (data.status === 'success') {
           setFormData(prev => ({
             ...prev,
-            ...data.data,
             firstName: data.data.firstname || '',
             lastName: data.data.lastname || '',
+            email: data.data.email || '',
+            website: data.data.website || '',
+            city: data.data.location || '',
+            streetAddress: data.data.street || '',
+            zipCode: data.data.zip_code || '',
+            gender: data.data.gender || ''
           }));
-          if (data.data.photo) {
-            setPhotoPreview(data.data.photo);
-          }
         }
       } catch (err) {
         setError('Failed to load profile data');
@@ -86,93 +84,6 @@ const Profile = () => {
     }));
   };
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
-  };
- const uploadPhoto = async () => {
-    if (!photoFile) return null;
-
-    const formData = new FormData();
-    formData.append('photo', photoFile);
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
-        {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
-      if (data.status === 'success') {
-        // Update local storage with new photo URL
-        const currentProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        const updatedProfile = {
-          ...currentProfile,
-          photourl: data.data.photo
-        };
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        
-        // Trigger a custom event to notify other components
-        window.dispatchEvent(new Event('profileUpdated'));
-        
-        return data.data.photo;
-      }
-      return null;
-    } catch (err) {
-      console.error('Error uploading photo:', err);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!userId) return;
-      
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/users/profile/${userId}`,
-          
-          {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        });
-
-        const data = await response.json();
-        if (data.status === 'success') {
-          // Store the profile data in localStorage
-          localStorage.setItem('userProfile', JSON.stringify(data.data));
-          
-          setFormData(prev => ({
-            ...prev,
-            ...data.data,
-            firstName: data.data.firstname || '',
-            lastName: data.data.lastname || '',
-          }));
-          if (data.data.photo) {
-            setPhotoPreview(data.data.photo);
-          }
-        }
-      } catch (err) {
-        setError('Failed to load profile data');
-        console.error('Error loading profile:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [userId]);
-
   const handleSubmit = async () => {
     if (!userId) {
       setError('User ID not found');
@@ -183,28 +94,27 @@ const Profile = () => {
     setError('');
 
     try {
-      // Handle photo upload first if there's a new photo
-      if (photoFile) {
-        await uploadPhoto();
-      }
-
-      // Only send the fields that the API accepts
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
         {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          firstname: formData.firstName,  
-          lastname: formData.lastName,   
-          gender: formData.gender,
-          password: formData.password
-        })
-      });
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            firstname: formData.firstName,
+            lastname: formData.lastName,
+            gender: formData.gender,
+            password: formData.password,
+            location: formData.city,
+            street: formData.streetAddress,
+            zip_code: formData.zipCode,
+            website: formData.website
+          })
+        }
+      );
 
       const data = await response.json();
       if (data.status === 'success') {
@@ -235,31 +145,6 @@ const Profile = () => {
           }`}
         />
       </button>
-    );
-  };
-
-  // Custom Select Component
-  const TimeSelect = ({ value, onChange, name }) => {
-    return (
-      <div className="relative">
-        <select
-          value={value}
-          onChange={onChange}
-          name={name}
-          className="w-full appearance-none bg-input border-gray border rounded-md px-3 py-2 pr-8"
-        >
-          {[...Array(24)].map((_, i) => (
-            <option key={i} value={`${i.toString().padStart(2, '0')}:00`}>
-              {`${i.toString().padStart(2, '0')}:00 ${i < 12 ? 'am' : 'pm'}`}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
     );
   };
 
@@ -299,28 +184,8 @@ const Profile = () => {
             )}
 
             <div className="mb-8">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    className="hidden"
-                    id="photo-upload"
-                  />
-                  <label htmlFor="photo-upload" className="cursor-pointer">
-                    <img
-                      src={photoPreview || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"}
-                      alt="Profile"
-                      className="w-20 h-20 rounded-full object-cover"
-                    />
-                    <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
-                      <Check className="w-4 h-4 text-secondary" />
-                    </div>
-                  </label>
-                </div>
-              </div>
 
+              <ProfilePhotoUpload />
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="font-medium mb-1">Expert visibility</h3>
@@ -419,7 +284,7 @@ const Profile = () => {
                         <input
                           type="text"
                           name="city"
-                          value={formData.location}
+                          value={formData.city}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="Your city"
@@ -431,55 +296,22 @@ const Profile = () => {
                         <input
                           type="text"
                           name="streetAddress"
-                          value={formData.street}
+                          value={formData.streetAddress}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="St. Address"
                         />
                       </div>
 
-               
                       <div>
                         <label className="block text-sm text-gray-600 mb-1">ZIP/Postal Code</label>
                         <input
                           type="text"
                           name="zipCode"
-                          value={formData.zip_code}
+                          value={formData.zipCode}
                           onChange={handleInputChange}
                           className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                           placeholder="ZIP code"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium mb-4">Work times</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-600 mb-1">Weekdays</label>
-                        <div className="flex space-x-4">
-                          <TimeSelect
-                            value={formData.openingTime}
-                            onChange={handleInputChange}
-                            name="openingTime"
-                          />
-                          <TimeSelect
-                            value={formData.closingTime}
-                            onChange={handleInputChange}
-                            name="closingTime"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">Weekends inclusive</h3>
-                          <p className="text-sm text-gray-500">Make times applicable to weekends</p>
-                        </div>
-                        <Toggle
-                          checked={formData.weekendsInclusive}
-                          onChange={() => handleToggle('weekendsInclusive')}
                         />
                       </div>
                     </div>

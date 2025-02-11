@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Facebook, Apple, Loader2 } from 'lucide-react';
+import { Facebook, Apple, Loader2, Eye, EyeOff } from 'lucide-react';
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -9,6 +9,7 @@ import GoogleAuth from '../signup/GoogleAuth';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -164,17 +165,24 @@ const LoginPage = () => {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <input
-                type="password"
+                type={isPasswordVisible ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-[#BFCAB4] bg-[#f0f6e6] rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                className="absolute inset-y-0 top-5 right-0 pr-3 flex items-center text-sm leading-5"
+              >
+                {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
             <button
@@ -203,16 +211,7 @@ const LoginPage = () => {
               <Facebook size={20} />
               Continue with Facebook
             </button>
-{/* 
-            <button
-              type="button"
-              disabled={isLoading}
-              className="w-full bg-white text-gray-700 py-2 rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none"
-            >
-              <FcGoogle size={30} />
-              Continue with Google
-            </button> */}
-            
+
             <GoogleAuth />
 
             <button
