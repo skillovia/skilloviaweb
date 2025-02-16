@@ -7,6 +7,7 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [responseData, setResponseData] = useState(null);
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -15,6 +16,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setResponseData(null);
     
     // Validate email
     if (!email) {
@@ -30,7 +32,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/forgot-password', {
+      const response = await fetch('https://testapi.humanserve.net/api/auth/forgot/password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +46,13 @@ const ForgotPassword = () => {
         throw new Error(data.message || 'Failed to process request');
       }
 
-      setSuccess(true);
+      // Check if the response matches expected format
+      if (data.status === 'success') {
+        setSuccess(true);
+        setResponseData(data);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -53,8 +61,8 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8  p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-[#F6FCEB]  py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8  border border-gray p-8 rounded-lg ">
         {/* Header */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Forgot Password</h2>
@@ -66,18 +74,18 @@ const ForgotPassword = () => {
         {/* Success Message */}
         {success ? (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
-            <div className="text-green-800 text-sm font-medium">
-              Password reset instructions have been sent to your email.
+            <div className="text-green-800 text-sm font-medium text-center">
+              {responseData?.message || 'Password reset instructions have been sent to your email.'}
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-green-700">
+            <div className="">
+              <p className="text-sm text-green-700 text-center">
                 Check your inbox for further instructions.
-              </span>
+              </p>
               <Link 
                 to="/login" 
-                className="text-sm font-medium text-green-600 hover:text-green-500 flex items-center gap-1"
+                className="text-sm font-medium bg-secondary block my-3 text-white text-center p-2 rounded-md hover:text-green-500 "
               >
-                Back to login <ArrowRight size={16} />
+                Back to login 
               </Link>
             </div>
           </div>
@@ -109,7 +117,7 @@ const ForgotPassword = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block bg-input border-gray w-full px-3 py-2 pl-10 border  placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray bg-input placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your email address"
                   disabled={loading}
                 />
@@ -121,9 +129,7 @@ const ForgotPassword = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-secondary
-                
-                hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

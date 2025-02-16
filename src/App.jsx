@@ -57,6 +57,7 @@ import NearByDetails from "./pages/User-Dashboard/Explore/NearByDetails";
 import Following from "./pages/Followers/Following";
 import Followers from "./pages/Followers/Followers";
 import ForgotPassword from "./pages/auth/ForgotPsw";
+import ResetPassword from "./pages/auth/signup/ResetPsw";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -97,6 +98,12 @@ const router = createBrowserRouter([
   {
     path: "/forgot-psw",
     element: <ForgotPassword/>,
+  },
+
+
+  {
+    path: "/reset-psw",
+    element: <ResetPassword/>,
   },
 
   {
