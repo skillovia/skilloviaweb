@@ -58,6 +58,9 @@ import Following from "./pages/Followers/Following";
 import Followers from "./pages/Followers/Followers";
 import ForgotPassword from "./pages/auth/ForgotPsw";
 import ResetPassword from "./pages/auth/signup/ResetPsw";
+import FailurePage from "./pages/Stripe/FailedPay";
+import SuccessPage from "./pages/Stripe/SucessPay";
+import CreateStripeAccount from "./pages/Stripe/CreateS";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -74,6 +77,19 @@ const router = createBrowserRouter([
     path: "/success",
     element: <Success/>,
   },
+
+
+  {
+    path: "/failure-pay",
+    element: <FailurePage/>,
+  },
+
+
+  {
+    path: "/success-pay",
+    element: <SuccessPage/>,
+  },
+
 
   {
     path: "/contact",
@@ -261,6 +277,16 @@ const router = createBrowserRouter([
     path: "/search",
     element: <ProtectedRoute><Search/></ProtectedRoute>,
   },
+
+
+// stripe
+
+
+{
+  path: "/create-stripe-account",
+  element: <ProtectedRoute><CreateStripeAccount/></ProtectedRoute>,
+}, 
+
 
   // payment
 

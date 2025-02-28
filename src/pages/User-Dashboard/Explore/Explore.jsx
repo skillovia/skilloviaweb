@@ -124,11 +124,11 @@ const ExploreSection = () => {
           {!isCategoriesLoading && !categoriesError && (
             <div className="flex gap-4 overflow-x-auto pb-4">
               {categories.map(category => (
-                <Link 
-                  key={category.id} 
-                  to={`/explore-list`}
-                  className="group cursor-pointer flex flex-col items-center p-2 rounded-md border bg-input border-gray flex-shrink-0"
-                >
+           <Link 
+           key={category.id} 
+           to={`/explore-list?category=${encodeURIComponent(category.title)}`}
+           className="group cursor-pointer flex flex-col items-center p-2 rounded-md border bg-input border-gray flex-shrink-0"
+         >
                   <div className="w-36 h-36 mb-2 overflow-hidden rounded-lg">
                     <img
                     src={category.thumbnail ? `https://${category.thumbnail}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
