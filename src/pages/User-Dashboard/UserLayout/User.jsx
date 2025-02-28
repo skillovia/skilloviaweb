@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaStar, FaRegStar, FaPlus } from "react-icons/fa";
-import { IoMdSettings } from "react-icons/io";
+import { IoMdSettings, IoMdWallet } from "react-icons/io";
 import UserLayout from "./UserLayout";
 import SlidingPockets from "./CashToken";
 import { Link } from "react-router-dom";
@@ -204,9 +204,13 @@ const ProfileCard = () => {
       <div className="max-w-4xl px-4 space-y-4">
         <div className="flex justify-between items-start">
           <div className="text-lg font-semibold">Profile</div>
-          <Link to="/settings">
-            <IoMdSettings className="text-gray-500" />
-          </Link>
+          <section className="flex space-x-4">
+  <Link to="/settings">
+    <IoMdSettings className="text-gray-500" />
+  </Link>
+  
+
+</section>
         </div>
 
         <div className="flex items-center gap-4">

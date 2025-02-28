@@ -1,61 +1,129 @@
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Loader2, Clock, DollarSign, Award, UserX, Search } from 'lucide-react';
 import BackButton from '../../../componets/Back';
 import UserLayout from '../UserLayout/UserLayout';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import FollowButton from '../../../componets/FollowBtn';
 
 const ExploreList = () => {
-  const suggestions = [
-    { id: '1', name: 'Sophia Johnson', username: '@sophiaJJ', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
-    { id: '2', name: 'Emily Davis', username: '@davis', image: 'https://randomuser.me/api/portraits/women/2.jpg' },
-    { id: '3', name: 'Oliver Smith', username: '@oliverSmith', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { id: '4', name: 'Ava Brown', username: '@avaBrown', image: 'https://randomuser.me/api/portraits/women/3.jpg' },
-    { id: '5', name: 'Noah Wilson', username: '@WilsonNoah', image: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { id: '6', name: 'Emma Martinez', username: '@emmaMtz', image: 'https://randomuser.me/api/portraits/women/4.jpg' },
-  ];
+  const [skills, setSkills] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const location = useLocation();
+  const categoryName = new URLSearchParams(location.search).get('category') || '';
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+          throw new Error('Authentication required');
+        }
+
+        const response = await fetch(
+          `https://testapi.humanserve.net/api/skills/searchname/${categoryName}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        const data = await response.json();
+        console.log(data, "here ...")
+
+        if (data.status === 'success') {
+          setSkills(data.data || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch skills');
+        }
+      } catch (err) {
+        console.error('Error fetching skills:', err);
+        setError('Unable to load skills. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, [categoryName]);
+
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+      <Search className="w-16 h-16 mb-4 text-secondary" />
+      <h3 className="text-xl font-medium mb-2 text-secondary">No Skills Found</h3>
+      <p className="text-center max-w-md text-secondary text-[12px]">
+        No one is currently offering skills in {categoryName}. 
+        Check back later or try searching for a different category.
+      </p>
+    </div>
+  );
+
+  const ErrorState = () => (
+    <div className="flex flex-col items-center justify-center py-16 text-red-500">
+      <UserX className="w-16 h-16 mb-4" />
+      <p className="text-center">{error}</p>
+    </div>
+  );
 
   return (
     <UserLayout>
+      <div className="max-w-4xl mx-auto ">
+        <div className="flex items-center gap-3 p-4 ">
+          <BackButton label='Explore'/>
+          <h1 className="lg:text-xl capitalize font-semibold">{categoryName}</h1>
+        </div>
 
-   
-
-    <div className="max-w-4xl mx-auto min-h-screen">
-      <div className="flex items-center gap-3 p-4 ">
-       <BackButton label='Explore'/>
-        <h1 className="text-xl font-semibold">DIY</h1>
-      </div>
-
-      <div className="p-4 space-y-4">
-        {suggestions.map((person) => (
-          <div key={person.id} className="flex items-center justify-between border border-gray bg-input p-4 rounded-lg">
-            <div className="flex items-center gap-3">
-              {person.image ? (
-                <Link to ="/explore-profile">
-                <img
-                  src={person.image}
-                  alt={person.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                </Link>
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-lg">
-                    {person.name.charAt(0)}
-                  </span>
-                </div>
-              )}
-              <div>
-                <h3 className="font-medium">{person.name}</h3>
-                <p className="text-sm text-gray-600">{person.username}</p>
-              </div>
-            </div>
-           <FollowButton />
+        {isLoading && (
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="animate-spin w-12 h-12 text-secondary" />
           </div>
-        ))}
-      </div>
-    </div>
+        )}
 
+        {error && <ErrorState />}
+
+        <div className="p-4 space-y-4">
+          {!isLoading && !error && skills?.length === 0 && <EmptyState />}
+          
+          {skills?.map((skill) => (
+            <div 
+              key={skill.id} 
+              className="flex items-center justify-between border border-gray bg-input p-4 rounded-lg hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-3">
+                <Link to={`/user-profile/${skill.user_id}`}>
+                  <img
+                    src={skill.photourl 
+                      ? `https://${skill.photourl}` 
+                      : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
+                    alt={skill.skill_type}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                </Link>
+                <div>
+                  <h3 className="font-medium">{skill.
+creator_name}</h3>
+                  <div className="flex items-center gap-2 text-sm ">
+                  
+                    <p>Exp: {skill.experience_level}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm ">
+                 
+                    <p>Rate: ${skill.hourly_rate}/hr</p>
+                  </div>
+                </div>
+              </div>
+              <FollowButton userId={skill.user_id} />
+            </div>
+          ))}
+        </div>
+      </div>
     </UserLayout>
   );
 };

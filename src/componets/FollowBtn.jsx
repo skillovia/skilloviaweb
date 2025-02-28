@@ -2,20 +2,26 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
-const FollowButton = () => {
-  const { id: following_id } = useParams();
+const FollowButton = ({ userId: propUserId }) => {
+  const { id: paramUserId } = useParams();
+  const userId = propUserId || paramUserId; // Use prop if available, fall back to URL param
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  
-  // Initialize isFollowing from localStorage
   const [isFollowing, setIsFollowing] = useState(() => {
-    const stored = localStorage.getItem(`following_${following_id}`);
+    const stored = localStorage.getItem(`following_${userId}`);
     return stored === 'true';
   });
 
+  // Don't render if we don't have a userId from either source
+  if (!userId) {
+    console.warn('FollowButton: No userId provided via props or URL params');
+    return null;
+  }
+
   const handleFollow = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
       const accessToken = localStorage.getItem('accessToken');
@@ -23,7 +29,7 @@ const FollowButton = () => {
         throw new Error('No access token found');
       }
 
-      const url = `${import.meta.env.VITE_BASE_URL}/follows/${isFollowing ? 'unfollow' : 'follow'}/${following_id}`;
+      const url = `${import.meta.env.VITE_BASE_URL}/follows/${isFollowing ? 'unfollow' : 'follow'}/${userId}`;
       const method = isFollowing ? 'DELETE' : 'POST';
 
       const response = await fetch(url, {
@@ -34,22 +40,15 @@ const FollowButton = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update follow status');
-      }
-
       const data = await response.json();
-      
-      // If the action was successful (based on the message)
+
       if (data.status === "success") {
         const newFollowingState = !isFollowing;
         setIsFollowing(newFollowingState);
-        // Store the new state in localStorage
-        localStorage.setItem(`following_${following_id}`, newFollowingState.toString());
+        localStorage.setItem(`following_${userId}`, newFollowingState.toString());
       }
     } catch (error) {
       console.error('Error updating follow status:', error);
-      
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +66,7 @@ const FollowButton = () => {
         text-sm
         transition-all 
         duration-200
-        ${isFollowing
+        ${isFollowing 
           ? 'border-gray-300 bg-gray-50 hover:border-red-200 hover:bg-red-50'
           : 'border-gray-300 hover:bg-gray-50'
         }
