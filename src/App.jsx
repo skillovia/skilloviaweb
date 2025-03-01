@@ -1,8 +1,11 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
-import ExamplePage from "./componets/Example";
+
 import ContactForm from "./pages/contact-us/Contact";
 import FAQSection from "./pages/faq/Faq";
 import Blog from "./pages/blog/Blog";
@@ -40,7 +43,7 @@ import PasswordReset from "./pages/User-Dashboard/Settings/General/Security/Pass
 import ExploreList from "./pages/User-Dashboard/Explore/ExploreList";
 import ProtectedRoute from "./Hooks/ProtectedRoutes";
 import Search from "./pages/Search/Search";
-import { UserProfileProvider } from "./context/UserProfileContex";
+
 import ExploreProfiles from "./pages/User-Dashboard/Explore/ExploreProfiles";
 import AddBillingScreen from "./pages/User-Dashboard/Settings/General/PaymentSettings/Billing/AddBilling";
 import AddWithdrawal from "./pages/User-Dashboard/Settings/General/PaymentSettings/Withdrawal/AddWithdrawal";
@@ -63,412 +66,276 @@ import CreateStripeAccount from "./pages/Stripe/CreateS";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LandingPage />,
+    element: <LandingPage/>,
   },
-  {
-    path: "/ex",
-    element: <ExamplePage />,
-  },
+  // {
+  //   path: "/ex",
+  //   element: <ExamplePage/>,
+  // },
 
   {
     path: "/success",
-    element: <Success />,
+    element: <Success/>,
   },
+
 
   {
     path: "/failure-pay",
-    element: <FailurePage />,
+    element: <FailurePage/>,
   },
+
 
   {
     path: "/success-pay",
-    element: <SuccessPage />,
+    element: <SuccessPage/>,
   },
+
 
   {
     path: "/contact",
-    element: <ContactForm />,
+    element: <ContactForm/>,
   },
   {
     path: "/faqs",
-    element: <FAQSection />,
+    element: <FAQSection/>,
   },
   {
     path: "/blog",
-    element: <Blog />,
+    element: <Blog/>,
   },
   {
     path: "/blog-details",
-    element: <BlogDetail />,
+    element: <BlogDetail/>,
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: <LoginPage/>,
   },
   {
     path: "/forgot-psw",
-    element: <ForgotPassword />,
+    element: <ForgotPassword/>,
   },
+
 
   {
     path: "/reset-psw",
-    element: <ResetPassword />,
+    element: <ResetPassword/>,
   },
 
   {
     path: "/signup",
-    element: <Phone />,
+    element: <Phone/>,
   },
   {
     path: "/otp",
-    element: <Otp />,
+    element: <Otp/>,
   },
-
+  
   {
     path: "/personal-details",
-    element: <PersonalDetails />,
+    element: <PersonalDetails/>,
   },
+  
 
   {
     path: "/google-auth",
-    element: <SignUp />,
+    element: <SignUp/>,
   },
 
   // Protected Routes
   {
     path: "/user",
-    element: (
-      <ProtectedRoute>
-        <User />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><User/></ProtectedRoute>,
   },
-
+  
   {
     path: "/explore",
-    element: (
-      <ProtectedRoute>
-        <ExploreSection />
-      </ProtectedRoute>
-    ),
+    element:<ProtectedRoute><ExploreSection/></ProtectedRoute>,
   },
   {
     path: "/explore-list",
-    element: (
-      <ProtectedRoute>
-        <ExploreList />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><ExploreList/></ProtectedRoute>,
   },
+
 
   {
     path: "/explore-profile",
-    element: (
-      <ProtectedRoute>
-        <ExploreProfiles />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><ExploreProfiles/></ProtectedRoute>,
   },
 
   {
     path: "/settings",
-    element: (
-      <ProtectedRoute>
-        <Settings />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Settings/></ProtectedRoute>,
   },
   {
     path: "/settings/profile",
-    element: (
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Profile/></ProtectedRoute>,
   },
   {
     path: "/settings/skills",
-    element: (
-      <ProtectedRoute>
-        <MySkillsPage />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><MySkillsPage/></ProtectedRoute>,
   },
   {
     path: "/settings/skill/add",
-    element: (
-      <ProtectedRoute>
-        <AddSkill />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><AddSkill/></ProtectedRoute>,
   },
   {
     path: "/settings/skills/:id",
-    element: (
-      <ProtectedRoute>
-        <SkillDetails />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><SkillDetails/></ProtectedRoute>,
   },
 
   {
     path: "/settings/skills/edit/:id",
-    element: (
-      <ProtectedRoute>
-        <EditSkillPage />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><EditSkillPage/></ProtectedRoute>,
   },
 
   {
     path: "/settings/kyc",
-    element: (
-      <ProtectedRoute>
-        <KYCPage />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><KYCPage/></ProtectedRoute>,
   },
   {
     path: "/settings/kyc/identification",
-    element: (
-      <ProtectedRoute>
-        <Identification />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Identification/></ProtectedRoute>,
   },
   {
     path: "/settings/kyc/bill",
-    element: (
-      <ProtectedRoute>
-        <UtilityBill />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><UtilityBill/></ProtectedRoute>,
   },
   {
     path: "/settings/payment",
-    element: (
-      <ProtectedRoute>
-        <Payment />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Payment/></ProtectedRoute>,
   },
   {
     path: "/settings/password",
-    element: (
-      <ProtectedRoute>
-        <PasswordReset />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><PasswordReset/></ProtectedRoute>,
   },
   {
     path: "/settings/devices",
-    element: (
-      <ProtectedRoute>
-        <LinkedDevices />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><LinkedDevices/></ProtectedRoute>,
   },
   {
     path: "/settings/notify",
-    element: (
-      <ProtectedRoute>
-        <NotificationSettings />
-      </ProtectedRoute>
-    ),
-  },
-
+    element: <ProtectedRoute><NotificationSettings/></ProtectedRoute>,
+  }, 
+  
   {
     path: "settings/invite",
-    element: (
-      <ProtectedRoute>
-        <Invite />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Invite/></ProtectedRoute>,
   },
   {
     path: "/settings/security",
-    element: (
-      <ProtectedRoute>
-        <Security />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Security/></ProtectedRoute>,
   },
   {
     path: "/messages",
-    element: (
-      <ProtectedRoute>
-        <Message />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Message/></ProtectedRoute>,
   },
   {
     path: "/chat/:userId",
-    element: (
-      <ProtectedRoute>
-        <ChatMobileDetails />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><ChatMobileDetails/></ProtectedRoute>,
   },
   {
     path: "/bookings",
-    element: (
-      <ProtectedRoute>
-        <Bookings />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Bookings/></ProtectedRoute>,
   },
   {
     path: "/book-profile",
-    element: (
-      <ProtectedRoute>
-        <BookProfile />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><BookProfile/></ProtectedRoute>,
   },
   {
     path: "/book-service",
-    element: (
-      <ProtectedRoute>
-        <BookService />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><BookService/></ProtectedRoute>,
   },
   {
     path: "/book-form",
-    element: (
-      <ProtectedRoute>
-        <BookingForm />
-      </ProtectedRoute>
-    ),
-  },
-
+    element: <ProtectedRoute><BookingForm/></ProtectedRoute>,
+  }, 
+  
   // {
   //   path: "/bookings/:id",
   //   element: <ProtectedRoute><BookingDetails/></ProtectedRoute>,
   // },
   {
     path: "/outward-progress/:id",
-    element: (
-      <ProtectedRoute>
-        <OutwardProgress />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><OutwardProgress/></ProtectedRoute>,
   },
   {
     path: "/outward-details/:id",
-    element: (
-      <ProtectedRoute>
-        <OutwardDetails />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><OutwardDetails/></ProtectedRoute>,
   },
   {
     path: "/inward-details/:id",
-    element: (
-      <ProtectedRoute>
-        <InwardDetails />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><InwardDetails/></ProtectedRoute>,
   },
   {
     path: "/community",
-    element: (
-      <ProtectedRoute>
-        <Community />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Community/></ProtectedRoute>,
   },
+
 
   {
     path: "/search",
-    element: (
-      <ProtectedRoute>
-        <Search />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Search/></ProtectedRoute>,
   },
 
-  // stripe
 
-  {
-    path: "/create-stripe-account",
-    element: (
-      <ProtectedRoute>
-        <CreateStripeAccount />
-      </ProtectedRoute>
-    ),
-  },
+// stripe
+
+
+{
+  path: "/create-stripe-account",
+  element: <ProtectedRoute><CreateStripeAccount/></ProtectedRoute>,
+}, 
+
 
   // payment
 
   {
     path: "/add-bills",
-    element: (
-      <ProtectedRoute>
-        <AddBillingScreen />
-      </ProtectedRoute>
-    ),
-  },
+    element: <ProtectedRoute><AddBillingScreen/></ProtectedRoute>,
+  }, 
 
   {
     path: "/bills",
-    element: (
-      <ProtectedRoute>
-        <BillingManagement />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><BillingManagement/></ProtectedRoute>,
   },
-
+  
+  
   {
     path: "/add-withdrawal",
-    element: (
-      <ProtectedRoute>
-        <AddWithdrawal />
-      </ProtectedRoute>
-    ),
-  },
-
+    element: <ProtectedRoute><AddWithdrawal/></ProtectedRoute>,
+  },  
+  
+  
   {
     path: "/get-paid",
-    element: (
-      <ProtectedRoute>
-        <WithdrawalManagement />
-      </ProtectedRoute>
-    ),
-  },
+    element: <ProtectedRoute><WithdrawalManagement/></ProtectedRoute>,
+  }, 
+
+
+    
+  {
+    path:"/user-profile/:id",
+    element: <ProtectedRoute><NearByDetails/></ProtectedRoute>,
+  }, 
 
   {
-    path: "/user-profile/:id",
-    element: (
-      <ProtectedRoute>
-        <NearByDetails />
-      </ProtectedRoute>
-    ),
-  },
+    path:"/following",
+    element: <ProtectedRoute><Following/></ProtectedRoute>,
+  }, 
 
   {
-    path: "/following",
-    element: (
-      <ProtectedRoute>
-        <Following />
-      </ProtectedRoute>
-    ),
-  },
+    path:"/followers",
+    element: <ProtectedRoute><Followers/></ProtectedRoute>,
+  }, 
 
-  {
-    path: "/followers",
-    element: (
-      <ProtectedRoute>
-        <Followers />
-      </ProtectedRoute>
-    ),
-  },
 ]);
 
 export default function App() {
   return (
     <React.StrictMode>
       <RouterProvider router={router} />
+   
     </React.StrictMode>
   );
 }
