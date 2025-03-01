@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from './Button'; // Adjust the import path based on your file structure
 import { Phone, Mail, Heart, Settings } from 'lucide-react'; // Import any icons you want to use
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../componets/Tabs';
+
 import { Home, User } from 'lucide-react'; // If you want to use icons
 import FileUpload from './Upload';
 import { Input, TextArea, Select } from './Input';
