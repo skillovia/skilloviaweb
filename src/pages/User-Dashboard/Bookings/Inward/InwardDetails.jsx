@@ -24,7 +24,7 @@ const InwardDetails = () => {
       try {
         // First fetch booking details
         const bookingResponse = await fetch(
-          "https://testapi.humanserve.net/api/bookings/get/user/inward",
+          "https://skilloviaapi.vercel.app/api/bookings/get/user/inward",
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -83,10 +83,10 @@ const InwardDetails = () => {
   const handleBookingAction = async (action) => {
     setIsProcessing(true);
     const accessToken = localStorage.getItem("accessToken");
-    
+
     try {
       const response = await fetch(
-        `https://testapi.humanserve.net/api/bookings/${action}/${id}`,
+        `https://skilloviaapi.vercel.app/api/bookings/${action}/${id}`,
         {
           method: "PUT",
           headers: {
@@ -101,14 +101,14 @@ const InwardDetails = () => {
       }
 
       // Update local booking status
-      setBookingDetails(prev => ({
+      setBookingDetails((prev) => ({
         ...prev,
-        status: action === 'accept' ? 'accepted' : 'rejected'
+        status: action === "accept" ? "accepted" : "rejected",
       }));
 
       // Show success message or redirect
       alert(`Booking ${action}ed successfully`);
-      navigate('/bookings'); // Or wherever you want to redirect
+      navigate("/bookings"); // Or wherever you want to redirect
     } catch (err) {
       setError(`Error ${action}ing booking: ${err.message}`);
     } finally {
@@ -206,7 +206,6 @@ const InwardDetails = () => {
             </span>
 
             <DynamicGoogleMap location={bookingDetails?.booking_location} />
-            
           </div>
 
           <div>
@@ -252,18 +251,18 @@ const InwardDetails = () => {
 
         <div className="flex gap-4 my-6">
           <button
-            onClick={() => handleBookingAction('accept')}
+            onClick={() => handleBookingAction("accept")}
             disabled={isProcessing}
             className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? 'Processing...' : 'Confirm completion'}
+            {isProcessing ? "Processing..." : "Confirm completion"}
           </button>
           <button
-            onClick={() => handleBookingAction('reject')}
+            onClick={() => handleBookingAction("reject")}
             disabled={isProcessing}
             className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? 'Processing...' : 'Open dispute'}
+            {isProcessing ? "Processing..." : "Open dispute"}
           </button>
         </div>
       </div>

@@ -1,59 +1,64 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Eye, EyeOff } from 'lucide-react';
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 import BackButton from "../../../componets/Back";
 import Slider from "../Slider";
 
 const PersonalDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const emailFromState = location.state?.email || ''; // Add fallback empty string
+  const emailFromState = location.state?.email || ""; // Add fallback empty string
 
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
+    firstname: "",
+    lastname: "",
     email: emailFromState, // Use the email from state
-    gender: '',
-    password: '',
-    phone: ''
+    gender: "",
+    password: "",
+    phone: "",
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [id]: value
+      [id]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      const response = await axios.post('https://testapi.humanserve.net/api/auth/register', {
-        phone: formData.phone,
-        email: formData.email,
-        firstname: formData.firstname,
-        lastname: formData.lastname,
-        gender: formData.gender,
-        password: formData.password
-      });
+      const response = await axios.post(
+        "https://skilloviaapi.vercel.app/api/auth/register",
+        {
+          phone: formData.phone,
+          email: formData.email,
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          gender: formData.gender,
+          password: formData.password,
+        }
+      );
 
       console.log(response.data);
-      
+
       // Handle successful registration
       if (response.data) {
-        navigate('/success'); // or wherever you want to redirect after successful registration
+        navigate("/success"); // or wherever you want to redirect after successful registration
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -63,18 +68,21 @@ const PersonalDetails = () => {
     <div className="flex min-h-screen bg-gray-50 md:p-8 p-4 bg-[#f6fceb]">
       <div className="flex flex-col w-full md:w-1/2 md:p-8">
         <div className="max-w-md w-full mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Personal details</h2>
-          <p className="text-sm text-gray-600 mb-6">Input your personal details</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Personal details
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Input your personal details
+          </p>
 
-          {error && (
-            <div className="mb-4 text-red-500 text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Phone Number
               </label>
               <input
@@ -89,7 +97,10 @@ const PersonalDetails = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="firstname"
+                className="block text-sm font-medium text-gray-700"
+              >
                 First name
               </label>
               <input
@@ -104,7 +115,10 @@ const PersonalDetails = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="lastname"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Last name
               </label>
               <input
@@ -119,7 +133,10 @@ const PersonalDetails = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <input
@@ -135,7 +152,10 @@ const PersonalDetails = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Gender
               </label>
               <select
@@ -153,11 +173,14 @@ const PersonalDetails = () => {
             </div>
 
             <div className="mb-6 relative">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
-                type={isPasswordVisible ? 'text' : 'password'}
+                type={isPasswordVisible ? "text" : "password"}
                 id="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -178,16 +201,19 @@ const PersonalDetails = () => {
               type="submit"
               disabled={loading}
               className={`w-full py-2 px-4 ${
-                loading ? 'bg-gray-400' : 'bg-primary hover:bg-green-600'
+                loading ? "bg-gray-400" : "bg-primary hover:bg-green-600"
               } text-secondary font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-green-500`}
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600">
             Already have an account?{" "}
-            <a href="/login" className="text-green-500 font-medium hover:underline">
+            <a
+              href="/login"
+              className="text-green-500 font-medium hover:underline"
+            >
               Log in
             </a>
           </p>
