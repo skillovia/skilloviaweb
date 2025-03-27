@@ -31,7 +31,9 @@ const StripeOnboarding = () => {
       }
 
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/users/stripe/create/connected/account",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/users/stripe/create/connected/account`,
         {
           method: "POST",
           headers: {
@@ -76,7 +78,7 @@ const StripeOnboarding = () => {
 
       // The API expects the stripeAccountId in the request body
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/users/stripe/connected/account/link",
+        `${import.meta.env.VITE_BASE_URL}/users/stripe/connected/account/link`,
         {
           method: "POST",
           headers: {

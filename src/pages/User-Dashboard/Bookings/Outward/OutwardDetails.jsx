@@ -24,7 +24,7 @@ const OutwardDetails = () => {
       try {
         // First fetch booking details
         const bookingResponse = await fetch(
-          "https://skilloviaapi.vercel.app/api/bookings/get/user/outward",
+          `${import.meta.env.VITE_BASE_URL}/bookings/get/user/outward`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -87,7 +87,7 @@ const OutwardDetails = () => {
 
     try {
       const response = await fetch(
-        `https://skilloviaapi.vercel.app/api/bookings/${action}/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/bookings/${action}/${id}`,
         {
           method: "PUT",
           headers: {

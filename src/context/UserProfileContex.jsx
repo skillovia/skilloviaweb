@@ -44,7 +44,7 @@ export const UserProfileProvider = ({ children }) => {
       }
 
       const response = await fetch(
-        `https://skilloviaapi.vercel.app/api/users/profile/${user_id}`,
+        `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -92,7 +92,7 @@ export const UserProfileProvider = ({ children }) => {
       formData.append("photo", file);
 
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/users/profile/upload",
+        `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
         {
           method: "PUT",
           headers: {

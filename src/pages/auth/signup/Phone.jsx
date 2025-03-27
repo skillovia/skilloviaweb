@@ -20,7 +20,7 @@ const Phone = () => {
 
     try {
       const response = await axios.post(
-        "https://skilloviaapi.vercel.app/api/auth/resend/code",
+        `${import.meta.env.VITE_BASE_URL}/auth/resend/code`,
         { email }
       );
       setSuccess(

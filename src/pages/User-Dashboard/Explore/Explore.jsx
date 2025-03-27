@@ -25,7 +25,7 @@ const ExploreSection = () => {
         }
 
         const response = await fetch(
-          "https://skilloviaapi.vercel.app/api/skills/get/categories",
+          `${import.meta.env.VITE_BASE_URL}/skills/get/categories`,
           {
             method: "GET",
             headers: {
@@ -72,7 +72,9 @@ const ExploreSection = () => {
         const { lat, lon } = decodedToken;
 
         const response = await fetch(
-          `https://skilloviaapi.vercel.app/api/users/people/nearby/38.7945952/-106.5348379`,
+          `${
+            import.meta.env.VITE_BASE_URL
+          }/users/people/nearby/38.7945952/-106.5348379`,
           {
             method: "GET",
             headers: {
@@ -130,7 +132,7 @@ const ExploreSection = () => {
 
           {!isCategoriesLoading && !categoriesError && (
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {categories.map((category) => (
+              {categories?.map((category) => (
                 <Link
                   key={category.id}
                   to={`/explore-list?category=${encodeURIComponent(
@@ -175,7 +177,7 @@ const ExploreSection = () => {
 
           {!isLoading && !error && (
             <div className="flex gap-8 overflow-x-auto pb-4">
-              {nearbyPeople.map((person) => (
+              {nearbyPeople?.map((person) => (
                 <Link
                   key={person.id}
                   to={`/user-profile/${person.id}`}

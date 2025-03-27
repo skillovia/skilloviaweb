@@ -42,7 +42,7 @@ const GoogleAuth = () => {
 
       const popup = window.open(
         // `https://dreamsimuapi.vercel.app/api/google`,
-        `https://skilloviaapi.vercel.app/api/auth/google`,
+        `${import.meta.env.VITE_BASE_URL}/auth/google`,
         "Google Login",
         `width=${width},height=${height},left=${left},top=${top}`
       );

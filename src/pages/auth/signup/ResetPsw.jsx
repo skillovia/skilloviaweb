@@ -39,7 +39,7 @@ const ResetPassword = () => {
 
     try {
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/auth/reset/forgot/password",
+        `${import.meta.env.VITE_BASE_URL}/auth/reset/forgot/password`,
         {
           method: "POST",
           headers: {

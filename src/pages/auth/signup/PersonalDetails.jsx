@@ -38,7 +38,7 @@ const PersonalDetails = () => {
 
     try {
       const response = await axios.post(
-        "https://skilloviaapi.vercel.app/api/auth/register",
+        `${import.meta.env.VITE_BASE_URL}/auth/register`,
         {
           phone: formData.phone,
           email: formData.email,

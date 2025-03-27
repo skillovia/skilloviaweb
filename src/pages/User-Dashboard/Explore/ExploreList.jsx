@@ -34,7 +34,7 @@ const ExploreList = () => {
         }
 
         const response = await fetch(
-          `https://skilloviaapi.vercel.app/api/skills/searchname/${categoryName}`,
+          `${import.meta.env.VITE_BASE_URL}/skills/searchname/${categoryName}`,
           {
             method: "GET",
             headers: {
