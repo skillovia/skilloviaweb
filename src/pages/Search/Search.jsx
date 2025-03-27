@@ -29,12 +29,19 @@ const UserSearch = () => {
     setIsLoading(true);
     try {
       const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        console.error("No access token found in localStorage"); // Debugging
+        return;
+      }
       const response = await fetch(
-        `https://skilloviaapi.vercel.app/api/users/searchuser/${normalizedSearchTerm}`,
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/users/searchuser/${normalizedSearchTerm}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json", // Ensures proper formatting
+            Authorization: `Bearer ${token}`,
           },
         }
       );

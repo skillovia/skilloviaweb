@@ -87,7 +87,7 @@ const BookingForm = () => {
 
       // First fetch the Stripe account ID
       const stripeAccountResponse = await fetch(
-        `https://skilloviaapi.vercel.app/api/users/stripe/get/account/${userId}`,
+        `${import.meta.env.VITE_BASE_URL}/users/stripe/get/account/${userId}`,
         {
           method: "GET",
           headers: {
@@ -108,7 +108,7 @@ const BookingForm = () => {
 
       // Now create payment intent with the fetched Stripe account ID
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/users/stripe/payment/intent",
+        `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
         {
           method: "POST",
           headers: {
@@ -162,7 +162,7 @@ const BookingForm = () => {
 
     try {
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/bookings",
+        `${import.meta.env.VITE_BASE_URL}/bookings`,
         {
           method: "POST",
           headers: {

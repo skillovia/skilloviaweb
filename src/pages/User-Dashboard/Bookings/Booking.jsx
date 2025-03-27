@@ -83,8 +83,8 @@ const Bookings = () => {
 
       const apiUrl =
         activeTab === "outward"
-          ? "https://skilloviaapi.vercel.app/api/bookings/get/user/outward"
-          : "https://skilloviaapi.vercel.app/api/bookings/get/user/inward";
+          ? `${import.meta.env.VITE_BASE_URL}/bookings/get/user/outward`
+          : `${import.meta.env.VITE_BASE_URL}/bookings/get/user/inward`;
 
       try {
         const response = await fetch(apiUrl, {

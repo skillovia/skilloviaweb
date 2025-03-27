@@ -112,7 +112,7 @@ const MessagingInterface = () => {
         }
 
         const response = await fetch(
-          "https://skilloviaapi.vercel.app/api/message/chat/history/users",
+          `${import.meta.env.VITE_BASE_URL}/message/chat/history/users`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

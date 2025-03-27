@@ -33,7 +33,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await fetch(
-        "https://skilloviaapi.vercel.app/api/auth/forgot/password",
+        `${import.meta.env.VITE_BASE_URL}/auth/forgot/password`,
         {
           method: "POST",
           headers: {

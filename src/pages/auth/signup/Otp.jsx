@@ -59,7 +59,7 @@ const Otp = () => {
 
     try {
       const response = await axios.post(
-        "https://skilloviaapi.vercel.app/api/auth/verify/email",
+        `${import.meta.env.VITE_BASE_URL}/auth/verify/email`,
         {
           email,
           code,
