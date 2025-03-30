@@ -73,7 +73,7 @@ const Following = () => {
             <div className="flex items-center space-x-4">
               {user.photourl && (
                 <img 
-                src={user.photourl ? `https://${user.photourl}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
+                src={user.photourl ? `${user.photourl}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
                   alt={user.following_name}
                   className="w-12 h-12 rounded-full object-cover"
                 />

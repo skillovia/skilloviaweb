@@ -225,7 +225,7 @@ const UtilityBill = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <img
-                      src={` https://${bill.fileUrl}`  }
+                      src={`${bill.fileUrl}`  }
                       alt="Utility Bill"
                       className="w-12 h-12 object-cover rounded"
                     />

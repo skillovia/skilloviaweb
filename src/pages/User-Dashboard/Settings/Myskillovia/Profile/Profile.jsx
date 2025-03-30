@@ -45,6 +45,7 @@ const Profile = () => {
         );
 
         const data = await response.json();
+        console.log(data);
         if (data.status === 'success') {
           setFormData(prev => ({
             ...prev,

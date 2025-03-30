@@ -92,7 +92,7 @@ const NearByDetails = () => {
         state: {
           userId: id,
           userName: `${profile.firstname} ${profile.lastname}`,
-          userPhoto: profile.photourl ? `https://${profile.photourl}` : null
+          userPhoto: profile.photourl ? `${profile.photourl}` : null
         }
       });
     }
@@ -109,7 +109,7 @@ const NearByDetails = () => {
 
         <div className="flex items-center gap-4 mb-6">
         <img
-        src={photourl ? `https://${photourl}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
+        src={photourl ? `${photourl}` : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'}
         alt={firstname}
         className="w-16 rounded-lg h-16 object-cover"
       />

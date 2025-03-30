@@ -295,7 +295,7 @@ const Identification = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <img
-                    src={` https://${doc.fileUrl}`  }
+                    src={`${doc.fileUrl}`  }
                    
                       alt="Identity Document"
                       className="w-12 h-12 object-cover rounded"

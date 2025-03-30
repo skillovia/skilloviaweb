@@ -35,31 +35,7 @@ const Verify = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Email Verification Card */}
-      {visibleCards.emailVerification && (
-        <div className="relative hidden">
-          <button
-            onClick={() => closeCard('emailVerification')}
-            className="absolute top-2 right-2 p-1 rounded-full hover:bg-teal-700 transition-colors"
-            aria-label="Close email verification card"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          <Link
-            to="/settings/kyc"
-            className="block bg-[#246868] text-white p-6 rounded-lg hover:bg-teal-800 transition-colors"
-          >
-            <h2 className="text-xl font-semibold mb-2">Please verify your email</h2>
-            <p className="text-teal-100 mb-4">
-              We sent a confirmation email to {email}, please visit your 
-              email to review and activate your account
-            </p>
-            <div className="flex items-center text-teal-100 hover:text-white">
-              <span className="font-medium">Activate your account</span>
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </div>
-          </Link>
-        </div>
-      )}
+  
 
       {/* Complete Profile Card */}
       {visibleCards.completeProfile && (
@@ -81,6 +57,33 @@ const Verify = () => {
             </p>
             <div className="flex items-center text-gray-700 hover:text-gray-900">
               <span className="font-medium">Complete profile</span>
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </div>
+          </Link>
+        </div>
+      )}
+
+
+
+{visibleCards.emailVerification && (
+        <div className="relative ">
+          <button
+            onClick={() => closeCard('emailVerification')}
+            className="absolute top-2 right-2 p-1 rounded-full hover:bg-teal-700 transition-colors"
+            aria-label="Close email verification card"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <Link
+            to="/create-stripe-account"
+            className="block bg-[#246868] text-white p-6 rounded-lg hover:bg-teal-800 transition-colors"
+          >
+          <h2 className="text-xl font-semibold mb-2">Please Setup your Stripe account</h2>
+<p className="text-teal-100 mb-4">
+  Click here to setup and activate your Stripe account
+</p>
+            <div className="flex items-center text-teal-100 hover:text-white">
+              <span className="font-medium">Activate your account</span>
               <ArrowRight className="w-5 h-5 ml-2" />
             </div>
           </Link>
