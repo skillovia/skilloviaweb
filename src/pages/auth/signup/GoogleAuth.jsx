@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 
 const GoogleAuth = () => {
@@ -10,31 +10,31 @@ const GoogleAuth = () => {
   useEffect(() => {
     // Add message listener to handle popup communication
     const handleMessage = (event) => {
-      console.log('Received message from popup:', event); // Log the message event
+      console.log("Received message from popup:", event); // Log the message event
       // Verify origin for security
       if (event.origin !== import.meta.env.VITE_BASE_URL) return;
 
       const { data } = event;
-      if (data?.status === 'success') {
-        console.log('Authentication successful:', data);
+      if (data?.status === "success") {
+        console.log("Authentication successful:", data);
         console.log(data.data.accessToken);
-        
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
-        navigate('/explore');
+
+        localStorage.setItem("accessToken", data.data.accessToken);
+        localStorage.setItem("refreshToken", data.data.refreshToken);
+        navigate("/explore");
       } else {
-        console.log('Authentication failed:', data);
-        setAuthError('Authentication failed. Please try again.');
+        console.log("Authentication failed:", data);
+        setAuthError("Authentication failed. Please try again.");
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [navigate]);
 
   const handleGoogleAuth = () => {
     try {
-      console.log('Opening Google Auth Popup...');
+      console.log("Opening Google Auth Popup...");
       const width = 500;
       const height = 600;
       const left = window.screenX + (window.outerWidth - width) / 2;
@@ -42,29 +42,29 @@ const GoogleAuth = () => {
 
       const popup = window.open(
         // `https://dreamsimuapi.vercel.app/api/google`,
-        `https://testapi.humanserve.net/api/auth/google`,
-        'Google Login',
+        `https://skilloviaapi.vercel.app/api/auth/google`,
+        "Google Login",
         `width=${width},height=${height},left=${left},top=${top}`
       );
 
       if (!popup) {
-        console.error('Failed to open popup. Please check pop-up blockers.');
-        setAuthError('Failed to open Google Login popup. Please try again.');
+        console.error("Failed to open popup. Please check pop-up blockers.");
+        setAuthError("Failed to open Google Login popup. Please try again.");
         return;
       }
 
-      console.log('Popup opened successfully.');
+      console.log("Popup opened successfully.");
 
       // Add popup check
       const checkPopup = setInterval(() => {
         if (popup.closed) {
-          console.log('Popup closed.');
+          console.log("Popup closed.");
           clearInterval(checkPopup);
         }
       }, 1000);
     } catch (error) {
-      console.error('Google auth error:', error);
-      setAuthError('Google authentication failed. Please try again.');
+      console.error("Google auth error:", error);
+      setAuthError("Google authentication failed. Please try again.");
     }
   };
 
