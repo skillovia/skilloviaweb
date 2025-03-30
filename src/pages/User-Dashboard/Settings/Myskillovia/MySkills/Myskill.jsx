@@ -110,7 +110,7 @@ const MySkillsPage = () => {
                   .map((thumbnail, index) => (
                     <img
                       key={index}
-                      src={`https://${thumbnail}`}
+                      src={thumbnail}
                       alt={`Skill thumbnail ${index + 1}`}
                       className="w-[10rem] h-[10rem] object-cover rounded-lg"
                     />

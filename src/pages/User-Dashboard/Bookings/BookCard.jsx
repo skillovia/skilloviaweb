@@ -4,7 +4,7 @@ const BookCard = ({ id, title, description, date, status, location, fileUrl, typ
       <div className="flex items-start gap-4">
         <div className="rounded-lg flex items-center justify-center">
           <img
-            src={`https://${fileUrl}`}
+            src={`${fileUrl}`}
             alt="Booking"
             className="w-28 h-28 rounded-lg object-cover"
           />

@@ -339,7 +339,7 @@ const EditSkillPage = () => {
                       <img
                         src={formData.thumbnails[index].startsWith('data:') 
                           ? formData.thumbnails[index] 
-                          : `https://${formData.thumbnails[index]}`}
+                          : `${formData.thumbnails[index]}`}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover rounded-lg"
                       />

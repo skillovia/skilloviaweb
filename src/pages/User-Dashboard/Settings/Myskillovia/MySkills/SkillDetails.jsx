@@ -111,7 +111,7 @@ const SkillDetails = () => {
           {thumbnails.map((thumbnail, index) => (
             <div key={index} className="aspect-square rounded-lg overflow-hidden">
               <img
-                src={`https://${thumbnail}`}
+                src={thumbnail}
                 alt={`${skill.skill_type} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
               />

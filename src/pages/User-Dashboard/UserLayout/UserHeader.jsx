@@ -7,15 +7,17 @@ const UserHeader = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState({
+    bookings: [],
+    followers: [],
+    followees: []
+  });
   const [notificationDropdown, setNotificationDropdown] = useState(false);
 
   const handleSearchClick = () => {
     navigate("/search");
   };
 
-  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleNotifications = () => setNotificationDropdown((prev) => !prev);
 
   // Helper function to ensure HTTPS URLs
@@ -68,27 +70,81 @@ const UserHeader = () => {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) {
+        throw new Error("Access token not found");
+      }
+
+      // Fetch different types of notifications concurrently
+      const [bookingsRes, followersRes, followeesRes] = await Promise.all([
+        fetch("https://skilloviaapi.vercel.app/api/notifications/bookings", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }),
+        fetch("https://skilloviaapi.vercel.app/api/notifications/follower", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }),
+        fetch("https://skilloviaapi.vercel.app/api/notifications/followees", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        })
+      ]);
+
+      // Parse responses
+      const bookingsData = await bookingsRes.json();
+      const followersData = await followersRes.json();
+      const followeesData = await followeesRes.json();
+
+      // Update notifications state
+      setNotifications({
+        bookings: bookingsData.data || [],
+        followers: followersData.data || [],
+        followees: followeesData.data || []
+      });
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      setError(err.message);
+    }
+  };
+
+  const getTotalNotificationCount = () => {
+    return notifications.bookings.length + 
+           notifications.followers.length + 
+           notifications.followees.length;
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchNotifications();
   }, []);
 
-  const notifications = [
-    {
-      id: 1,
-      message: "John liked your post",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      message: "New message from Sarah",
-      time: "5 hours ago",
-    },
-    {
-      id: 3,
-      message: "You have a new follower",
-      time: "1 day ago",
-    },
-  ];
+  // Render notifications dropdown
+  const renderNotificationsDropdown = () => {
+    const allNotifications = [
+      ...notifications.bookings.map(n => ({ ...n, type: 'bookings' })),
+      ...notifications.followers.map(n => ({ ...n, type: 'followers' })),
+      ...notifications.followees.map(n => ({ ...n, type: 'followees' }))
+    ];
+
+    return (
+      <div className="lg:absolute right-0 mt-5 lg:w-80 fixed w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
+        <div className="px-4 py-4 b rounded-b-2xl">
+          <h3 className="font-semibold">Notifications</h3>
+          {allNotifications.map((notification) => (
+            <div
+              key={`${notification.type}-${notification.id}`}
+              className="p-2 bg-input border border-gray my-2 rounded-md"
+            >
+             <p className="text-secondary text-[13px] font-semibold"> {notification.title} </p>
+             <p className="text-[12px]">   {notification.description} </p>
+            
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   if (error) {
     return (
@@ -146,16 +202,10 @@ const UserHeader = () => {
               onClick={toggleNotifications}
             />
             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              3
+              {getTotalNotificationCount()}
             </span>
 
-            {notificationDropdown && (
-              <div className="lg:absolute right-0 mt-2 lg:w-80 fixed w-full bg-input rounded-lg shadow-lg py-2 z-50">
-                <div className="px-4 py-2">
-                  <h3 className="font-semibold">Notifications</h3>
-                </div>
-              </div>
-            )}
+            {notificationDropdown && renderNotificationsDropdown()}
           </div>
 
           {/* Profile - Updated section */}

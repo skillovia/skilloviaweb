@@ -61,7 +61,7 @@ const BookService = () => {
             thumbnails.map((thumbnail, index) => (
               <img
                 key={index}
-                src={`https://${thumbnail}`}
+                src={`${thumbnail}`}
                 alt={`${skill.skill_type} ${index + 1}`}
                 className="w-full h-48 object-cover rounded-lg"
               />

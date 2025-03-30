@@ -19,13 +19,7 @@ const ProfileCard = () => {
 
   const [skills, setSkills] = useState([]);
 
-  // Helper function to ensure URL starts with https://
-  const ensureHttps = (url) => {
-    if (!url) return "";
-    if (url.startsWith("https://")) return url;
-    if (url.startsWith("http://")) return url.replace("http://", "https://");
-    return `https://${url}`;
-  };
+
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -48,6 +42,7 @@ const ProfileCard = () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
+      console.log(accessToken);
 
       const formData = new FormData();
       formData.append("photo", file);
@@ -71,7 +66,7 @@ const ProfileCard = () => {
       // Update profile data with new photo URL
       setProfileData((prev) => ({
         ...prev,
-        photourl: ensureHttps(data.photourl || data.data?.photourl),
+        photourl:data.photourl || data.data?.photourl,
       }));
     } catch (err) {
       console.error("Error uploading image:", err);
@@ -114,7 +109,7 @@ const ProfileCard = () => {
         // Ensure photourl uses https before setting profile data
         const updatedData = {
           ...data.data,
-          photourl: ensureHttps(data.data.photourl),
+          photourl: data.data.photourl,
         };
         setProfileData(updatedData);
         console.log("Updated profile data:", updatedData);
