@@ -36,10 +36,10 @@ const ExploreSection = () => {
   // Distance options with their values in kilometers
   const distances = [
     { value: 'all', label: 'All Distances' },
-    { value: '2', label: '0 - 5 miles' },
-    { value: '5', label: '6 - 10 miles' },
-    { value: '10', label: '11 - 20 miles' },
-    { value: '20', label: '20+ miles' }
+    { value: '200', label: '0 - 5 miles' },
+    { value: '500', label: '6 - 10 miles' },
+    { value: '1000', label: '11 - 20 miles' },
+    { value: '2000', label: '20+ miles' }
   ];
 
   const FilterDropdown = ({ icon: Icon, label, value, options, onChange }) => (
