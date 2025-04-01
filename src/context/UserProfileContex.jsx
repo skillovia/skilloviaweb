@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { jwtDecode } from "jwt-decode"; // Ensure jwt-decode is imported
 
 // Create the context
 const UserProfileContext = createContext();
@@ -28,19 +29,62 @@ export const UserProfileProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  // const updateProfile = async () => {
+  //   try {
+  //     const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+  //     const user_id = decodedToken?.id;
+
+  //     if (!user_id) {
+  //       throw new Error("User ID not found in token");
+  //     }
+
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found");
+  //     }
+
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch profile");
+  //     }
+
+  //     const data = await response.json();
+  //     const updatedData = {
+  //       ...data.data,
+  //       photourl: ensureHttps(data.data.photourl),
+  //     };
+  //     setProfileData(updatedData);
+  //   } catch (err) {
+  //     console.error("Error fetching profile:", err);
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const updateProfile = async () => {
     try {
-      const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
-      const user_id = decodedToken?.id;
-
-      if (!user_id) {
-        throw new Error("User ID not found in token");
-      }
-
       const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) {
-        throw new Error("Access token not found");
+        throw new Error("❌ Access token not found");
+      }
+
+      const decodedToken = jwtDecode(accessToken); // ✅ Decode directly
+      console.log("🔑 Decoded Token:", decodedToken); // Debugging log
+
+      const user_id = decodedToken?.id; // ✅ Define user_id correctly
+      if (!user_id) {
+        throw new Error("❌ User ID not found in token");
       }
 
       const response = await fetch(
@@ -53,17 +97,19 @@ export const UserProfileProvider = ({ children }) => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+        throw new Error("❌ Failed to fetch profile");
       }
 
       const data = await response.json();
       const updatedData = {
         ...data.data,
-        photourl: ensureHttps(data.data.photourl),
+        photourl: ensureHttps(data.data.photourl), // Ensure correct URL handling
       };
+
       setProfileData(updatedData);
+      console.log("✅ Updated profile data:", updatedData);
     } catch (err) {
-      console.error("Error fetching profile:", err);
+      console.error("❌ Error fetching profile:", err);
       setError(err.message);
     } finally {
       setLoading(false);

@@ -6,7 +6,7 @@ import SlidingPockets from "./CashToken";
 import { Link } from "react-router-dom";
 import { Loader2, Plus } from "lucide-react";
 import Bio from "./Bio";
-
+import { jwtDecode } from "jwt-decode";
 import { HiOutlineExternalLink } from "react-icons/hi";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import EmptyState from "../../../componets/EmptyState";
@@ -18,8 +18,6 @@ const ProfileCard = () => {
   const [uploading, setUploading] = useState(false);
 
   const [skills, setSkills] = useState([]);
-
-
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -66,7 +64,7 @@ const ProfileCard = () => {
       // Update profile data with new photo URL
       setProfileData((prev) => ({
         ...prev,
-        photourl:data.photourl || data.data?.photourl,
+        photourl: data.photourl || data.data?.photourl,
       }));
     } catch (err) {
       console.error("Error uploading image:", err);
@@ -76,20 +74,71 @@ const ProfileCard = () => {
     }
   };
 
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       // const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+  //       // const user_id = decodedToken?.id;
+
+  //       if (!user_id) {
+  //         throw new Error("User ID not found in token");
+  //       }
+
+  //       const accessToken = localStorage.getItem("accessToken");
+
+  //       if (!accessToken) {
+  //         throw new Error("Access token not found");
+  //       }
+  //       const decodedToken = jwtDecode(accessToken); // ✅ Decode directly
+  //       console.log("🔑 Decoded Token:", decodedToken); // Debugging log
+
+  //       const user_id = decodedToken?.id;
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch profile");
+  //       }
+
+  //       const data = await response.json();
+  //       // Ensure photourl uses https before setting profile data
+  //       const updatedData = {
+  //         ...data.data,
+  //         photourl: data.data.photourl,
+  //       };
+  //       setProfileData(updatedData);
+  //       console.log("Updated profile data:", updatedData);
+  //     } catch (err) {
+  //       console.error("Error fetching profile:", err);
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, []);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
-        const user_id = decodedToken?.id;
-
-        if (!user_id) {
-          throw new Error("User ID not found in token");
-        }
-
         const accessToken = localStorage.getItem("accessToken");
 
         if (!accessToken) {
-          throw new Error("Access token not found");
+          throw new Error("❌ Access token not found");
+        }
+
+        const decodedToken = jwtDecode(accessToken); // ✅ Decode directly
+        console.log("🔑 Decoded Token:", decodedToken); // Debugging log
+
+        const user_id = decodedToken?.id; // ✅ Define user_id correctly
+        if (!user_id) {
+          throw new Error("❌ User ID not found in token");
         }
 
         const response = await fetch(
@@ -102,19 +151,18 @@ const ProfileCard = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch profile");
+          throw new Error("❌ Failed to fetch profile");
         }
 
         const data = await response.json();
-        // Ensure photourl uses https before setting profile data
         const updatedData = {
           ...data.data,
-          photourl: data.data.photourl,
+          photourl: data.data.photourl, // Ensure correct URL handling
         };
         setProfileData(updatedData);
-        console.log("Updated profile data:", updatedData);
+        console.log("✅ Updated profile data:", updatedData);
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("❌ Error fetching profile:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -123,7 +171,6 @@ const ProfileCard = () => {
 
     fetchProfile();
   }, []);
-
   useEffect(() => {
     const fetchSkills = async () => {
       try {
@@ -200,12 +247,10 @@ const ProfileCard = () => {
         <div className="flex justify-between items-start">
           <div className="text-lg font-semibold">Profile</div>
           <section className="flex space-x-4">
-  <Link to="/settings">
-    <IoMdSettings className="text-gray-500" />
-  </Link>
-  
-
-</section>
+            <Link to="/settings">
+              <IoMdSettings className="text-gray-500" />
+            </Link>
+          </section>
         </div>
 
         <div className="flex items-center gap-4">
@@ -245,9 +290,7 @@ const ProfileCard = () => {
 
         <div className="flex gap-8 text-sm">
           <Link to="/followers">
-            <p  className="font-semibold">
-              {profileData.total_followers}
-            </p>
+            <p className="font-semibold">{profileData.total_followers}</p>
             <div className="text-gray-500">followers</div>
           </Link>
           <div>

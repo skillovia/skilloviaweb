@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, MapPin, Bell, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const UserHeader = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const UserHeader = () => {
   const [notifications, setNotifications] = useState({
     bookings: [],
     followers: [],
-    followees: []
+    followees: [],
   });
   const [notificationDropdown, setNotificationDropdown] = useState(false);
 
@@ -28,19 +29,62 @@ const UserHeader = () => {
     return `https://${url}`;
   };
 
+  // const fetchProfile = async () => {
+  //   try {
+  //     const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+  //     const user_id = decodedToken?.id;
+
+  //     if (!user_id) {
+  //       throw new Error("User ID not found in token");
+  //     }
+
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found");
+  //     }
+
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch profile");
+  //     }
+
+  //     const data = await response.json();
+  //     const updatedData = {
+  //       ...data.data,
+  //       photourl: ensureHttps(data.data.photourl),
+  //     };
+  //     setProfileData(updatedData);
+  //   } catch (err) {
+  //     console.error("Error fetching profile:", err);
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchProfile = async () => {
     try {
-      const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
-      const user_id = decodedToken?.id;
-
-      if (!user_id) {
-        throw new Error("User ID not found in token");
-      }
-
       const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) {
-        throw new Error("Access token not found");
+        throw new Error("❌ Access token not found in localStorage");
+      }
+
+      const decodedToken = jwtDecode(accessToken); // ✅ Decode the token
+      console.log("🔑 Decoded Token:", decodedToken); // Debugging log
+
+      const user_id = decodedToken?.id;
+      if (!user_id) {
+        throw new Error("❌ User ID not found in token");
       }
 
       const response = await fetch(
@@ -53,7 +97,7 @@ const UserHeader = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+        throw new Error("❌ Failed to fetch profile");
       }
 
       const data = await response.json();
@@ -63,13 +107,12 @@ const UserHeader = () => {
       };
       setProfileData(updatedData);
     } catch (err) {
-      console.error("Error fetching profile:", err);
+      console.error("❌ Error fetching profile:", err.message);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
   const fetchNotifications = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -81,14 +124,14 @@ const UserHeader = () => {
       // Fetch different types of notifications concurrently
       const [bookingsRes, followersRes, followeesRes] = await Promise.all([
         fetch("https://skilloviaapi.vercel.app/api/notifications/bookings", {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }),
         fetch("https://skilloviaapi.vercel.app/api/notifications/follower", {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
         }),
         fetch("https://skilloviaapi.vercel.app/api/notifications/followees", {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        })
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
       ]);
 
       // Parse responses
@@ -100,7 +143,7 @@ const UserHeader = () => {
       setNotifications({
         bookings: bookingsData.data || [],
         followers: followersData.data || [],
-        followees: followeesData.data || []
+        followees: followeesData.data || [],
       });
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -109,9 +152,11 @@ const UserHeader = () => {
   };
 
   const getTotalNotificationCount = () => {
-    return notifications.bookings.length + 
-           notifications.followers.length + 
-           notifications.followees.length;
+    return (
+      notifications.bookings.length +
+      notifications.followers.length +
+      notifications.followees.length
+    );
   };
 
   useEffect(() => {
@@ -122,9 +167,9 @@ const UserHeader = () => {
   // Render notifications dropdown
   const renderNotificationsDropdown = () => {
     const allNotifications = [
-      ...notifications.bookings.map(n => ({ ...n, type: 'bookings' })),
-      ...notifications.followers.map(n => ({ ...n, type: 'followers' })),
-      ...notifications.followees.map(n => ({ ...n, type: 'followees' }))
+      ...notifications.bookings.map((n) => ({ ...n, type: "bookings" })),
+      ...notifications.followers.map((n) => ({ ...n, type: "followers" })),
+      ...notifications.followees.map((n) => ({ ...n, type: "followees" })),
     ];
 
     return (
@@ -136,9 +181,11 @@ const UserHeader = () => {
               key={`${notification.type}-${notification.id}`}
               className="p-2 bg-input border border-gray my-2 rounded-md"
             >
-             <p className="text-secondary text-[13px] font-semibold"> {notification.title} </p>
-             <p className="text-[12px]">   {notification.description} </p>
-            
+              <p className="text-secondary text-[13px] font-semibold">
+                {" "}
+                {notification.title}{" "}
+              </p>
+              <p className="text-[12px]"> {notification.description} </p>
             </div>
           ))}
         </div>
@@ -183,14 +230,18 @@ const UserHeader = () => {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Location */}
-          <Link to="/settings/profile" className="hidden sm:flex items-center gap-2 text-gray-700">
+          <Link
+            to="/settings/profile"
+            className="hidden sm:flex items-center gap-2 text-gray-700"
+          >
             <MapPin className="h-5 w-5 text-secondary" />
             <section className="block">
               <p className="font-semibold capitalize leading-[12px] text-secondary text-[14px] block">
                 {profileData?.location || "Not set"}
               </p>
               <span className="text-[12px] text-secondary truncate max-w-[100px] capitalize sm:max-w-none">
-                {profileData?.street || "Not set"} {profileData?.zip_code || "Not set"}
+                {profileData?.street || "Not set"}{" "}
+                {profileData?.zip_code || "Not set"}
               </span>
             </section>
           </Link>
@@ -218,7 +269,10 @@ const UserHeader = () => {
                   </div>
                 ) : (
                   <img
-                    src={profileData?.photourl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"}
+                    src={
+                      profileData?.photourl ||
+                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&s"
+                    }
                     alt="Profile"
                     className="h-full w-full rounded-full object-cover"
                   />
