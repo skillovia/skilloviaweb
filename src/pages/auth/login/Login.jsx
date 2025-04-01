@@ -1,65 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { Facebook, Apple, Loader2, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Facebook, Apple, Loader2, Eye, EyeOff } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import Slider from '../Slider';
-import GoogleAuth from '../signup/GoogleAuth';
+import { Link, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import Slider from "../Slider";
+import GoogleAuth from "../signup/GoogleAuth";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const decodeAndStoreToken = (accessToken, refreshToken) => {
     try {
       const decodedToken = jwtDecode(accessToken);
-      
+
       // Store both tokens
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('decodedToken', JSON.stringify(decodedToken));
-      
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("decodedToken", JSON.stringify(decodedToken));
+
       return decodedToken;
     } catch (error) {
-      console.error('Error decoding token:', error);
-      setError('Invalid token received');
+      console.error("Error decoding token:", error);
+      setError("Invalid token received");
       return null;
     }
   };
 
   const refreshAccessToken = async () => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/get/refreshtokenweb`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${refreshToken}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/get/refreshtokenweb`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       const data = await response.json();
 
-      if (data.status === 'success') {
-        const decodedToken = decodeAndStoreToken(data.data.accessToken, data.data.refreshToken);
+      if (data.status === "success") {
+        const decodedToken = decodeAndStoreToken(
+          data.data.accessToken,
+          data.data.refreshToken
+        );
         return decodedToken ? data.data.accessToken : null;
       } else {
-        throw new Error('Failed to refresh token');
+        throw new Error("Failed to refresh token");
       }
     } catch (error) {
-      console.error('Error refreshing token:', error);
+      console.error("Error refreshing token:", error);
       // Clear all stored tokens on refresh failure
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('decodedToken');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("decodedToken");
       return null;
     }
   };
@@ -67,50 +73,52 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
       console.log(data);
 
-      if (data.status === 'success') {
+      if (data.status === "success") {
         const decodedToken = decodeAndStoreToken(
           data.data.accessToken,
           data.data.refreshToken
         );
 
         console.log(decodedToken);
-        
-        
+
         if (decodedToken) {
-          navigate('/explore');
+          navigate("/explore");
         }
       } else {
-        setError('Invalid credentials. Please try again.');
+        setError("Invalid credentials. Please try again.");
       }
     } catch (err) {
-      setError('Something went wrong. Please try again later.');
-      console.error('Login error:', err);
+      setError("Something went wrong. Please try again later.");
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const checkAndRefreshToken = async () => {
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       try {
         const decoded = jwtDecode(accessToken);
         const currentTime = Date.now() / 1000;
-        
+
         // Refresh token if it expires in less than 5 minutes (300 seconds)
         if (decoded.exp - currentTime < 300) {
           const newToken = await refreshAccessToken();
@@ -121,7 +129,7 @@ const LoginPage = () => {
           return true;
         }
       } catch (error) {
-        console.error('Error checking token:', error);
+        console.error("Error checking token:", error);
       }
     }
     return false;
@@ -131,11 +139,71 @@ const LoginPage = () => {
     const checkAuth = async () => {
       const isValid = await checkAndRefreshToken();
       if (isValid) {
-        navigate('/explore');
+        navigate("/explore");
       }
     };
-    
+
     checkAuth();
+  }, [navigate]);
+
+  const redirectToGoogle = () => {
+    console.log("Redirecting to Google OAuth...");
+    window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/google`;
+  };
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const accessToken = urlParams.get("accessToken");
+  //   const refreshToken = urlParams.get("refreshToken");
+
+  //   console.log("🚀 Full URL:", window.location.href);
+  //   console.log("🔑 Access Token from URL:", accessToken);
+  //   console.log("🔄 Refresh Token from URL:", refreshToken);
+
+  //   if (accessToken && refreshToken) {
+  //     console.log("✅ Tokens found! Saving to localStorage...");
+
+  //     try {
+  //       localStorage.setItem("accessToken", accessToken);
+  //       localStorage.setItem("refreshToken", refreshToken);
+  //       console.log("📝 Tokens successfully saved to localStorage!");
+
+  //       setTimeout(() => {
+  //         navigate("/explore", { replace: true });
+  //       }, 500);
+  //     } catch (error) {
+  //       console.error("❌ Error saving tokens:", error);
+  //     }
+  //   } else {
+  //     console.log("❌ No tokens found in URL.");
+  //   }
+  // }, [navigate]);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+    const refreshToken = urlParams.get("refreshToken");
+
+    console.log("🚀 Full URL:", window.location.href);
+    console.log("🔑 Access Token from URL:", accessToken);
+    console.log("🔄 Refresh Token from URL:", refreshToken);
+
+    if (accessToken && refreshToken) {
+      console.log("✅ Tokens found! Saving to localStorage...");
+
+      try {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        console.log("📝 Tokens successfully saved to localStorage!");
+
+        setTimeout(() => {
+          // Navigate directly to Explore after saving tokens
+          navigate("/explore", { replace: true });
+        }, 500); // Delay to ensure token storage is complete
+      } catch (error) {
+        console.error("❌ Error saving tokens:", error);
+      }
+    } else {
+      console.log("❌ No tokens found in URL.");
+    }
   }, [navigate]);
 
   return (
@@ -143,7 +211,7 @@ const LoginPage = () => {
       <div className="flex flex-col w-full md:w-1/2 md:p-8">
         <div className="max-w-md w-full mx-auto">
           <h2 className="text-3xl font-bold mb-6">Welcome back!</h2>
-          
+
           {error && (
             <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 rounded-md">
               {error}
@@ -170,7 +238,7 @@ const LoginPage = () => {
                 Password
               </label>
               <input
-                type={isPasswordVisible ? 'text' : 'password'}
+                type={isPasswordVisible ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-[#BFCAB4] bg-[#f0f6e6] rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
@@ -196,10 +264,15 @@ const LoginPage = () => {
                   Verifying...
                 </>
               ) : (
-                'Verify'
+                "Verify"
               )}
             </button>
-            <Link to="/forgot-psw" className='block text-secondary font-semibold'>Forgot password ?</Link>
+            <Link
+              to="/forgot-psw"
+              className="block text-secondary font-semibold"
+            >
+              Forgot password ?
+            </Link>
 
             <div className="text-center text-gray-500">Or</div>
 
@@ -212,8 +285,6 @@ const LoginPage = () => {
               Continue with Facebook
             </button>
 
-            <GoogleAuth />
-
             <button
               type="button"
               disabled={isLoading}
@@ -223,20 +294,29 @@ const LoginPage = () => {
               Continue with Apple
             </button>
           </form>
-
+          <div className="mt-6">
+            <button
+              onClick={redirectToGoogle}
+              className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+            >
+              <FcGoogle size={24} className="mr-2" />
+              Continue with Google
+            </button>
+          </div>
           <p className="mt-4 text-sm text-gray-600">
-            Don't have an account? 
+            Don't have an account?
             <a href="/signup" className="text-blue-600 hover:underline ml-1">
               Sign up
             </a>
           </p>
 
           <p className="mt-4 text-xs text-gray-500">
-            By continuing to use SoftSorta, you agree to our Terms of Service and Privacy Policy
+            By continuing to use SoftSorta, you agree to our Terms of Service
+            and Privacy Policy
           </p>
         </div>
       </div>
-      
+
       <Slider />
     </div>
   );
