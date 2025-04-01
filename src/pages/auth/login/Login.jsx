@@ -276,7 +276,7 @@ const LoginPage = () => {
 
             <div className="text-center text-gray-500">Or</div>
 
-            <button
+            {/*<button
               type="button"
               disabled={isLoading}
               className="w-full bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none"
@@ -292,7 +292,7 @@ const LoginPage = () => {
             >
               <Apple size={20} />
               Continue with Apple
-            </button>
+            </button>*/}
           </form>
           <div className="mt-6">
             <button
