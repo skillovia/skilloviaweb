@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Pencil, Check, X, Loader, MapPin } from 'lucide-react';
 
 const EditableProfile = ({ 
@@ -22,11 +22,227 @@ const EditableProfile = ({
     lat: lat|| null
   });
 
+  // Refs for Google Places Autocomplete
+  const locationInputRef = useRef(null);
+  const streetInputRef = useRef(null);
+  
+  // Track if Google Maps API is loaded
+  const [placesApiLoaded, setPlacesApiLoaded] = useState(false);
+  const [placesApiLoading, setPlacesApiLoading] = useState(false);
+
+  // Store autocomplete instances
+  const autocompleteInstancesRef = useRef({
+    location: null,
+    street: null
+  });
+
+  // Load Google Maps API - use environment variable for API key
+  useEffect(() => {
+    if (!window.google && !placesApiLoading && isEditing) {
+      setPlacesApiLoading(true);
+      
+      // Get API key
+      const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
+      
+      if (!apiKey) {
+        setGeocodeError('Google Maps API key is missing.');
+        setPlacesApiLoading(false);
+        return;
+      }
+
+      const googleMapScript = document.createElement('script');
+      googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      googleMapScript.async = true;
+      googleMapScript.defer = true;
+      
+      googleMapScript.onload = () => {
+        setPlacesApiLoaded(true);
+        setPlacesApiLoading(false);
+      };
+      
+      googleMapScript.onerror = () => {
+        setGeocodeError('Failed to load Google Maps API. Please check your internet connection and API key.');
+        setPlacesApiLoading(false);
+      };
+      
+      document.body.appendChild(googleMapScript);
+      
+      return () => {
+        if (document.body.contains(googleMapScript)) {
+          document.body.removeChild(googleMapScript);
+        }
+      };
+    } else if (window.google) {
+      setPlacesApiLoaded(true);
+    }
+  }, [isEditing]);
+
+  // Helper function to extract components from place object
+  const extractAddressComponents = (place, componentType) => {
+    if (!place.address_components) return null;
+    
+    const component = place.address_components.find(
+      comp => comp.types.includes(componentType)
+    );
+    
+    return component ? component.long_name : null;
+  };
+
+  // Initialize city/location autocomplete
+  const initLocationAutocomplete = () => {
+    if (!window.google || !locationInputRef.current) return;
+    
+    try {
+      // Clean up previous instance if it exists
+      if (autocompleteInstancesRef.current.location) {
+        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.location);
+      }
+      
+      const locationAutocomplete = new window.google.maps.places.Autocomplete(locationInputRef.current, {
+        types: ['(cities)']
+      });
+      
+      autocompleteInstancesRef.current.location = locationAutocomplete;
+      
+      locationAutocomplete.addListener('place_changed', () => {
+        const place = locationAutocomplete.getPlace();
+        
+        if (!place.geometry) {
+          setGeocodeError('No details available for this location');
+          return;
+        }
+        
+        const cityName = extractAddressComponents(place, 'locality') || 
+                         extractAddressComponents(place, 'administrative_area_level_1') ||
+                         place.name;
+        
+        setFormData(prev => ({
+          ...prev,
+          location: cityName || ''
+        }));
+        
+        setGeocodeError('');
+      });
+    } catch (err) {
+      console.error('Error initializing location autocomplete:', err);
+      setGeocodeError('Error initializing location search');
+    }
+  };
+
+  // Initialize street address autocomplete
+  const initStreetAutocomplete = () => {
+    if (!window.google || !streetInputRef.current) return;
+    
+    try {
+      // Clean up previous instance if it exists
+      if (autocompleteInstancesRef.current.street) {
+        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.street);
+      }
+      
+      const addressAutocomplete = new window.google.maps.places.Autocomplete(streetInputRef.current, {
+        types: ['address']
+      });
+      
+      autocompleteInstancesRef.current.street = addressAutocomplete;
+      
+      addressAutocomplete.addListener('place_changed', () => {
+        const place = addressAutocomplete.getPlace();
+        
+        if (!place.geometry) {
+          setGeocodeError('No details available for this address');
+          return;
+        }
+        
+        // Extract the street part
+        if (place.formatted_address) {
+          const addressParts = place.formatted_address.split(',');
+          const streetPart = addressParts[0]; // First part is typically the street address
+          
+          setFormData(prev => ({
+            ...prev,
+            street: streetPart
+          }));
+        } else {
+          // Extract and combine components
+          const streetNumber = extractAddressComponents(place, 'street_number');
+          const streetName = extractAddressComponents(place, 'route');
+          const subpremise = extractAddressComponents(place, 'subpremise'); // For apt/suite numbers
+          
+          // Build the street address with all components
+          let fullStreetAddress = '';
+          if (streetNumber) fullStreetAddress += streetNumber;
+          if (streetName) fullStreetAddress += (fullStreetAddress ? ' ' : '') + streetName;
+          if (subpremise) fullStreetAddress += (fullStreetAddress ? ', ' : '') + subpremise;
+          
+          if (fullStreetAddress) {
+            setFormData(prev => ({
+              ...prev,
+              street: fullStreetAddress
+            }));
+          }
+        }
+        
+        // Get other address components
+        const postalCode = extractAddressComponents(place, 'postal_code');
+        const city = extractAddressComponents(place, 'locality') || 
+                     extractAddressComponents(place, 'sublocality') ||
+                     extractAddressComponents(place, 'administrative_area_level_1');
+        
+        // Update form data with any other found components
+        setFormData(prev => {
+          const updates = {};
+          
+          if (postalCode) {
+            updates.zip_code = postalCode;
+          }
+          
+          if (city) {
+            updates.location = city;
+          }
+          
+          // Set longitude and latitude
+          if (place.geometry && place.geometry.location) {
+            updates.lon = place.geometry.location.lng();
+            updates.lat = place.geometry.location.lat();
+          }
+          
+          return { ...prev, ...updates };
+        });
+        
+        setGeocodeError('');
+      });
+    } catch (err) {
+      console.error('Error initializing street autocomplete:', err);
+      setGeocodeError('Error initializing address search');
+    }
+  };
+
+  // Initialize autocomplete after API loads
+  useEffect(() => {
+    if (placesApiLoaded && isEditing) {
+      initLocationAutocomplete();
+      initStreetAutocomplete();
+    }
+  }, [placesApiLoaded, isEditing]);
+
+  // Re-initialize autocomplete if inputs are recreated
+  useEffect(() => {
+    if (placesApiLoaded && locationInputRef.current && isEditing) {
+      initLocationAutocomplete();
+    }
+  }, [locationInputRef.current, placesApiLoaded, isEditing]);
+
+  useEffect(() => {
+    if (placesApiLoaded && streetInputRef.current && isEditing) {
+      initStreetAutocomplete();
+    }
+  }, [streetInputRef.current, placesApiLoaded, isEditing]);
+
   // Geocoding effect to convert address to coordinates using Google Geocoding API
   useEffect(() => {
     const geocodeAddress = async () => {
-      // Only attempt geocoding if we have a complete address
-      if (formData.street && formData.location && formData.zip_code) {
+      // Only attempt geocoding if we have a complete address and no coordinates yet
+      if (formData.street && formData.location && formData.zip_code && (!formData.lon || !formData.lat)) {
         try {
           // Use Google Geocoding API
           const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
@@ -37,17 +253,17 @@ const EditableProfile = ({
           );
           
           const data = await response.json();
-        console.log(data);
+          console.log(data);
           
           if (data.status === 'OK' && data.results.length > 0) {
-            const { lng, lat } = data.results[0].geometry.location;
+            const { lat, lng } = data.results[0].geometry.location;
             
-            console.log('Geocoded Coordinates:', { lon: lng, lat: lat });
+            console.log('Geocoded Coordinates:', { lon: lng, lat });
 
             setFormData(prev => ({
               ...prev,
               lon: lng,
-              lat: lat,
+              lat,
               formatted_address: data.results[0].formatted_address
             }));
             
@@ -66,7 +282,7 @@ const EditableProfile = ({
           setGeocodeError('Failed to geocode address');
           setFormData(prev => ({
             ...prev,
-            long: null,
+            lon: null,
             lat: null,
             formatted_address: null
           }));
@@ -189,6 +405,13 @@ const EditableProfile = ({
           </div>
         )}
 
+        {placesApiLoading && (
+          <div className="p-3 bg-blue-50 border border-blue-100 text-blue-600 rounded-md text-sm flex items-center">
+            <Loader className="w-4 h-4 animate-spin mr-2" />
+            Loading location services...
+          </div>
+        )}
+
         <div className="space-y-3">
           <textarea
             value={formData.bio}
@@ -199,23 +422,33 @@ const EditableProfile = ({
             disabled={isLoading}
           />
 
-          <input
-            type="text"
-            value={formData.location}
-            onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-            className="w-full p-2 text-sm text-gray-600 border border-gray bg-input rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-            placeholder="Location"
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              type="text"
+              ref={locationInputRef}
+              value={formData.location}
+              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              className="w-full p-2 text-sm text-gray-600 border border-gray bg-input rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              placeholder="Location"
+              disabled={isLoading}
+              autoComplete="off"
+            />
+            <p className="text-xs text-gray-500 mt-1">Start typing to see city suggestions</p>
+          </div>
 
-          <input
-            type="text"
-            value={formData.street}
-            onChange={(e) => setFormData(prev => ({ ...prev, street: e.target.value }))}
-            className="w-full p-2 text-sm text-gray-600 border border-gray bg-input rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-            placeholder="Street"
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              type="text"
+              ref={streetInputRef}
+              value={formData.street}
+              onChange={(e) => setFormData(prev => ({ ...prev, street: e.target.value }))}
+              className="w-full p-2 text-sm text-gray-600 border border-gray bg-input rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              placeholder="Street"
+              disabled={isLoading}
+              autoComplete="off"
+            />
+            <p className="text-xs text-gray-500 mt-1">Start typing to see address suggestions</p>
+          </div>
 
           <input
             type="text"
@@ -263,7 +496,7 @@ const EditableProfile = ({
         )}
         {formData.lon && formData.lat && (
           <p className="text-xs text-gray-400">
-            Coordinates: {formData.lon.toFixed(4)}, {formData.lat.toFixed(4)}
+            Coordinates: {formData.lon.toFixed(6)}, {formData.lat.toFixed(6)}
           </p>
         )}
       </div>

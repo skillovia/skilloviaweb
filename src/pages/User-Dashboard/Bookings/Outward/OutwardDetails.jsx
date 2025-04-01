@@ -122,7 +122,7 @@ const OutwardDetails = () => {
           userId: id,
           userName: `${technicianProfile.firstname} ${technicianProfile.lastname}`,
           userPhoto: technicianProfile.photourl
-            ? `https://${technicianProfile.photourl}`
+            ? `${technicianProfile.photourl}`
             : null,
         },
       });
@@ -165,7 +165,7 @@ const OutwardDetails = () => {
               <img
                 src={
                   technicianProfile?.photourl
-                    ? `https://${technicianProfile.photourl}`
+                    ? `${technicianProfile.photourl}`
                     : "https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg"
                 }
                 alt="Technician"
