@@ -492,7 +492,7 @@ const BookingForm = () => {
                   Service: {skill.skill_type}
                 </p>
                 <p className="text-sm font-medium mb-4">
-                  Amount: ${skill.hourly_rate}
+                  Amount: £{skill.hourly_rate}
                 </p>
                 <div className="h-px bg-gray-200 w-full mb-4"></div>
               </div>
