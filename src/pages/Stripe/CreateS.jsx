@@ -85,6 +85,7 @@ const StripeOnboarding = () => {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({ stripeAccountId }),
         }
       );
