@@ -215,7 +215,8 @@ const BookingForm = () => {
           },
           body: JSON.stringify({
             amount: calculatePrice(),
-            currency: "usd",
+            // currency: "usd",
+            currency: "gbp",
             customerEmail: "customer@example.com",
             stripeAccountId: stripeAccountId,
           }),
