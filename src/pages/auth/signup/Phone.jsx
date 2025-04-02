@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Facebook, Apple } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom"; // Add useNavigate
