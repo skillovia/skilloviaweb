@@ -46,8 +46,12 @@ const BookingForm = () => {
   const [paymentMethod, setPaymentMethod] = useState(null); // 'account' or 'sparktoken'
 
   // Price calculation
+  // const calculatePrice = () => {
+  //   return skill?.hourly_rate ? skill.hourly_rate * 100 : 5000; // Convert hourly_rate to cents or default to 5000 cents ($50.00)
+  // };
+
   const calculatePrice = () => {
-    return skill?.hourly_rate ? skill.hourly_rate * 100 : 5000; // Convert hourly_rate to cents or default to 5000 cents ($50.00)
+    return skill?.hourly_rate ? skill.hourly_rate : 9; // Just send GBP (e.g., £9)
   };
 
   const handleInputChange = (e) => {
