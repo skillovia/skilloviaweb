@@ -12,7 +12,7 @@ const ExploreSection = () => {
   const [error, setError] = useState("");
   const [categoriesError, setCategoriesError] = useState("");
   // State for filters
-  const [stateFilter, setStateFilter] = useState("lagos");
+  const [stateFilter, setStateFilter] = useState("london");
   const [distanceFilter, setDistanceFilter] = useState("all");
   // User's position from token
   const [userPosition, setUserPosition] = useState(null);
