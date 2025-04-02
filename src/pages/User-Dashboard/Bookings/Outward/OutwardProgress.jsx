@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import UserLayout from '../../UserLayout/UserLayout';
-import BookCard from '../BookCard';
-import { Check, Loader2 } from 'lucide-react';
-import BackButton from '../../../../componets/Back';
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import UserLayout from "../../UserLayout/UserLayout";
+import BookCard from "../BookCard";
+import { Check, Loader2 } from "lucide-react";
+import BackButton from "../../../../componets/Back";
 
 const OutwardProgress = () => {
   const { id } = useParams();
@@ -21,7 +21,7 @@ const OutwardProgress = () => {
 
       try {
         const bookingResponse = await fetch(
-          "https://skilloviaapi.vercel.app/api/bookings/get/user/outward",
+          `${import.meta.env.VITE_BASE_URL}/bookings/get/user/outward`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -60,10 +60,10 @@ const OutwardProgress = () => {
   const handleBookingAction = async (action) => {
     setIsProcessing(true);
     const accessToken = localStorage.getItem("accessToken");
-    
+
     try {
       const response = await fetch(
-        `https://skilloviaapi.vercel.app/api/bookings/${action}/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/bookings/${action}/${id}`,
         {
           method: "PUT",
           headers: {
@@ -78,14 +78,14 @@ const OutwardProgress = () => {
       }
 
       // Update local booking status
-      setBookingDetails(prev => ({
+      setBookingDetails((prev) => ({
         ...prev,
-        status: action === 'accept' ? 'accepted' : 'rejected'
+        status: action === "accept" ? "accepted" : "rejected",
       }));
 
       // Show success message and redirect
       alert(`Booking ${action}ed successfully`);
-      navigate('/bookings');
+      navigate("/bookings");
     } catch (err) {
       setError(`Error ${action}ing booking: ${err.message}`);
     } finally {
@@ -95,11 +95,11 @@ const OutwardProgress = () => {
 
   const getTimelineData = (status) => {
     const statusMap = {
-      'pending': 1,
-      'accepted': 2,
-      'in_progress': 3,
-      'completed': 4,
-      'disputed': 4,
+      pending: 1,
+      accepted: 2,
+      in_progress: 3,
+      completed: 4,
+      disputed: 4,
     };
 
     const currentStep = statusMap[status] || 0;
@@ -108,28 +108,28 @@ const OutwardProgress = () => {
       {
         status: "Service completed",
         timestamp: bookingDetails?.updated_at || "-",
-        hasCheck: currentStep >= 4
+        hasCheck: currentStep >= 4,
       },
       {
         status: "Service in progress",
         timestamp: bookingDetails?.booking_date || "-",
-        hasCheck: currentStep >= 3
+        hasCheck: currentStep >= 3,
       },
       {
         status: "Booking request confirmed",
         timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 2
+        hasCheck: currentStep >= 2,
       },
       {
         status: "Booking request sent",
         timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 1
+        hasCheck: currentStep >= 1,
       },
       {
         status: "Payment confirmed",
         timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 1
-      }
+        hasCheck: currentStep >= 1,
+      },
     ];
   };
 
@@ -172,7 +172,7 @@ const OutwardProgress = () => {
             fileUrl={bookingDetails.file_url}
           />
         )}
-        
+
         <div className="mb-6 mt-4">
           <div className="flex justify-between mb-4">
             <h2 className="font-medium">Progress</h2>
@@ -192,7 +192,7 @@ const OutwardProgress = () => {
                     aria-hidden="true"
                   />
                 )}
-                
+
                 <div className="absolute left-0 top-1">
                   {item.hasCheck ? (
                     <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center">
@@ -206,9 +206,7 @@ const OutwardProgress = () => {
                   <p className="font-medium text-gray-900 mb-1">
                     {item.status}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    {item.timestamp}
-                  </p>
+                  <p className="text-sm text-gray-500">{item.timestamp}</p>
                 </div>
               </div>
             ))}
@@ -216,18 +214,18 @@ const OutwardProgress = () => {
         </div>
         <div className="flex gap-4">
           <button
-            onClick={() => handleBookingAction('accept')}
+            onClick={() => handleBookingAction("accept")}
             disabled={isProcessing}
             className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? 'Processing...' : 'Confirm completion'}
+            {isProcessing ? "Processing..." : "Confirm completion"}
           </button>
           <button
-            onClick={() => handleBookingAction('reject')}
+            onClick={() => handleBookingAction("reject")}
             disabled={isProcessing}
             className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? 'Processing...' : 'Open dispute'}
+            {isProcessing ? "Processing..." : "Open dispute"}
           </button>
         </div>
       </div>

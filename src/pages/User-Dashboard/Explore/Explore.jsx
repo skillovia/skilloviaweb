@@ -185,7 +185,7 @@ const ExploreSection = () => {
         }
 
         const response = await fetch(
-          "https://skilloviaapi.vercel.app/api/skills/get/categories",
+          `${import.meta.env.VITE_BASE_URL}/skills/get/categories`,
           {
             method: "GET",
             headers: {
@@ -238,11 +238,15 @@ const ExploreSection = () => {
 
         if (distanceFilter === "all") {
           // If no distance filter, use the state filter
-          url = `https://skilloviaapi.vercel.app/api/users/people/within/${stateFilter}`;
+          url = `${
+            import.meta.env.VITE_BASE_URL
+          }/users/people/within/${stateFilter}`;
           console.log("Fetching by state:", url);
         } else {
           // If distance filter is active, use the /nearby endpoint with coordinates and distance
-          url = `https://skilloviaapi.vercel.app/api/users/people/nearby/${userPosition.latitude}/${userPosition.longitude}/${distanceFilter}`;
+          url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
+            userPosition.latitude
+          }/${userPosition.longitude}/${distanceFilter}`;
           console.log("Fetching by distance:", url);
         }
 

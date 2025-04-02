@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Search, Send, Loader2 } from 'lucide-react';
-import UserLayout from '../UserLayout/UserLayout';
-import ChatMobile from './MessageMobile/ChatMobile';
+import React, { useState, useEffect, useRef } from "react";
+import { MessageCircle, Search, Send, Loader2 } from "lucide-react";
+import UserLayout from "../UserLayout/UserLayout";
+import ChatMobile from "./MessageMobile/ChatMobile";
 
 const MessagingInterface = () => {
   const [messages, setMessages] = useState([]);
@@ -10,82 +10,94 @@ const MessagingInterface = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [error, setError] = useState(null);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
   const pollingInterval = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Get sender ID from stored decoded token
   const getSenderId = () => {
     try {
-      const decodedToken = JSON.parse(localStorage.getItem('decodedToken'));
+      const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
       return decodedToken?.id;
     } catch (error) {
-      console.error('Error getting sender ID:', error);
+      console.error("Error getting sender ID:", error);
       return null;
     }
   };
 
   const markMessagesAsRead = async (messages) => {
     const currentUserId = getSenderId();
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) return;
 
-    const unreadMessages = messages.filter(msg => 
-      msg.sender_id !== currentUserId && !msg.mark_as_read
+    const unreadMessages = messages.filter(
+      (msg) => msg.sender_id !== currentUserId && !msg.mark_as_read
     );
 
     for (const msg of unreadMessages) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message/markasread/${msg.id}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/message/markasread/${msg.id}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          console.error('Failed to mark message as read:', msg.id);
+          console.error("Failed to mark message as read:", msg.id);
         }
       } catch (error) {
-        console.error('Error marking message as read:', error);
+        console.error("Error marking message as read:", error);
       }
     }
   };
 
   const fetchNewMessages = async () => {
     if (!selectedChat?.userId) return;
-    
+
     try {
       const senderId = getSenderId();
       if (!senderId) return;
 
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) throw new Error('Access token not found');
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message/${senderId}/${selectedChat.userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      
-      if (!response.ok) throw new Error('Failed to fetch messages');
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/message/${senderId}/${
+          selectedChat.userId
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch messages");
 
       const data = await response.json();
-      if (data.data && (!selectedChat.messages || data.data.length > selectedChat.messages.length)) {
-        setSelectedChat(prev => ({
+      if (
+        data.data &&
+        (!selectedChat.messages ||
+          data.data.length > selectedChat.messages.length)
+      ) {
+        setSelectedChat((prev) => ({
           ...prev,
-          messages: data.data
+          messages: data.data,
         }));
         markMessagesAsRead(data.data);
         scrollToBottom();
       }
     } catch (err) {
-      console.error('Error fetching new messages:', err);
+      console.error("Error fetching new messages:", err);
     }
   };
 
@@ -93,41 +105,44 @@ const MessagingInterface = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const accessToken = localStorage.getItem('accessToken');
-        
+        const accessToken = localStorage.getItem("accessToken");
+
         if (!accessToken) {
-          throw new Error('No access token found');
+          throw new Error("No access token found");
         }
 
-        const response = await fetch('https://skilloviaapi.vercel.app/api/message/chat/history/users', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/message/chat/history/users`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch users');
+          throw new Error("Failed to fetch users");
         }
 
         const data = await response.json();
-        
-        if (data.status === 'success' && Array.isArray(data.data)) {
-          const formattedUsers = data.data.map(user => ({
+
+        if (data.status === "success" && Array.isArray(data.data)) {
+          const formattedUsers = data.data.map((user) => ({
             id: user.user_id,
             name: user.name,
-            message: user.lastmessage || 'Recent..',
-            time: formatTime(user.lastmessagetime) || '1 mins',
+            message: user.lastmessage || "Recent..",
+            time: formatTime(user.lastmessagetime) || "1 mins",
             unreadCount: user.unreadmessagecount || 0,
-            photoUrl: user.photourl 
+            photoUrl: user.photourl
               ? `${user.photourl}`
-              : 'https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg'
+              : "https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg",
           }));
           setMessages(formattedUsers);
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching users:', err);
+        console.error("Error fetching users:", err);
       } finally {
         setLoading(false);
       }
@@ -149,7 +164,7 @@ const MessagingInterface = () => {
       // Initial fetch and scroll
       fetchNewMessages();
       scrollToBottom();
-      
+
       // Set up polling
       pollingInterval.current = setInterval(fetchNewMessages, 3000);
 
@@ -164,29 +179,34 @@ const MessagingInterface = () => {
   const formatTime = (timestamp) => {
     if (!timestamp) return null;
     const date = new Date(timestamp);
-    
+
     // Check if message is from today
     const today = new Date();
-    const isToday = date.getDate() === today.getDate() && 
-                    date.getMonth() === today.getMonth() && 
-                    date.getFullYear() === today.getFullYear();
-    
+    const isToday =
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+
     if (isToday) {
       // For today's messages, just show the time
-      return date.toLocaleString('en-US', { 
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true 
-      }).toLowerCase();
+      return date
+        .toLocaleString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        })
+        .toLowerCase();
     } else {
       // For older messages, show date and time
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true
-      }).toLowerCase();
+      return date
+        .toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        })
+        .toLowerCase();
     }
   };
   const fetchChatHistory = async (userId) => {
@@ -194,33 +214,36 @@ const MessagingInterface = () => {
     try {
       const senderId = getSenderId();
       if (!senderId || !userId) {
-        throw new Error('Sender ID or User ID not found');
+        throw new Error("Sender ID or User ID not found");
       }
 
-      const accessToken = localStorage.getItem('accessToken');
+      const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
-        throw new Error('Access token not found');
+        throw new Error("Access token not found");
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message/${senderId}/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/message/${senderId}/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to fetch chat history');
+        throw new Error("Failed to fetch chat history");
       }
 
       const data = await response.json();
       setSelectedChat({
         userId,
-        messages: data.data || []
+        messages: data.data || [],
       });
       markMessagesAsRead(data.data || []);
       scrollToBottom();
     } catch (error) {
-      console.error('Error fetching chat history:', error);
+      console.error("Error fetching chat history:", error);
       setError(error.message);
     } finally {
       setChatLoading(false);
@@ -236,38 +259,38 @@ const MessagingInterface = () => {
     if (!senderId) return;
 
     try {
-      const accessToken = localStorage.getItem('accessToken');
+      const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
-        throw new Error('Access token not found');
+        throw new Error("Access token not found");
       }
 
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/message`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           senderId: senderId,
           receiverId: selectedChat.userId,
           content: newMessage,
-          mark_as_read: false
+          mark_as_read: false,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
 
       const data = await response.json();
-      setSelectedChat(prev => ({
+      setSelectedChat((prev) => ({
         ...prev,
-        messages: [...prev.messages, data.data]
+        messages: [...prev.messages, data.data],
       }));
-      setNewMessage('');
+      setNewMessage("");
       scrollToBottom();
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       setError(error.message);
     } finally {
       setSendingMessage(false);
@@ -283,7 +306,10 @@ const MessagingInterface = () => {
         <div className="w-80">
           <div className="p-4">
             <div className="relative">
-              <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-3 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Search messages"
@@ -298,9 +324,7 @@ const MessagingInterface = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-green-500" />
               </div>
             ) : error ? (
-              <div className="text-red-500 text-center p-4">
-                {error}
-              </div>
+              <div className="text-red-500 text-center p-4">{error}</div>
             ) : (
               messages.map((chat) => (
                 <div
@@ -317,18 +341,18 @@ const MessagingInterface = () => {
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">{chat.name}</h3>
                       <span className="block">
-
-                      <p className="text-sm text-gray-500">{chat.time}</p>
-                      {chat.unreadCount > 0 && (
-                    <span className="bg-green-500  text-white text-sm font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {chat.unreadCount}
-                    </span>
-                  )}
+                        <p className="text-sm text-gray-500">{chat.time}</p>
+                        {chat.unreadCount > 0 && (
+                          <span className="bg-green-500  text-white text-sm font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                            {chat.unreadCount}
+                          </span>
+                        )}
                       </span>
-
                     </div>
-                
-                    <p className="text-sm text-gray-500 truncate">{chat.message}</p>
+
+                    <p className="text-sm text-gray-500 truncate">
+                      {chat.message}
+                    </p>
                   </div>
                 </div>
               ))
@@ -343,12 +367,14 @@ const MessagingInterface = () => {
               {/* Chat Header */}
               <div className="flex items-center p-4 bg-gray-50">
                 <img
-                  src={messages.find(m => m.id === selectedChat.userId)?.photoUrl}
+                  src={
+                    messages.find((m) => m.id === selectedChat.userId)?.photoUrl
+                  }
                   alt="Selected chat"
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <h2 className="ml-4 font-medium">
-                  {messages.find(m => m.id === selectedChat.userId)?.name}
+                  {messages.find((m) => m.id === selectedChat.userId)?.name}
                 </h2>
               </div>
 
@@ -363,14 +389,16 @@ const MessagingInterface = () => {
                     <div
                       key={message.id}
                       className={`flex ${
-                        message.sender_id === currentUserId ? 'justify-end' : 'justify-start'
+                        message.sender_id === currentUserId
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md xl:max-w-lg rounded-lg p-3 ${
                           message.sender_id === currentUserId
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-800'
+                            ? "bg-green-600 text-white"
+                            : "bg-white text-gray-800"
                         }`}
                       >
                         <p className="whitespace-pre-line">{message.content}</p>
@@ -395,8 +423,8 @@ const MessagingInterface = () => {
                     className="w-full pl-4 pr-12 py-2 bg-input border-gray shadow-sm rounded-lg border focus:outline-none focus:border-green-500"
                     disabled={sendingMessage}
                   />
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="absolute right-2 top-2 text-green-500 hover:text-green-600 disabled:opacity-50"
                     disabled={sendingMessage}
                   >
