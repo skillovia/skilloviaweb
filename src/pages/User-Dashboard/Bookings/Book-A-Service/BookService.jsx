@@ -1,18 +1,15 @@
-import { ArrowLeft, Star } from 'lucide-react';
-import React, { useState } from 'react';
-import UserLayout from '../../UserLayout/UserLayout';
-import BackButton from '../../../../componets/Back';
-import { Link, useLocation } from 'react-router-dom';
+import { ArrowLeft, Star } from "lucide-react";
+import React, { useState } from "react";
+import UserLayout from "../../UserLayout/UserLayout";
+import BackButton from "../../../../componets/Back";
+import { Link, useLocation } from "react-router-dom";
 
 const BookService = () => {
   const location = useLocation();
   const { user, skill } = location.state || {};
-  
 
   // Loading state when booking
   const [loading, setLoading] = useState(false);
-
-
 
   if (!user || !skill) {
     return (
@@ -28,12 +25,14 @@ const BookService = () => {
   const skill_id = skill.skill_id;
 
   // Extract thumbnail URLs
-  const thumbnails = skill ? [
-    skill.thumbnail01,
-    skill.thumbnail02,
-    skill.thumbnail03,
-    skill.thumbnail04
-  ].filter(Boolean) : [];
+  const thumbnails = skill
+    ? [
+        skill.thumbnail01,
+        skill.thumbnail02,
+        skill.thumbnail03,
+        skill.thumbnail04,
+      ].filter(Boolean)
+    : [];
 
   // Handle booking click
   const handleBookClick = () => {
@@ -47,8 +46,12 @@ const BookService = () => {
           <BackButton label={skill.skill_type} />
           <Link
             to="/book-form"
-            state={{ user, skill, skillId: skill_id}}
-            className={`ml-auto px-4 py-1 rounded-full ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-book hover:bg-yellow-200"}`}
+            state={{ user, skill, skillId: skill_id }}
+            className={`ml-auto px-4 py-1 rounded-full ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-book hover:bg-yellow-200"
+            }`}
             onClick={handleBookClick}
           >
             {loading ? "Booking..." : "Book"}
@@ -83,12 +86,14 @@ const BookService = () => {
 
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-gray-600">Experience Level: {skill.experience_level}</span>
+            <span className="text-gray-600">
+              Experience Level: {skill.experience_level}
+            </span>
           </div>
           <div className="flex items-center gap-4 text-gray-600">
             <div className="flex items-center gap-2">
               <span>Hourly rate</span>
-              <span className="font-semibold">${skill.hourly_rate}</span>
+              <span className="font-semibold">£{skill.hourly_rate}</span>
             </div>
           </div>
         </div>
