@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  FaCopy, 
-  FaWhatsapp, 
-  FaTwitter, 
-  FaFacebook, 
+import React, { useState, useEffect } from "react";
+import {
+  FaCopy,
+  FaWhatsapp,
+  FaTwitter,
+  FaFacebook,
   FaLinkedin,
   FaUsers,
   FaGift,
   FaDollarSign,
   FaCheckCircle,
-  FaSpinner
-} from 'react-icons/fa';
-import UserLayout from '../../../../UserLayout/UserLayout';
-
+  FaSpinner,
+} from "react-icons/fa";
+import UserLayout from "../../../../UserLayout/UserLayout";
+import { jwtDecode } from "jwt-decode";
 const Invite = () => {
   const [copySuccess, setCopySuccess] = useState(false);
-  const [referralCode, setReferralCode] = useState('');
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const userId = localStorage.getItem('decodedToken') 
-    ? JSON.parse(localStorage.getItem('decodedToken')).id 
-    : null;
+  // const userId = localStorage.getItem('decodedToken')
+  //   ? JSON.parse(localStorage.getItem('decodedToken')).id
+  //   : null;
+
+  const accessToken = localStorage.getItem("accessToken");
+
+  const userId = accessToken ? jwtDecode(accessToken).id : null;
 
   useEffect(() => {
     fetchProfile();
@@ -29,43 +33,45 @@ const Invite = () => {
 
   const fetchProfile = async () => {
     if (!userId) {
-      setError('User ID not found');
+      setError("User ID not found");
       setLoading(false);
       return;
     }
-    
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/profile/${userId}`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch profile');
+        throw new Error("Failed to fetch profile");
       }
 
       const responseData = await response.json();
-      
+
       // Access the referral_code from the correct path in the response
       if (responseData.data && responseData.data.referral_code) {
         setReferralCode(responseData.data.referral_code);
-        setError(''); // Clear any existing errors
+        setError(""); // Clear any existing errors
       } else {
-        setError('No referral code found in profile');
+        setError("No referral code found in profile");
       }
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching profile:', err);
+      console.error("Error fetching profile:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : '';
+  const referralLink = referralCode
+    ? `${window.location.origin}/signup?ref=${referralCode}`
+    : "";
 
   const handleCopyLink = async () => {
     if (!referralLink) return;
@@ -80,7 +86,7 @@ const Invite = () => {
 
   const handleShare = async (platform, url) => {
     if (!referralLink) return;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   if (loading) {
@@ -101,7 +107,8 @@ const Invite = () => {
             <FaUsers className="mr-2" size={32} /> Invite Friends
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Share the benefits with your friends and earn rewards for every successful referral!
+            Share the benefits with your friends and earn rewards for every
+            successful referral!
           </p>
         </div>
 
@@ -144,7 +151,14 @@ const Invite = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
-                  onClick={() => handleShare('whatsapp', `https://wa.me/?text=Join%20me!%20${encodeURIComponent(referralLink)}`)}
+                  onClick={() =>
+                    handleShare(
+                      "whatsapp",
+                      `https://wa.me/?text=Join%20me!%20${encodeURIComponent(
+                        referralLink
+                      )}`
+                    )
+                  }
                   disabled={!referralLink}
                   className="p-3 bg-[#25D366] text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -152,7 +166,14 @@ const Invite = () => {
                   WhatsApp
                 </button>
                 <button
-                  onClick={() => handleShare('twitter', `https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=Join%20me!`)}
+                  onClick={() =>
+                    handleShare(
+                      "twitter",
+                      `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                        referralLink
+                      )}&text=Join%20me!`
+                    )
+                  }
                   disabled={!referralLink}
                   className="p-3 bg-[#1DA1F2] text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -160,7 +181,14 @@ const Invite = () => {
                   Twitter
                 </button>
                 <button
-                  onClick={() => handleShare('facebook', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`)}
+                  onClick={() =>
+                    handleShare(
+                      "facebook",
+                      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                        referralLink
+                      )}`
+                    )
+                  }
                   disabled={!referralLink}
                   className="p-3 bg-[#1877F2] text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -168,7 +196,14 @@ const Invite = () => {
                   Facebook
                 </button>
                 <button
-                  onClick={() => handleShare('linkedin', `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(referralLink)}`)}
+                  onClick={() =>
+                    handleShare(
+                      "linkedin",
+                      `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+                        referralLink
+                      )}`
+                    )
+                  }
                   disabled={!referralLink}
                   className="p-3 bg-[#0077B5] text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -193,7 +228,9 @@ const Invite = () => {
                 </div>
                 <div>
                   <p className="font-medium">Share your unique referral link</p>
-                  <p className="text-sm text-gray-600">Send your link to friends via any platform</p>
+                  <p className="text-sm text-gray-600">
+                    Send your link to friends via any platform
+                  </p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -202,7 +239,9 @@ const Invite = () => {
                 </div>
                 <div>
                   <p className="font-medium">Friends sign up</p>
-                  <p className="text-sm text-gray-600">They create an account using your link</p>
+                  <p className="text-sm text-gray-600">
+                    They create an account using your link
+                  </p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
@@ -211,7 +250,9 @@ const Invite = () => {
                 </div>
                 <div>
                   <p className="font-medium">Earn rewards</p>
-                  <p className="text-sm text-gray-600">Get bonuses for successful referrals</p>
+                  <p className="text-sm text-gray-600">
+                    Get bonuses for successful referrals
+                  </p>
                 </div>
               </li>
             </ul>

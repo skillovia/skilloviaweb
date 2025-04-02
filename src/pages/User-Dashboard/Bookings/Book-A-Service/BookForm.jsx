@@ -11,7 +11,7 @@ import {
   PaymentElement,
   AddressElement,
 } from "@stripe/react-stripe-js";
-
+import { jwtDecode } from "jwt-decode";
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(
   "pk_test_51QrcLQ09r1sd9IYht35RhBj1DoUQHGdeSUQx85N9gOzUW8vwBzurLss9Yq7SbeeioMr9HDi39f2gN3OV14oM7N9H00vEoA1iDS"
@@ -96,16 +96,29 @@ const BookingForm = () => {
   const handleSparkTokenPayment = async () => {
     setLoading(true);
 
+    // try {
+    //   // Get user ID and access token from localStorage
+    //   const userId = localStorage.getItem("decodedToken")
+    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
+    //     : null;
+    //   const accessToken = localStorage.getItem("accessToken");
+
+    //   if (!accessToken) {
+    //     throw new Error("Access token not found");
+    //   }
     try {
-      // Get user ID and access token from localStorage
-      const userId = localStorage.getItem("decodedToken")
-        ? JSON.parse(localStorage.getItem("decodedToken")).id
-        : null;
+      // Get the access token from localStorage
       const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) {
         throw new Error("Access token not found");
       }
+
+      // Decode the token to get the user ID (assuming you use JWT)
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.id;
+
+      console.log("Decoded User ID:", userId);
 
       // Implement SparkToken payment logic here
 
@@ -145,16 +158,30 @@ const BookingForm = () => {
   const handleProceedToPayment = async () => {
     setLoading(true);
 
+    // try {
+    //   // Get user ID and access token from localStorage
+    //   const userId = localStorage.getItem("decodedToken")
+    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
+    //     : null;
+    //   const accessToken = localStorage.getItem("accessToken");
+
+    //   if (!accessToken) {
+    //     throw new Error("Access token not found");
+    //   }
+
     try {
-      // Get user ID and access token from localStorage
-      const userId = localStorage.getItem("decodedToken")
-        ? JSON.parse(localStorage.getItem("decodedToken")).id
-        : null;
+      // Get the access token from localStorage
       const accessToken = localStorage.getItem("accessToken");
 
       if (!accessToken) {
         throw new Error("Access token not found");
       }
+
+      // Decode the access token to get the user ID (assuming you use JWT)
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.id;
+
+      console.log("Decoded User ID:", userId);
 
       // First fetch the Stripe account ID
       const stripeAccountResponse = await fetch(

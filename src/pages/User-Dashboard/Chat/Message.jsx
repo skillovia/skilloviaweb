@@ -19,9 +19,25 @@ const MessagingInterface = () => {
   };
 
   // Get sender ID from stored decoded token
+  // const getSenderId = () => {
+  //   try {
+  //     const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+  //     return decodedToken?.id;
+  //   } catch (error) {
+  //     console.error("Error getting sender ID:", error);
+  //     return null;
+  //   }
+  // };
   const getSenderId = () => {
     try {
-      const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) {
+        throw new Error("Access token not found");
+      }
+
+      // Decode the access token to get the user ID (assuming it's a JWT)
+      const decodedToken = jwtDecode(accessToken);
       return decodedToken?.id;
     } catch (error) {
       console.error("Error getting sender ID:", error);
