@@ -1,36 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Check, Loader2 } from 'lucide-react';
-import UserLayout from '../../../UserLayout/UserLayout';
-import BackButton from '../../../../../componets/Back';
-import ProfilePhotoUpload from './ProfileUpload';
+import React, { useState, useEffect, useRef } from "react";
+import { Check, Loader2 } from "lucide-react";
+import UserLayout from "../../../UserLayout/UserLayout";
+import BackButton from "../../../../../componets/Back";
+import ProfilePhotoUpload from "./ProfileUpload";
+
+import { jwtDecode } from "jwt-decode";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
     expertVisibility: true,
-    firstName: '',
-    lastName: '',
-    email: '',
-    website: '',
-    city: '',
-    streetAddress: '',
-    zipCode: '',
-    openingTime: '00:00',
-    closingTime: '00:00',
+    firstName: "",
+    lastName: "",
+    email: "",
+    website: "",
+    city: "",
+    streetAddress: "",
+    zipCode: "",
+    openingTime: "00:00",
+    closingTime: "00:00",
     weekendsInclusive: false,
-    gender: '',
-    password: ''
+    gender: "",
+    password: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [apiError, setApiError] = useState('');
-  
+  const [error, setError] = useState("");
+  const [apiError, setApiError] = useState("");
+
   // Refs for Google Places Autocomplete
   const cityInputRef = useRef(null);
   const streetInputRef = useRef(null);
   const zipInputRef = useRef(null);
-  
+
   // Track if Google Maps API is loaded
   const [placesApiLoaded, setPlacesApiLoaded] = useState(false);
   const [placesApiLoading, setPlacesApiLoading] = useState(false);
@@ -38,44 +40,52 @@ const Profile = () => {
   // Store autocomplete instances
   const autocompleteInstancesRef = useRef({
     city: null,
-    street: null
+    street: null,
   });
 
-  const userId = localStorage.getItem('decodedToken') 
-    ? JSON.parse(localStorage.getItem('decodedToken')).id 
-    : null;
+  // const userId = localStorage.getItem('decodedToken')
+  //   ? JSON.parse(localStorage.getItem('decodedToken')).id
+  //   : null;
+
+  const accessToken = localStorage.getItem("accessToken");
+
+  const userId = accessToken ? jwtDecode(accessToken).id : null;
 
   // Load Google Maps API - use environment variable for API key
   useEffect(() => {
     if (!window.google && !placesApiLoading) {
       setPlacesApiLoading(true);
-      
+
       // Get API key from environment variable
       const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
-      
+
       if (!apiKey) {
-        setApiError('Google Maps API key is missing. Please check your environment variables.');
+        setApiError(
+          "Google Maps API key is missing. Please check your environment variables."
+        );
         setPlacesApiLoading(false);
         return;
       }
 
-      const googleMapScript = document.createElement('script');
+      const googleMapScript = document.createElement("script");
       googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       googleMapScript.async = true;
       googleMapScript.defer = true;
-      
+
       googleMapScript.onload = () => {
         setPlacesApiLoaded(true);
         setPlacesApiLoading(false);
       };
-      
+
       googleMapScript.onerror = () => {
-        setApiError('Failed to load Google Maps API. Please check your internet connection and API key.');
+        setApiError(
+          "Failed to load Google Maps API. Please check your internet connection and API key."
+        );
         setPlacesApiLoading(false);
       };
-      
+
       document.body.appendChild(googleMapScript);
-      
+
       return () => {
         if (document.body.contains(googleMapScript)) {
           document.body.removeChild(googleMapScript);
@@ -89,141 +99,155 @@ const Profile = () => {
   // Helper function to extract components from place object
   const extractAddressComponents = (place, componentType) => {
     if (!place.address_components) return null;
-    
-    const component = place.address_components.find(
-      comp => comp.types.includes(componentType)
+
+    const component = place.address_components.find((comp) =>
+      comp.types.includes(componentType)
     );
-    
+
     return component ? component.long_name : null;
   };
 
   // Initialize city autocomplete
   const initCityAutocomplete = () => {
     if (!window.google || !cityInputRef.current) return;
-    
+
     try {
       // Clean up previous instance if it exists
       if (autocompleteInstancesRef.current.city) {
-        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.city);
+        google.maps.event.clearInstanceListeners(
+          autocompleteInstancesRef.current.city
+        );
       }
-      
-      const cityAutocomplete = new window.google.maps.places.Autocomplete(cityInputRef.current, {
-        types: ['(cities)']
-      });
-      
+
+      const cityAutocomplete = new window.google.maps.places.Autocomplete(
+        cityInputRef.current,
+        {
+          types: ["(cities)"],
+        }
+      );
+
       autocompleteInstancesRef.current.city = cityAutocomplete;
-      
-      cityAutocomplete.addListener('place_changed', () => {
+
+      cityAutocomplete.addListener("place_changed", () => {
         const place = cityAutocomplete.getPlace();
-        
+
         if (!place.geometry) {
-          setApiError('No details available for this location');
+          setApiError("No details available for this location");
           return;
         }
-        
-        const cityName = extractAddressComponents(place, 'locality') || 
-                         extractAddressComponents(place, 'administrative_area_level_1') ||
-                         place.name;
-        
-        setFormData(prev => ({
+
+        const cityName =
+          extractAddressComponents(place, "locality") ||
+          extractAddressComponents(place, "administrative_area_level_1") ||
+          place.name;
+
+        setFormData((prev) => ({
           ...prev,
-          city: cityName || ''
+          city: cityName || "",
         }));
-        
-        setApiError('');
+
+        setApiError("");
       });
     } catch (err) {
-      console.error('Error initializing city autocomplete:', err);
-      setApiError('Error initializing location search');
+      console.error("Error initializing city autocomplete:", err);
+      setApiError("Error initializing location search");
     }
   };
 
   // Initialize street address autocomplete
-// Initialize street address autocomplete
-const initStreetAutocomplete = () => {
-  if (!window.google || !streetInputRef.current) return;
-  
-  try {
-    // Clean up previous instance if it exists
-    if (autocompleteInstancesRef.current.street) {
-      google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.street);
-    }
-    
-    const addressAutocomplete = new window.google.maps.places.Autocomplete(streetInputRef.current, {
-      types: ['address']
-    });
-    
-    autocompleteInstancesRef.current.street = addressAutocomplete;
-    
-    addressAutocomplete.addListener('place_changed', () => {
-      const place = addressAutocomplete.getPlace();
-      
-      if (!place.geometry) {
-        setApiError('No details available for this address');
-        return;
+  // Initialize street address autocomplete
+  const initStreetAutocomplete = () => {
+    if (!window.google || !streetInputRef.current) return;
+
+    try {
+      // Clean up previous instance if it exists
+      if (autocompleteInstancesRef.current.street) {
+        google.maps.event.clearInstanceListeners(
+          autocompleteInstancesRef.current.street
+        );
       }
-      
-      // Log the full place object to see what we're getting
-      console.log('Full place object:', place);
-      
-      // Option 1: Use the formatted_address directly if available
-      if (place.formatted_address) {
-        // Extract just the street part (before the city/state/zip)
-        const addressParts = place.formatted_address.split(',');
-        const streetPart = addressParts[0]; // First part is typically the street address
-        
-        setFormData(prev => ({
-          ...prev,
-          streetAddress: streetPart
-        }));
-      } else {
-        // Option 2: Extract and combine components
-        const streetNumber = extractAddressComponents(place, 'street_number');
-        const streetName = extractAddressComponents(place, 'route');
-        const subpremise = extractAddressComponents(place, 'subpremise'); // For apt/suite numbers
-        
-        // Build the street address with all components
-        let fullStreetAddress = '';
-        if (streetNumber) fullStreetAddress += streetNumber;
-        if (streetName) fullStreetAddress += (fullStreetAddress ? ' ' : '') + streetName;
-        if (subpremise) fullStreetAddress += (fullStreetAddress ? ', ' : '') + subpremise;
-        
-        if (fullStreetAddress) {
-          setFormData(prev => ({
+
+      const addressAutocomplete = new window.google.maps.places.Autocomplete(
+        streetInputRef.current,
+        {
+          types: ["address"],
+        }
+      );
+
+      autocompleteInstancesRef.current.street = addressAutocomplete;
+
+      addressAutocomplete.addListener("place_changed", () => {
+        const place = addressAutocomplete.getPlace();
+
+        if (!place.geometry) {
+          setApiError("No details available for this address");
+          return;
+        }
+
+        // Log the full place object to see what we're getting
+        console.log("Full place object:", place);
+
+        // Option 1: Use the formatted_address directly if available
+        if (place.formatted_address) {
+          // Extract just the street part (before the city/state/zip)
+          const addressParts = place.formatted_address.split(",");
+          const streetPart = addressParts[0]; // First part is typically the street address
+
+          setFormData((prev) => ({
             ...prev,
-            streetAddress: fullStreetAddress
+            streetAddress: streetPart,
           }));
+        } else {
+          // Option 2: Extract and combine components
+          const streetNumber = extractAddressComponents(place, "street_number");
+          const streetName = extractAddressComponents(place, "route");
+          const subpremise = extractAddressComponents(place, "subpremise"); // For apt/suite numbers
+
+          // Build the street address with all components
+          let fullStreetAddress = "";
+          if (streetNumber) fullStreetAddress += streetNumber;
+          if (streetName)
+            fullStreetAddress += (fullStreetAddress ? " " : "") + streetName;
+          if (subpremise)
+            fullStreetAddress += (fullStreetAddress ? ", " : "") + subpremise;
+
+          if (fullStreetAddress) {
+            setFormData((prev) => ({
+              ...prev,
+              streetAddress: fullStreetAddress,
+            }));
+          }
         }
-      }
-      
-      // Continue with other components as before
-      const postalCode = extractAddressComponents(place, 'postal_code');
-      const city = extractAddressComponents(place, 'locality') || 
-                   extractAddressComponents(place, 'sublocality') ||
-                   extractAddressComponents(place, 'administrative_area_level_1');
-      
-      // Update form data with any other found components
-      setFormData(prev => {
-        const updates = {};
-        
-        if (postalCode) {
-          updates.zipCode = postalCode;
-        }
-        
-        if (city) {
-          updates.city = city;
-        }
-        
-        return { ...prev, ...updates };
+
+        // Continue with other components as before
+        const postalCode = extractAddressComponents(place, "postal_code");
+        const city =
+          extractAddressComponents(place, "locality") ||
+          extractAddressComponents(place, "sublocality") ||
+          extractAddressComponents(place, "administrative_area_level_1");
+
+        // Update form data with any other found components
+        setFormData((prev) => {
+          const updates = {};
+
+          if (postalCode) {
+            updates.zipCode = postalCode;
+          }
+
+          if (city) {
+            updates.city = city;
+          }
+
+          return { ...prev, ...updates };
+        });
+
+        setApiError("");
       });
-      
-      setApiError('');
-    });
-  } catch (err) {
-    console.error('Error initializing street autocomplete:', err);
-    setApiError('Error initializing address search');
-  }
-};
+    } catch (err) {
+      console.error("Error initializing street autocomplete:", err);
+      setApiError("Error initializing address search");
+    }
+  };
 
   // Initialize autocomplete after API loads
   useEffect(() => {
@@ -249,15 +273,15 @@ const initStreetAutocomplete = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) return;
-      
+
       setIsLoading(true);
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/users/profile/${userId}`,
           {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            }
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
         );
 
@@ -266,25 +290,25 @@ const initStreetAutocomplete = () => {
         }
 
         const data = await response.json();
-        
-        if (data.status === 'success') {
-          setFormData(prev => ({
+
+        if (data.status === "success") {
+          setFormData((prev) => ({
             ...prev,
-            firstName: data.data.firstname || '',
-            lastName: data.data.lastname || '',
-            email: data.data.email || '',
-            website: data.data.website || '',
-            city: data.data.location || '',
-            streetAddress: data.data.street || '',
-            zipCode: data.data.zip_code || '',
-            gender: data.data.gender || ''
+            firstName: data.data.firstname || "",
+            lastName: data.data.lastname || "",
+            email: data.data.email || "",
+            website: data.data.website || "",
+            city: data.data.location || "",
+            streetAddress: data.data.street || "",
+            zipCode: data.data.zip_code || "",
+            gender: data.data.gender || "",
           }));
         } else {
-          setError(data.message || 'Failed to load profile data');
+          setError(data.message || "Failed to load profile data");
         }
       } catch (err) {
-        setError('Failed to load profile data');
-        console.error('Error loading profile:', err);
+        setError("Failed to load profile data");
+        console.error("Error loading profile:", err);
       } finally {
         setIsLoading(false);
       }
@@ -295,36 +319,36 @@ const initStreetAutocomplete = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleToggle = (name) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: !prev[name]
+      [name]: !prev[name],
     }));
   };
 
   const handleSubmit = async () => {
     if (!userId) {
-      setError('User ID not found');
+      setError("User ID not found");
       return;
     }
 
     setIsSaving(true);
-    setError('');
+    setError("");
 
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
         {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
             email: formData.email,
@@ -335,8 +359,8 @@ const initStreetAutocomplete = () => {
             location: formData.city,
             street: formData.streetAddress,
             zip_code: formData.zipCode,
-            website: formData.website
-          })
+            website: formData.website,
+          }),
         }
       );
 
@@ -345,14 +369,14 @@ const initStreetAutocomplete = () => {
       }
 
       const data = await response.json();
-      if (data.status === 'success') {
-        console.log('Profile updated successfully');
+      if (data.status === "success") {
+        console.log("Profile updated successfully");
       } else {
-        setError(data.message || 'Failed to update profile');
+        setError(data.message || "Failed to update profile");
       }
     } catch (err) {
-      setError('Something went wrong while updating profile');
-      console.error('Error updating profile:', err);
+      setError("Something went wrong while updating profile");
+      console.error("Error updating profile:", err);
     } finally {
       setIsSaving(false);
     }
@@ -364,12 +388,12 @@ const initStreetAutocomplete = () => {
       <button
         onClick={onChange}
         className={`relative w-11 h-6 rounded-full transition-colors ${
-          checked ? 'bg-primary' : 'bg-gray-500'
+          checked ? "bg-primary" : "bg-gray-500"
         }`}
       >
         <div
           className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-secondary transition-transform ${
-            checked ? 'translate-x-5' : 'translate-x-0'
+            checked ? "translate-x-5" : "translate-x-0"
           }`}
         />
       </button>
@@ -387,9 +411,9 @@ const initStreetAutocomplete = () => {
           <>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
-                <BackButton label='Edit profile' />
+                <BackButton label="Edit profile" />
               </div>
-              <button 
+              <button
                 onClick={handleSubmit}
                 disabled={isSaving}
                 className="bg-primary text-secondary font-semibold px-4 py-2 rounded-full hover:bg-green-500 transition-colors flex items-center space-x-2"
@@ -400,7 +424,7 @@ const initStreetAutocomplete = () => {
                     <span>Saving...</span>
                   </>
                 ) : (
-                  'Save changes'
+                  "Save changes"
                 )}
               </button>
             </div>
@@ -422,20 +446,24 @@ const initStreetAutocomplete = () => {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="font-medium mb-1">Expert visibility</h3>
-                  <p className="text-sm text-gray-500">Make yourself visible to clients</p>
+                  <p className="text-sm text-gray-500">
+                    Make yourself visible to clients
+                  </p>
                 </div>
-                <Toggle 
+                <Toggle
                   checked={formData.expertVisibility}
-                  onChange={() => handleToggle('expertVisibility')}
+                  onChange={() => handleToggle("expertVisibility")}
                 />
               </div>
 
               <form className="space-y-6">
                 <h3 className="font-medium">Personal details</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">First name</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      First name
+                    </label>
                     <input
                       type="text"
                       name="firstName"
@@ -447,7 +475,9 @@ const initStreetAutocomplete = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Last name</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Last name
+                    </label>
                     <input
                       type="text"
                       name="lastName"
@@ -459,7 +489,9 @@ const initStreetAutocomplete = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Email</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -471,7 +503,9 @@ const initStreetAutocomplete = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Website link</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Website link
+                    </label>
                     <input
                       type="url"
                       name="website"
@@ -483,7 +517,9 @@ const initStreetAutocomplete = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Gender</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Gender
+                    </label>
                     <select
                       name="gender"
                       value={formData.gender}
@@ -498,7 +534,9 @@ const initStreetAutocomplete = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Password</label>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Password
+                    </label>
                     <input
                       type="password"
                       name="password"
@@ -517,10 +555,12 @@ const initStreetAutocomplete = () => {
                         Loading location services...
                       </div>
                     )}
-                    
+
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">City</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          City
+                        </label>
                         <input
                           type="text"
                           name="city"
@@ -531,11 +571,15 @@ const initStreetAutocomplete = () => {
                           placeholder="Your city"
                           autoComplete="off"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Start typing to see suggestions</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Start typing to see suggestions
+                        </p>
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">Street address</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          Street address
+                        </label>
                         <input
                           type="text"
                           name="streetAddress"
@@ -546,11 +590,15 @@ const initStreetAutocomplete = () => {
                           placeholder="St. Address"
                           autoComplete="off"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Start typing to see suggestions</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Start typing to see suggestions
+                        </p>
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">ZIP/Postal Code</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          ZIP/Postal Code
+                        </label>
                         <input
                           type="text"
                           name="zipCode"
@@ -571,6 +619,6 @@ const initStreetAutocomplete = () => {
       </div>
     </UserLayout>
   );
-}
+};
 
 export default Profile;

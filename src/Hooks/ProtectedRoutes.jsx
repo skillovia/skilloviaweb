@@ -106,7 +106,35 @@ const ProtectedRoute = ({ children }) => {
       return;
     }
 
+    // try {
+    //   const decodedToken = jwtDecode(token);
+    //   const currentTime = Date.now() / 1000;
+
+    //   console.log("🔓 Decoded Token:", decodedToken);
+    //   console.log(
+    //     "⏳ Expiration Time:",
+    //     decodedToken.exp,
+    //     "| Current Time:",
+    //     currentTime
+    //   );
+
+    //   if (decodedToken.exp < currentTime) {
+    //     console.log("⚠️ Token expired, redirecting to login...");
+    //     localStorage.removeItem("accessToken");
+    //     setAuthStatus("unauthenticated");
+    //   } else {
+    //     console.log("✅ Token is valid, allowing access...");
+    //     setAuthStatus("authenticated");
+    //   }
     try {
+      const token = localStorage.getItem("accessToken"); // Ensure token is from localStorage
+
+      if (!token) {
+        console.log("🚫 No token found, redirecting to login...");
+        setAuthStatus("unauthenticated");
+        return;
+      }
+
       const decodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000;
 
@@ -131,6 +159,12 @@ const ProtectedRoute = ({ children }) => {
       localStorage.removeItem("accessToken");
       setAuthStatus("unauthenticated");
     }
+
+    // } catch (error) {
+    //   console.error("❌ Invalid token:", error);
+    //   localStorage.removeItem("accessToken");
+    //   setAuthStatus("unauthenticated");
+    // }
   }, []);
 
   if (authStatus === "loading") {
