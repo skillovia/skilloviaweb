@@ -127,7 +127,7 @@ const ExploreList = () => {
                     <p>Exp: {skill.experience_level}</p>
                   </div>
                   <div className="flex items-center gap-2 text-sm ">
-                    <p>Rate: ${skill.hourly_rate}/hr</p>
+                    <p>Rate: £{skill.hourly_rate}/hr</p>
                   </div>
                 </div>
               </div>
