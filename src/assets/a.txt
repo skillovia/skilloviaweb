@@ -25,7 +25,7 @@ const ExploreSection = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch('https://skilloviaapi.vercel.app/api/skills/get/categories', {
+        const response = await fetch( `${import.meta.env.VITE_BASE_URL}/skills/get/categories`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -71,7 +71,7 @@ const ExploreSection = () => {
         console.log(decodedToken, "decodedToken");
         
      
-        const response = await fetch(`https://skilloviaapi.vercel.app/api/users/people/nearby/${lat}/${lon}/${radius}`, {
+        const response = await fetch( `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${lat}/${lon}/${radius}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${accessToken}`,

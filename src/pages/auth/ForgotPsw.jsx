@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { AlertCircle, ArrowRight, Loader2, Mail } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { AlertCircle, ArrowRight, Loader2, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [responseData, setResponseData] = useState(null);
 
@@ -15,46 +15,49 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setResponseData(null);
-    
+
     // Validate email
     if (!email) {
-      setError('Email is required');
+      setError("Email is required");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('https://skilloviaapis.vercel.app/api/auth/forgot/password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/forgot/password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to process request');
+        throw new Error(data.message || "Failed to process request");
       }
 
       // Check if the response matches expected format
-      if (data.status === 'success') {
+      if (data.status === "success") {
         setSuccess(true);
         setResponseData(data);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -67,7 +70,8 @@ const ForgotPassword = () => {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Forgot Password</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we'll send you a link to reset your
+            password.
           </p>
         </div>
 
@@ -75,17 +79,18 @@ const ForgotPassword = () => {
         {success ? (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
             <div className="text-green-800 text-sm font-medium text-center">
-              {responseData?.message || 'Password reset instructions have been sent to your email.'}
+              {responseData?.message ||
+                "Password reset instructions have been sent to your email."}
             </div>
             <div className="">
               <p className="text-sm text-green-700 text-center">
                 Check your inbox for further instructions.
               </p>
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="text-sm font-medium bg-secondary block my-3 text-white text-center p-2 rounded-md hover:text-green-500 "
               >
-                Back to login 
+                Back to login
               </Link>
             </div>
           </div>
@@ -134,7 +139,7 @@ const ForgotPassword = () => {
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  'Send Reset Link'
+                  "Send Reset Link"
                 )}
               </button>
             </div>

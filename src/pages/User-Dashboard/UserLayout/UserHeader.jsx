@@ -123,13 +123,13 @@ const UserHeader = () => {
 
       // Fetch different types of notifications concurrently
       const [bookingsRes, followersRes, followeesRes] = await Promise.all([
-        fetch("https://skilloviaapi.vercel.app/api/notifications/bookings", {
+        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/bookings`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
-        fetch("https://skilloviaapi.vercel.app/api/notifications/follower", {
+        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/follower`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
-        fetch("https://skilloviaapi.vercel.app/api/notifications/followees", {
+        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/followees`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       ]);
