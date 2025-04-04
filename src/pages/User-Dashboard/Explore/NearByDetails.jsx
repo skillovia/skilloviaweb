@@ -164,7 +164,8 @@ const NearByDetails = () => {
                       Experience level: {skill.experience_level || "Unknown"}
                     </p>
                     <h3 className="text-[14px] font-medium">
-                      hourly_rate: £{skill.hourly_rate}
+                      hourly_rate: £{skill.hourly_rate} - {skill.spark_token}{" "}
+                      Spark Token
                     </h3>
                   </div>
                   <Link
