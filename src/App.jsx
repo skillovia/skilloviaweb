@@ -60,6 +60,8 @@ import SuccessPage from "./pages/Stripe/SucessPay";
 import CreateStripeAccount from "./pages/Stripe/CreateS";
 import GoogleAuthHandler from "./pages/GoogleAuthHandler";
 import TokenHandler from "./TokenHandler";
+import OpenDisputePage from "./pages/Dispute-Review/Dispute/Dispute";
+import Review from "./pages/Dispute-Review/Review/Review";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -464,6 +466,26 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Following />
+      </ProtectedRoute>
+    ),
+  },
+  
+  
+  {
+    path: "/open-dispute",
+    element: (
+      <ProtectedRoute>
+        <OpenDisputePage />
+      </ProtectedRoute>
+    ),
+  },  
+  
+  
+  {
+    path: "/review",
+    element: (
+      <ProtectedRoute>
+        <Review />
       </ProtectedRoute>
     ),
   },

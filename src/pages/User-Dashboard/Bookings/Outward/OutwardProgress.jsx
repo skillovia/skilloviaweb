@@ -93,6 +93,40 @@ const OutwardProgress = () => {
     }
   };
 
+
+
+  const handleNavigateToReview = () => {
+    if (bookingDetails) {
+      navigate("/review", {
+        state: {
+          skillId: bookingDetails.skills_id,
+          bookingUserId: bookingDetails.booking_user_id,
+          bookingId: bookingDetails.id,
+          title: bookingDetails.title,
+   
+        }
+      });
+    } else {
+      alert("Cannot submit review: Missing booking information");
+    }
+  };
+
+  const handleOpenDispute = () => {
+    // Navigate to the dispute page with all booking data passed via navigate state
+    if (bookingDetails) {
+      navigate("/open-dispute", {
+        state: {
+          bookingId: bookingDetails.id,
+          bookedUserId: bookingDetails.booked_user_id,
+          bookingTitle: bookingDetails.title,
+          description: bookingDetails.description
+        }
+      });
+    } else {
+      alert("Cannot open dispute: Missing booking information");
+    }
+  };
+
   const getTimelineData = (status) => {
     const statusMap = {
       pending: 1,
@@ -212,21 +246,22 @@ const OutwardProgress = () => {
             ))}
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 my-6">
           <button
-            onClick={() => handleBookingAction("accept")}
+            onClick={() => handleNavigateToReview()}
             disabled={isProcessing}
             className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing..." : "Confirm completion"}
+        Confirm completion
           </button>
           <button
-            onClick={() => handleBookingAction("reject")}
+            onClick={handleOpenDispute}
             disabled={isProcessing}
             className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing..." : "Open dispute"}
-          </button>
+           Open dispute
+          </button> 
+         
         </div>
       </div>
     </UserLayout>
