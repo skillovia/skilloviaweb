@@ -44,6 +44,8 @@ const OutwardDetails = () => {
           (booking) => booking.id === numericId
         );
 
+        console.log("Booking Data:vhere...........", booking);
+
         if (!booking) {
           throw new Error("Booking not found");
         }
@@ -107,13 +109,50 @@ const OutwardDetails = () => {
         status: action === "accept" ? "accepted" : "rejected",
       }));
 
-      // Show success message and redirect
-      alert(`Booking ${action}ed successfully`);
-      navigate("/bookings"); // Or your preferred redirect path
+      // If the action is "accept", navigate to the review page
+      if (action === "accept") {
+        handleNavigateToReview();
+      } else {
+        // Show success message and redirect for other actions
+        alert(`Booking ${action}ed successfully`);
+        navigate("/bookings"); // Or your preferred redirect path
+      }
     } catch (err) {
       setError(`Error ${action}ing booking: ${err.message}`);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleNavigateToReview = () => {
+    if (bookingDetails) {
+      navigate("/review", {
+        state: {
+          skillId: bookingDetails.skills_id,
+          bookingUserId: bookingDetails.booking_user_id,
+          bookingId: bookingDetails.id,
+          title: bookingDetails.title,
+   
+        }
+      });
+    } else {
+      alert("Cannot submit review: Missing booking information");
+    }
+  };
+
+  const handleOpenDispute = () => {
+    // Navigate to the dispute page with all booking data passed via navigate state
+    if (bookingDetails) {
+      navigate("/open-dispute", {
+        state: {
+          bookingId: bookingDetails.id,
+          bookedUserId: bookingDetails.booked_user_id,
+          bookingTitle: bookingDetails.title,
+          description: bookingDetails.description
+        }
+      });
+    } else {
+      alert("Cannot open dispute: Missing booking information");
     }
   };
 
@@ -255,7 +294,7 @@ const OutwardDetails = () => {
             {isProcessing ? "Processing..." : "Confirm completion"}
           </button>
           <button
-            onClick={() => handleBookingAction("reject")}
+            onClick={handleOpenDispute}
             disabled={isProcessing}
             className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
