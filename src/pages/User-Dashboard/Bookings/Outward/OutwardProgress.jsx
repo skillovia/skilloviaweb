@@ -80,34 +80,20 @@ const OutwardProgress = () => {
       // Update local booking status
       setBookingDetails((prev) => ({
         ...prev,
-        status: action === "accept" ? "accepted" : "rejected",
+        status: action === "accept" ? "accepted" : action === "in-progress" ? "in_progress" : "completed",
       }));
 
       // Show success message and redirect
-      alert(`Booking ${action}ed successfully`);
-      navigate("/bookings");
+      const actionVerb = action === "in-progress" ? "started" : action === "complete" ? "completed" : "accepted";
+      alert(`Booking ${actionVerb} successfully`);
+      
+      if (action === "complete") {
+        navigate("/bookings");
+      }
     } catch (err) {
-      setError(`Error ${action}ing booking: ${err.message}`);
+      setError(`Error with booking action: ${err.message}`);
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-
-
-  const handleNavigateToReview = () => {
-    if (bookingDetails) {
-      navigate("/review", {
-        state: {
-          skillId: bookingDetails.skills_id,
-          bookingUserId: bookingDetails.booking_user_id,
-          bookingId: bookingDetails.id,
-          title: bookingDetails.title,
-   
-        }
-      });
-    } else {
-      alert("Cannot submit review: Missing booking information");
     }
   };
 
@@ -128,7 +114,8 @@ const OutwardProgress = () => {
   };
 
   const getTimelineData = (status) => {
-    const statusMap = {
+    // Define status check logic
+    const statusChecks = {
       pending: 1,
       accepted: 2,
       in_progress: 3,
@@ -136,37 +123,76 @@ const OutwardProgress = () => {
       disputed: 4,
     };
 
-    const currentStep = statusMap[status] || 0;
+    const currentStep = statusChecks[status] || 0;
 
     return [
       {
-        status: "Service completed",
+        status: "Booking request sent",
+        timestamp: bookingDetails?.created_at || "-",
+        hasCheck: currentStep >= 1, // Always checked as it's the first step
+      },
+      {
+        status: "Booking request confirmed",
         timestamp: bookingDetails?.updated_at || "-",
-        hasCheck: currentStep >= 4,
+        hasCheck: currentStep >= 2, // Checked for accepted, in_progress, completed
+      },
+      {
+        status: "Payment confirmed",
+        timestamp: bookingDetails?.updated_at || "-",
+        hasCheck: currentStep >= 2, // Checked same time as confirmation
       },
       {
         status: "Service in progress",
         timestamp: bookingDetails?.booking_date || "-",
-        hasCheck: currentStep >= 3,
+        hasCheck: currentStep >= 3, // Checked for in_progress, completed
       },
       {
-        status: "Booking request confirmed",
-        timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 2,
-      },
-      {
-        status: "Booking request sent",
-        timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 1,
-      },
-      {
-        status: "Payment confirmed",
-        timestamp: bookingDetails?.created_at || "-",
-        hasCheck: currentStep >= 1,
+        status: "Service completed",
+        timestamp: bookingDetails?.updated_at || "-",
+        hasCheck: currentStep >= 4, // Only checked when completed
       },
     ];
   };
-
+  const renderActionButton = () => {
+    if (!bookingDetails) return null;
+    
+    switch (bookingDetails.status) {
+      case "pending":
+       
+        return null;
+      case "accepted":
+        return (
+          <button
+            onClick={() => handleBookingAction("in-progress")}
+            disabled={isProcessing}
+            className="flex-1 bg-blue-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Start Service
+          </button>
+        );
+      case "in_progress":
+        return (
+          <button
+            onClick={() => handleBookingAction("complete")}
+            disabled={isProcessing}
+            className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Mark Complete
+          </button>
+        );
+      case "completed":
+        return (
+          <button
+            disabled={true}
+            className="flex-1 bg-gray-300 text-gray-600 py-3 rounded-full text-[15px] font-medium disabled:cursor-not-allowed"
+          >
+            Service Completed
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
   if (loading) {
     return (
       <UserLayout>
@@ -247,21 +273,17 @@ const OutwardProgress = () => {
           </div>
         </div>
         <div className="flex gap-4 my-6">
-          <button
-            onClick={() => handleNavigateToReview()}
-            disabled={isProcessing}
-            className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-        Confirm completion
-          </button>
-          <button
-            onClick={handleOpenDispute}
-            disabled={isProcessing}
-            className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-           Open dispute
-          </button> 
-         
+          {renderActionButton()}
+          
+          {bookingDetails && bookingDetails.status !== "completed" && (
+            <button
+              onClick={handleOpenDispute}
+              disabled={isProcessing}
+              className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Open dispute
+            </button>
+          )}
         </div>
       </div>
     </UserLayout>
