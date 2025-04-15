@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import UserLayout from "../../UserLayout/UserLayout";
 import BackButton from "../../../../componets/Back";
 import BookCard from "../BookCard";
-import { Loader2, MessageCircleMore } from "lucide-react";
+import { Loader2, MessageCircleMore, X, CheckCircle } from "lucide-react";
 import DynamicGoogleMap from "../../../../componets/Map/Map";
 
 const InwardDetails = () => {
@@ -14,6 +14,8 @@ const InwardDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,11 +108,56 @@ const InwardDetails = () => {
         status: action === "accept" ? "accepted" : "rejected",
       }));
 
-      // Show success message or redirect
+      // Show success message
       alert(`Booking ${action}ed successfully`);
-      navigate("/bookings"); // Or wherever you want to redirect
     } catch (err) {
       setError(`Error ${action}ing booking: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCompleteBooking = async () => {
+    setIsProcessing(true);
+    const accessToken = localStorage.getItem("accessToken");
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/bookings/completed/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: "completed"
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to complete booking");
+      }
+
+      // Update local booking status
+      setBookingDetails((prev) => ({
+        ...prev,
+        status: "completed",
+      }));
+
+      // Close confirmation modal and show success modal
+      setShowCompletionModal(false);
+      setShowSuccessModal(true);
+      
+      // Redirect after delay
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/bookings");
+      }, 3000); // Redirect after 3 seconds
+    } catch (err) {
+      setError(`Error completing booking: ${err.message}`);
+      setShowCompletionModal(false);
     } finally {
       setIsProcessing(false);
     }
@@ -250,22 +297,132 @@ const InwardDetails = () => {
         </div>
 
         <div className="flex gap-4 my-6">
-          <button
-            onClick={() => handleBookingAction("accept")}
-            disabled={isProcessing}
-            className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isProcessing ? "Processing..." : "Confirm completion"}
-          </button>
+          {bookingDetails.status === "completed" ? (
+            <button
+              disabled
+              className="flex-1 bg-gray-300 text-white py-3 rounded-full text-[15px] font-medium cursor-not-allowed"
+            >
+              Completed
+            </button>
+          ) : bookingDetails.status === "accepted" ? (
+            <button
+              onClick={() => setShowCompletionModal(true)}
+              disabled={isProcessing}
+              className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isProcessing ? "Processing..." : "Complete booking"}
+            </button>
+          ) : (
+            <button
+              onClick={() => handleBookingAction("accept")}
+              disabled={isProcessing}
+              className="flex-1 bg-green-400 text-white py-3 rounded-full text-[15px] font-medium hover:bg-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isProcessing ? "Processing..." : "Accept booking"}
+            </button>
+          )}
           <button
             onClick={() => handleBookingAction("reject")}
-            disabled={isProcessing}
+            disabled={isProcessing || bookingDetails.status === "completed"}
             className="flex-1 bg-red-100 text-red-600 py-3 rounded-full text-[15px] font-medium hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing..." : "Open dispute"}
+            {isProcessing ? "Processing..." : "Reject booking"}
           </button>
         </div>
       </div>
+
+      {/* Completion Confirmation Modal */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-input rounded-lg p-6 max-w-md w-full shadow-xl animate-fadeIn">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-800">Complete Booking</h3>
+              <button
+                onClick={() => setShowCompletionModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="mb-8">
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to mark this booking as completed? This action cannot be undone.
+              </p>
+              
+              <div className="bg-input p-4 rounded-lg border border-gray">
+                <h4 className="text-sm font-semibold mb-3 text-gray-700">Booking Details:</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">ID:</span>
+                    <span className="text-sm font-medium">{bookingDetails?.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Client:</span>
+                    <span className="text-sm font-medium">{clientProfile?.firstname} {clientProfile?.lastname}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Title:</span>
+                    <span className="text-sm font-medium">{bookingDetails?.title}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <button
+                onClick={handleCompleteBooking}
+                disabled={isProcessing}
+                className="flex-1 bg-secondary text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  "Confirm Completion"
+                )}
+              </button>
+              <button
+                onClick={() => setShowCompletionModal(false)}
+                className="flex-1 bg-gray-100 text-red-600 py-3 px-4 border border-red-500 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl animate-fadeIn text-center">
+            <div className="mb-4 flex justify-center">
+              <CheckCircle size={64} className="text-secondary" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Booking Completed!</h3>
+            <p className="text-gray-600 mb-6">
+              You have successfully marked this booking as completed.
+            </p>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
+              <div className="text-sm text-gray-600">
+                You will be redirected to the bookings page in a few seconds...
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/bookings");
+              }}
+              className="w-full bg-secondary text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+            >
+              Go to Bookings
+            </button>
+          </div>
+        </div>
+      )}
     </UserLayout>
   );
 };
