@@ -93,7 +93,9 @@ const BookService = () => {
           <div className="flex items-center gap-4 text-gray-600">
             <div className="flex items-center gap-2">
               <span>Hourly rate</span>
-              <span className="font-semibold">£{skill.hourly_rate}</span>
+              <span className="font-semibold">
+                £{skill.hourly_rate} - {skill.spark_token} Spark Token
+              </span>
             </div>
           </div>
         </div>
