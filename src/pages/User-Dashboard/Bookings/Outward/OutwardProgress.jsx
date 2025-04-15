@@ -153,13 +153,21 @@ const OutwardProgress = () => {
       },
     ];
   };
+  
   const renderActionButton = () => {
     if (!bookingDetails) return null;
     
     switch (bookingDetails.status) {
       case "pending":
-       
-        return null;
+        // Return a disabled button when status is pending
+        return (
+          <button
+            disabled={true}
+            className="flex-1 bg-gray-300 text-gray-600 py-3 rounded-full text-[15px] font-medium cursor-not-allowed"
+          >
+            Start Service (Awaiting Acceptance)
+          </button>
+        );
       case "accepted":
         return (
           <button
@@ -193,6 +201,7 @@ const OutwardProgress = () => {
         return null;
     }
   };
+  
   if (loading) {
     return (
       <UserLayout>
