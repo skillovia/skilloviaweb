@@ -2,12 +2,75 @@ import React, { useState, useEffect } from 'react';
 import { HiCurrencyPound, HiSparkles } from 'react-icons/hi';
 import { IoMdWallet } from 'react-icons/io';
 import { Loader2 } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+
+const stripePromise = loadStripe('pk_test_51QrcLQ09r1sd9IYht35RhBj1DoUQHGdeSUQx85N9gOzUW8vwBzurLss9Yq7SbeeioMr9HDi39f2gN3OV14oM7N9H00vEoA1iDS');
+
+// Payment form component
+const CheckoutForm = ({ clientSecret, onSuccess, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!stripe || !elements) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    const result = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: window.location.origin + '/payment-success',
+      },
+      redirect: 'if_required',
+    });
+    
+    if (result.error) {
+      setError(result.error.message);
+      setLoading(false);
+    } else {
+      // Payment succeeded
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <PaymentElement />
+      {error && <div className="text-red-500 mt-2">{error}</div>}
+      <div className="flex justify-end gap-2 mt-4">
+        <button 
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          disabled={loading || !stripe}
+          className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+        >
+          {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Pay'}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [fundingAmount, setFundingAmount] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [paymentStep, setPaymentStep] = useState('amount'); 
   const [balanceData, setBalanceData] = useState({
     cash: cash_balance || 0,
     tokens: spark_token_balance || 0,
@@ -55,7 +118,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
     fetchBalance();
   }, []);
 
-  const handleFundAccount = async () => {
+  const handleInitiatePayment = async () => {
     try {
       setLoading(true);
       const accessToken = localStorage.getItem("accessToken");
@@ -72,7 +135,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ amount: fundingAmount })
+          body: JSON.stringify({ amount: parseFloat(fundingAmount) })
         }
       );
 
@@ -82,15 +145,33 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
 
       const data = await response.json();
       
-      // Refresh the balance
-      fetchBalance();
+      // Save the client secret and move to payment step
+      setClientSecret(data.clientSecret);
+      setPaymentStep('payment');
       
-      setModalOpen(false);
     } catch (error) {
-      console.error("Error funding account:", error);
+      console.error("Error initiating payment:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaymentSuccess = async () => {
+    // Refresh the balance
+    await fetchBalance();
+    
+    // Reset and close the modal
+    setModalOpen(false);
+    setPaymentStep('amount');
+    setClientSecret('');
+    setFundingAmount('');
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setPaymentStep('amount');
+    setClientSecret('');
+    setFundingAmount('');
   };
 
   const pockets = [
@@ -162,35 +243,52 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50 ">
+        <div className="fixed inset-0 bg-black bg-opacity-25 px-4 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Fund Account</h2>
-            <div className="mb-4">
-              <label htmlFor="fundingAmount" className="block text-sm font-medium mb-1">Enter amount:</label>
-              <input
-                type="number"
-                id="fundingAmount"
-                value={fundingAmount}
-                onChange={(e) => setFundingAmount(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2"
-                placeholder="Enter amount"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleFundAccount}
-                disabled={loading || !fundingAmount}
-                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-opacity-90 transition-colors"
-              >
-                {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Fund'}
-              </button>
-            </div>
+            {paymentStep === 'amount' ? (
+              <>
+                <h2 className="text-lg font-semibold mb-4">Fund Account</h2>
+                <div className="mb-4">
+                  <label htmlFor="fundingAmount" className="block text-sm font-medium mb-1">Enter amount:</label>
+                  <input
+                    type="number"
+                    id="fundingAmount"
+                    value={fundingAmount}
+                    onChange={(e) => setFundingAmount(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2"
+                    placeholder="Enter amount"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleInitiatePayment}
+                    disabled={loading || !fundingAmount}
+                    className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+                  >
+                    {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Continue'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold mb-4">Complete Payment</h2>
+                {clientSecret && (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <CheckoutForm 
+                      clientSecret={clientSecret}
+                      onSuccess={handlePaymentSuccess}
+                      onCancel={handleCloseModal}
+                    />
+                  </Elements>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

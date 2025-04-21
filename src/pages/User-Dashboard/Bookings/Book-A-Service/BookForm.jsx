@@ -45,10 +45,7 @@ const BookingForm = () => {
   const [clientSecret, setClientSecret] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null); // 'account' or 'sparktoken'
 
-  // Price calculation
-  // const calculatePrice = () => {
-  //   return skill?.hourly_rate ? skill.hourly_rate * 100 : 5000; // Convert hourly_rate to cents or default to 5000 cents ($50.00)
-  // };
+
 
   const calculatePrice = () => {
     return skill?.hourly_rate ? skill.hourly_rate : 9; // Just send GBP (e.g., £9)
@@ -100,16 +97,7 @@ const BookingForm = () => {
   const handleSparkTokenPayment = async () => {
     setLoading(true);
 
-    // try {
-    //   // Get user ID and access token from localStorage
-    //   const userId = localStorage.getItem("decodedToken")
-    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
-    //     : null;
-    //   const accessToken = localStorage.getItem("accessToken");
 
-    //   if (!accessToken) {
-    //     throw new Error("Access token not found");
-    //   }
     try {
       // Get the access token from localStorage
       const accessToken = localStorage.getItem("accessToken");
@@ -124,7 +112,7 @@ const BookingForm = () => {
 
       console.log("Decoded User ID:", userId);
 
-      // Implement SparkToken payment logic here
+     
 
       const sparkTokenResponse = await fetch(
         `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
@@ -162,16 +150,7 @@ const BookingForm = () => {
   const handleProceedToPayment = async () => {
     setLoading(true);
 
-    // try {
-    //   // Get user ID and access token from localStorage
-    //   const userId = localStorage.getItem("decodedToken")
-    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
-    //     : null;
-    //   const accessToken = localStorage.getItem("accessToken");
-
-    //   if (!accessToken) {
-    //     throw new Error("Access token not found");
-    //   }
+ 
 
     try {
       // Get the access token from localStorage
