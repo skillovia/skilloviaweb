@@ -74,56 +74,7 @@ const ProfileCard = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       // const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
-  //       // const user_id = decodedToken?.id;
 
-  //       if (!user_id) {
-  //         throw new Error("User ID not found in token");
-  //       }
-
-  //       const accessToken = localStorage.getItem("accessToken");
-
-  //       if (!accessToken) {
-  //         throw new Error("Access token not found");
-  //       }
-  //       const decodedToken = jwtDecode(accessToken); // ✅ Decode directly
-  //       console.log("🔑 Decoded Token:", decodedToken); // Debugging log
-
-  //       const user_id = decodedToken?.id;
-  //       const response = await fetch(
-  //         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${accessToken}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch profile");
-  //       }
-
-  //       const data = await response.json();
-  //       // Ensure photourl uses https before setting profile data
-  //       const updatedData = {
-  //         ...data.data,
-  //         photourl: data.data.photourl,
-  //       };
-  //       setProfileData(updatedData);
-  //       console.log("Updated profile data:", updatedData);
-  //     } catch (err) {
-  //       console.error("Error fetching profile:", err);
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProfile();
-  // }, []);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -198,20 +149,6 @@ const ProfileCard = () => {
 
     fetchSkills();
   }, []);
-
-  const StarRating = ({ rating }) => {
-    return (
-      <div className="flex gap-1">
-        {[...Array(5)].map((_, index) =>
-          index < rating ? (
-            <FaStar key={index} className="text-yellow-400 text-sm" />
-          ) : (
-            <FaRegStar key={index} className="text-gray-300 text-sm" />
-          )
-        )}
-      </div>
-    );
-  };
 
   if (loading) {
     return (
