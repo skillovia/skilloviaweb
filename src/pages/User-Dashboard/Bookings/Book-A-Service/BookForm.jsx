@@ -97,118 +97,76 @@ const BookingForm = () => {
     }
   };
 
+  // const handleSparkTokenPayment = async () => {
+  //   setLoading(true);
+
+  //   // try {
+  //   //   // Get user ID and access token from localStorage
+  //   //   const userId = localStorage.getItem("decodedToken")
+  //   //     ? JSON.parse(localStorage.getItem("decodedToken")).id
+  //   //     : null;
+  //   //   const accessToken = localStorage.getItem("accessToken");
+
+  //   //   if (!accessToken) {
+  //   //     throw new Error("Access token not found");
+  //   //   }
+  //   try {
+  //     // Get the access token from localStorage
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found");
+  //     }
+
+  //     // Decode the token to get the user ID (assuming you use JWT)
+  //     const decodedToken = jwtDecode(accessToken);
+  //     const userId = decodedToken.id;
+
+  //     console.log("Decoded User ID:", userId);
+
+  //     // Implement SparkToken payment logic here
+
+  //     const sparkTokenResponse = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //         body: JSON.stringify({
+  //           amount: calculatePrice(),
+  //           userId: userId,
+  //           skillId: skill.skill_id,
+  //         }),
+  //       }
+  //     );
+
+  //     const sparkTokenResult = await sparkTokenResponse.json();
+  //     if (sparkTokenResponse.ok) {
+  //       // Successful SparkToken payment
+  //       handleBookingSubmit(sparkTokenResult.data.transactionId);
+  //     } else {
+  //       alert(`Error: ${sparkTokenResult.message}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error processing SparkToken payment:", error);
+  //     alert(
+  //       "Something went wrong with the SparkToken payment. Please try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleSparkTokenPayment = async () => {
     setLoading(true);
-
-    // try {
-    //   // Get user ID and access token from localStorage
-    //   const userId = localStorage.getItem("decodedToken")
-    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
-    //     : null;
-    //   const accessToken = localStorage.getItem("accessToken");
-
-    //   if (!accessToken) {
-    //     throw new Error("Access token not found");
-    //   }
     try {
-      // Get the access token from localStorage
       const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
 
-      if (!accessToken) {
-        throw new Error("Access token not found");
-      }
-
-      // Decode the token to get the user ID (assuming you use JWT)
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.id;
 
-      console.log("Decoded User ID:", userId);
-
-      // Implement SparkToken payment logic here
-
-      const sparkTokenResponse = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            amount: calculatePrice(),
-            userId: userId,
-            skillId: skill.skill_id,
-          }),
-        }
-      );
-
-      const sparkTokenResult = await sparkTokenResponse.json();
-      if (sparkTokenResponse.ok) {
-        // Successful SparkToken payment
-        handleBookingSubmit(sparkTokenResult.data.transactionId);
-      } else {
-        alert(`Error: ${sparkTokenResult.message}`);
-      }
-    } catch (error) {
-      console.error("Error processing SparkToken payment:", error);
-      alert(
-        "Something went wrong with the SparkToken payment. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleProceedToPayment = async () => {
-    setLoading(true);
-
-    // try {
-    //   // Get user ID and access token from localStorage
-    //   const userId = localStorage.getItem("decodedToken")
-    //     ? JSON.parse(localStorage.getItem("decodedToken")).id
-    //     : null;
-    //   const accessToken = localStorage.getItem("accessToken");
-
-    //   if (!accessToken) {
-    //     throw new Error("Access token not found");
-    //   }
-
-    try {
-      // Get the access token from localStorage
-      const accessToken = localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error("Access token not found");
-      }
-
-      // Decode the access token to get the user ID (assuming you use JWT)
-      const decodedToken = jwtDecode(accessToken);
-      const userId = decodedToken.id;
-
-      console.log("Decoded User ID:", userId);
-
-      // First fetch the Stripe account ID
-      const stripeAccountResponse = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/users/stripe/get/account/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      const stripeAccountResult = await stripeAccountResponse.json();
-      if (!stripeAccountResponse.ok) {
-        throw new Error(
-          `Error fetching Stripe account: ${stripeAccountResult.message}`
-        );
-      }
-
-      const stripeAccountId = stripeAccountResult.data.stripe_account_id;
-      console.log("Stripe account ID:", stripeAccountId);
-
-      // Now create payment intent with the fetched Stripe account ID
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
         {
@@ -219,23 +177,143 @@ const BookingForm = () => {
           },
           body: JSON.stringify({
             amount: calculatePrice(),
-            // currency: "usd",
             currency: "gbp",
-            customerEmail: "customer@example.com",
-            stripeAccountId: stripeAccountId,
+            paymentMethod: "spark_token",
           }),
         }
       );
 
       const result = await response.json();
       if (response.ok) {
-        setClientSecret(result.data);
-        setShowPaymentModal(true);
+        alert("SparkToken payment successful!");
+        handleBookingSubmit(); // Or whatever your success handler is
       } else {
         alert(`Error: ${result.message}`);
       }
     } catch (error) {
-      console.error("Error creating payment intent:", error);
+      console.error("SparkToken payment error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // const handleProceedToPayment = async () => {
+  //   setLoading(true);
+
+  //   // try {
+  //   //   // Get user ID and access token from localStorage
+  //   //   const userId = localStorage.getItem("decodedToken")
+  //   //     ? JSON.parse(localStorage.getItem("decodedToken")).id
+  //   //     : null;
+  //   //   const accessToken = localStorage.getItem("accessToken");
+
+  //   //   if (!accessToken) {
+  //   //     throw new Error("Access token not found");
+  //   //   }
+
+  //   try {
+  //     // Get the access token from localStorage
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found");
+  //     }
+
+  //     // Decode the access token to get the user ID (assuming you use JWT)
+  //     const decodedToken = jwtDecode(accessToken);
+  //     const userId = decodedToken.id;
+
+  //     console.log("Decoded User ID:", userId);
+
+  //     // First fetch the Stripe account ID
+  //     const stripeAccountResponse = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/stripe/get/account/${userId}`,
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+
+  //     const stripeAccountResult = await stripeAccountResponse.json();
+  //     if (!stripeAccountResponse.ok) {
+  //       throw new Error(
+  //         `Error fetching Stripe account: ${stripeAccountResult.message}`
+  //       );
+  //     }
+
+  //     const stripeAccountId = stripeAccountResult.data.stripe_account_id;
+  //     console.log("Stripe account ID:", stripeAccountId);
+
+  //     // Now create payment intent with the fetched Stripe account ID
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //         body: JSON.stringify({
+  //           amount: calculatePrice(),
+  //           // currency: "usd",
+  //           currency: "gbp",
+  //           customerEmail: "customer@example.com",
+  //           stripeAccountId: stripeAccountId,
+  //         }),
+  //       }
+  //     );
+
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       setClientSecret(result.data);
+  //       setShowPaymentModal(true);
+  //     } else {
+  //       alert(`Error: ${result.message}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error creating payment intent:", error);
+  //     alert("Something went wrong. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const handleProceedToPayment = async () => {
+    setLoading(true);
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
+
+      const decodedToken = jwtDecode(accessToken);
+      const userId = decodedToken.id;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            amount: calculatePrice(),
+            currency: "gbp",
+            paymentMethod: "wallet",
+          }),
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Wallet payment successful!");
+        handleBookingSubmit(); // Or whatever your success handler is
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Wallet payment error:", error);
       alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
