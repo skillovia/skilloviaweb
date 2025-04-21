@@ -45,10 +45,7 @@ const BookingForm = () => {
   const [clientSecret, setClientSecret] = useState("");
   const [paymentMethod, setPaymentMethod] = useState(null); // 'account' or 'sparktoken'
 
-  // Price calculation
-  // const calculatePrice = () => {
-  //   return skill?.hourly_rate ? skill.hourly_rate * 100 : 5000; // Convert hourly_rate to cents or default to 5000 cents ($50.00)
-  // };
+
 
   const calculatePrice = () => {
     return skill?.hourly_rate ? skill.hourly_rate : 9; // Just send GBP (e.g., £9)
@@ -160,6 +157,7 @@ const BookingForm = () => {
   // };
   const handleSparkTokenPayment = async () => {
     setLoading(true);
+
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
@@ -167,8 +165,17 @@ const BookingForm = () => {
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.id;
 
+
+      console.log("Decoded User ID:", userId);
+
+     
+
+      const sparkTokenResponse = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
+
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
+
         {
           method: "POST",
           headers: {
@@ -282,6 +289,7 @@ const BookingForm = () => {
   // };
   const handleProceedToPayment = async () => {
     setLoading(true);
+
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
