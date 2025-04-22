@@ -170,8 +170,8 @@ const BookingForm = () => {
 
      
 
-      const sparkTokenResponse = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
+      // const sparkTokenResponse = await fetch(
+      //   `${import.meta.env.VITE_BASE_URL}/payments/sparktoken`,
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
