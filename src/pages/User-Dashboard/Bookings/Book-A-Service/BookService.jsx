@@ -24,6 +24,9 @@ const BookService = () => {
   // Extract skill_id
   const skill_id = skill.skill_id;
 
+  console.log("Skill ID:", skill_id);
+  
+
   // Extract thumbnail URLs
   const thumbnails = skill
     ? [
