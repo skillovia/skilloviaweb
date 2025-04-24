@@ -132,6 +132,7 @@ const OutwardDetails = () => {
           bookingUserId: bookingDetails.booking_user_id,
           bookingId: bookingDetails.id,
           title: bookingDetails.title,
+          booked_user_id: bookingDetails.booked_user_id 
    
         }
       });

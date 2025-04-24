@@ -1,6 +1,6 @@
-import { Upload, X, CreditCard, Coins, CheckCircle, Loader2 } from "lucide-react";
+import { Upload, X, CreditCard, Coins, CheckCircle, Loader2, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import UserLayout from "../../UserLayout/UserLayout";
 import BackButton from "../../../../componets/Back";
 import { loadStripe } from "@stripe/stripe-js";
@@ -33,6 +33,8 @@ const BookingForm = () => {
     location: "",
     date: "",
     image: null,
+    lon: null,
+    lat: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,121 @@ const BookingForm = () => {
     currency: "GBP"
   });
   const [balanceLoading, setBalanceLoading] = useState(false);
+  
+  // Refs for Google Places Autocomplete
+  const locationInputRef = useRef(null);
+  
+  // Track if Google Maps API is loaded
+  const [placesApiLoaded, setPlacesApiLoaded] = useState(false);
+  const [placesApiLoading, setPlacesApiLoading] = useState(false);
+  const [geocodeError, setGeocodeError] = useState(null);
+
+  // Store autocomplete instances
+  const autocompleteInstancesRef = useRef({
+    location: null
+  });
+
+  // Load Google Maps API
+  useEffect(() => {
+    if (!window.google && !placesApiLoading) {
+      setPlacesApiLoading(true);
+      
+      // Get API key - using same key as in EditableProfile
+      const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
+      
+      if (!apiKey) {
+        setGeocodeError('Google Maps API key is missing.');
+        setPlacesApiLoading(false);
+        return;
+      }
+
+      const googleMapScript = document.createElement('script');
+      googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      googleMapScript.async = true;
+      googleMapScript.defer = true;
+      
+      googleMapScript.onload = () => {
+        setPlacesApiLoaded(true);
+        setPlacesApiLoading(false);
+      };
+      
+      googleMapScript.onerror = () => {
+        setGeocodeError('Failed to load Google Maps API. Please check your internet connection and API key.');
+        setPlacesApiLoading(false);
+      };
+      
+      document.body.appendChild(googleMapScript);
+      
+      return () => {
+        if (document.body.contains(googleMapScript)) {
+          document.body.removeChild(googleMapScript);
+        }
+      };
+    } else if (window.google) {
+      setPlacesApiLoaded(true);
+    }
+  }, []);
+
+  // Helper function to extract components from place object
+  const extractAddressComponents = (place, componentType) => {
+    if (!place.address_components) return null;
+    
+    const component = place.address_components.find(
+      comp => comp.types.includes(componentType)
+    );
+    
+    return component ? component.long_name : null;
+  };
+
+  // Initialize location autocomplete
+  const initLocationAutocomplete = () => {
+    if (!window.google || !locationInputRef.current) return;
+    
+    try {
+      // Clean up previous instance if it exists
+      if (autocompleteInstancesRef.current.location) {
+        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.location);
+      }
+      
+      const locationAutocomplete = new window.google.maps.places.Autocomplete(locationInputRef.current, {
+        types: ['geocode'] // Allow all types of locations
+      });
+      
+      autocompleteInstancesRef.current.location = locationAutocomplete;
+      
+      locationAutocomplete.addListener('place_changed', () => {
+        const place = locationAutocomplete.getPlace();
+        
+        if (!place.geometry) {
+          setGeocodeError('No details available for this location');
+          return;
+        }
+        
+        // Get full address
+        const fullAddress = place.formatted_address || place.name;
+        
+        // Update form data with location and coordinates
+        setFormData(prev => ({
+          ...prev,
+          location: fullAddress || '',
+          lon: place.geometry.location.lng(),
+          lat: place.geometry.location.lat()
+        }));
+        
+        setGeocodeError('');
+      });
+    } catch (err) {
+      console.error('Error initializing location autocomplete:', err);
+      setGeocodeError('Error initializing location search');
+    }
+  };
+
+  // Initialize autocomplete after API loads
+  useEffect(() => {
+    if (placesApiLoaded && locationInputRef.current) {
+      initLocationAutocomplete();
+    }
+  }, [placesApiLoaded, locationInputRef.current]);
 
   const calculatePrice = () => {
     return skill?.hourly_rate ? skill.hourly_rate : 9; // Just send GBP (e.g., £9)
@@ -242,6 +359,12 @@ const BookingForm = () => {
     bookingData.append("booking_date", formData.date);
     bookingData.append("payment_intent_id", paymentIntentId);
     bookingData.append("payment_method", paymentMethod); // Add the payment method used
+    
+    // Add longitude and latitude if available
+    if (formData.lon && formData.lat) {
+      bookingData.append("lon", formData.lon);
+      bookingData.append("lat", formData.lat);
+    }
 
     if (formData.image) {
       bookingData.append("file", formData.image);
@@ -265,7 +388,7 @@ const BookingForm = () => {
         setShowPaymentModal(false);
         setSuccess(true);
         setShowSuccessModal(true); // Show success modal
-        setFormData({ description: "", location: "", date: "", image: null });
+        setFormData({ description: "", location: "", date: "", image: null, lon: null, lat: null });
         setImagePreview(null);
       } else {
         alert(`Error: ${result.message}`);
@@ -278,23 +401,16 @@ const BookingForm = () => {
     }
   };
 
-  // Remove the auto-redirect effect since we want manual redirection now
-  // useEffect(() => {
-  //   if (success) {
-  //     const timer = setTimeout(() => {
-  //       setShowSuccessModal(false);
-  //       navigate("/bookings");
-  //     }, 3000); // Extended time to see success message
-  // 
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [success, navigate]);
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/bookings");
+      }, 3000); // Extended time to see success message
 
-  // Handler for when user clicks OK on success modal
-  const handleSuccessConfirm = () => {
-    setShowSuccessModal(false);
-    navigate("/bookings");
-  };
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
 
   if (!user || !skill) {
     return (
@@ -375,14 +491,39 @@ const BookingForm = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="Search location"
-                className="w-full p-3 bg-input border border-gray rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  name="location"
+                  ref={locationInputRef}
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="Search location"
+                  className="w-full p-3 pl-10 bg-input border border-gray rounded-lg"
+                  autoComplete="off"
+                />
+                <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Start typing to see location suggestions</p>
+              
+              {/* Show coordinates if available */}
+              {formData.lon && formData.lat && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Coordinates: {formData.lon.toFixed(6)}, {formData.lat.toFixed(6)}
+                </p>
+              )}
+              
+              {/* Show geocoding errors if any */}
+              {geocodeError && (
+                <p className="text-xs text-red-500 mt-1">{geocodeError}</p>
+              )}
+              
+              {placesApiLoading && (
+                <div className="flex items-center text-xs text-blue-500 mt-1">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  Loading places service...
+                </div>
+              )}
             </div>
 
             <div>
@@ -557,7 +698,7 @@ const BookingForm = () => {
           </div>
         )}
 
-        {/* Updated Success Modal with OK button */}
+        {/* Success Modal */}
         {showSuccessModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full text-center">
@@ -566,12 +707,9 @@ const BookingForm = () => {
               <p className="text-gray-600 mb-6">
                 Your booking for {skill.skill_type} has been confirmed.
               </p>
-              <button
-                onClick={handleSuccessConfirm}
-                className="px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-green-600 transition-colors"
-              >
-                OK
-              </button>
+              <p className="text-sm text-gray-400">
+                Redirecting to your bookings in a moment...
+              </p>
             </div>
           </div>
         )}
