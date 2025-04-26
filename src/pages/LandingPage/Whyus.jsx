@@ -1,8 +1,14 @@
 import React from 'react';
 import { Wallet, Leaf, Shield, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const NumberDisplay = ({ number }) => (
-  <div className="relative w-32 h-32">
+  <motion.div 
+    className="relative w-32 h-32"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.5 }}
+  >
     <svg viewBox="0 0 100 100" className="w-full h-full">
       <defs>
         <clipPath id={`clip-${number}`}>
@@ -12,7 +18,6 @@ const NumberDisplay = ({ number }) => (
             fontSize="180"
             fontWeight="bold"
             textAnchor="middle"
-            // fontFamily="sans-serif"
           >
             {number}
           </text>
@@ -61,7 +66,7 @@ const NumberDisplay = ({ number }) => (
         {number}
       </text>
     </svg>
-  </div>
+  </motion.div>
 );
 
 const WhyLoveSkillovia = () => {
@@ -92,60 +97,126 @@ const WhyLoveSkillovia = () => {
     }
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 12
+      }
+    }
+  };
+
   return (
     <>
       <div className="bg-[#bfcab4] min-h-screen">
         <div className="mx-auto">
-          <section className="desc px-4 lg:px-[4rem] py-8 lg:py-[5rem]">
-            <p className="text-lg text-gray-600 mb-2">Why Join Skillovia?</p>
-            <h2 className="lg:text-[4rem] text-[2rem] font-bold lg:leading-[4.2rem] text-gray-800">
+          <motion.section 
+            className="desc px-4 lg:px-[4rem] py-8 lg:py-[5rem]"
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.p 
+              className="text-lg text-gray-600 mb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              Why Join Skillovia?
+            </motion.p>
+            <motion.h2 
+              className="lg:text-[4rem] text-[2rem] font-bold lg:leading-[4.2rem] text-gray-800"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
               Why You'll Love<br />
               Skillovia
-            </h2>
-          </section>
+            </motion.h2>
+          </motion.section>
 
-          <div className=" pb-16 grid lg:grid-cols-2 gap-10 px-4 lg:px-[4rem]  ">
+          <motion.div 
+            className="pb-16 grid lg:grid-cols-2 gap-10 px-4 lg:px-[4rem]"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             {benefits.map((benefit, index) => (
-              <div
+              <motion.div
                 key={index}
                 className="bg-off rounded-xl py-[4rem] px-4 lg:px-[5rem] transition-all hover:shadow-xl group relative overflow-hidden"
+                variants={itemVariants}
+                whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
               >
-               
-                    <section className=" flex rounded-r-2xl bnorder">
-
+                <section className="flex rounded-r-2xl">
                   <NumberDisplay number={benefit.number} />
-                  <div className="flevx items-center gap-3 ">
-                      <div className="p-3 bg-gray-50 rounded-xl shadow-sm">
-                        {benefit.icon}
-                      </div>
-                      <h3 className="text-xl font-bold text-secondary">
-                        {benefit.title}
-                      </h3>
-                    </div>
-                    </section>
+                  <motion.div 
+                    className="flevx items-center gap-3"
+                    initial={{ x: 20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 * index, duration: 0.5 }}
+                  >
+                    <motion.div 
+                      className="p-3 bg-gray-50 rounded-xl shadow-sm"
+                      whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+                    >
+                      {benefit.icon}
+                    </motion.div>
+                    <h3 className="text-xl font-bold text-secondary">
+                      {benefit.title}
+                    </h3>
+                  </motion.div>
+                </section>
 
-
-                  <div className="">
-                  
-                    <p className="text-gray-600 leading-relaxed">
-                      {benefit.description}
-                    </p>
-                  </div>
-              
-                
-               
-              </div>
+                <motion.div 
+                  className=""
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + (0.1 * index), duration: 0.5 }}
+                >
+                  <p className="text-gray-600 leading-relaxed">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
   
-      <section className="ad">
-        <img src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1736693122/rsz_iphone_mockup3_nvown8_s3wrr2.png" className='h-[120vh] w-full object-cover' alt="" />
-    </section>
+      <motion.section 
+        className="ad"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        viewport={{ once: true }}
+      >
+        <motion.img 
+          src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1736693122/rsz_iphone_mockup3_nvown8_s3wrr2.png" 
+          className='h-[120vh] w-full object-cover' 
+          alt=""
+          initial={{ scale: 1.1 }}
+          whileInView={{ scale: 1 }}
+          transition={{ duration: 1.2 }}
+        />
+      </motion.section>
     </>
   );
 };
 
 export default WhyLoveSkillovia;
-
