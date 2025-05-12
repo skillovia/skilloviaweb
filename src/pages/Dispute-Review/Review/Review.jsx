@@ -8,16 +8,17 @@ import { Star, Loader2 } from "lucide-react";
 const Review = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { skillId, bookingUserId, bookingId, title, revieweeId } = location.state || {};
+  const { skillId, bookingUserId, bookingId, title, booked_user_id } = location.state || {};
   
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
-  console.log(skillId, bookingUserId, bookingId, title, "alll here");
+  console.log("[LOG] Component loaded with data:", { skillId, bookingId, title, booked_user_id });
 
   const handleRatingChange = (selectedRating) => {
+    console.log("[LOG] Rating selected:", selectedRating);
     setRating(selectedRating);
   };
 
@@ -25,15 +26,24 @@ const Review = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    
+
     const accessToken = localStorage.getItem("accessToken");
-    
+
+    if (!accessToken) {
+      console.warn("[WARN] No access token found in localStorage.");
+    } else {
+      console.log("[LOG] Access token retrieved successfully.");
+    }
+
     const reviewData = {
       skillId: skillId,
-      revieweeId: bookingUserId,
+      revieweeId: booked_user_id,
       rating: rating,
-      comment: comment
+      comment: comment,
+     
     };
+
+    console.log("[LOG] Review data being submitted:", reviewData);
 
     try {
       const response = await fetch(
@@ -48,21 +58,30 @@ const Review = () => {
         }
       );
 
+      console.log("[LOG] Response status:", response.status);
+
       if (!response.ok) {
-        throw new Error("Failed to submit review");
+        const errorData = await response.json();
+        console.error("[ERROR] Submission failed:", errorData);
+        throw new Error(errorData?.message || "Failed to submit review");
       }
 
-      // Show success message and redirect
+      const result = await response.json();
+      console.log("[LOG] Review submitted successfully:", result);
+
       alert("Review submitted successfully");
       navigate("/bookings");
     } catch (err) {
+      console.error("[ERROR] Exception during submission:", err.message);
       setError(err.message);
     } finally {
       setIsSubmitting(false);
+      console.log("[LOG] Submission attempt finished.");
     }
   };
 
   if (!skillId || !bookingUserId) {
+    console.error("[ERROR] Missing required parameters:", { skillId, bookingUserId, booked_user_id });
     return (
       <UserLayout>
         <div className="text-red-500 text-center py-8">
@@ -113,7 +132,10 @@ const Review = () => {
                 id="comment"
                 rows={4}
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                onChange={(e) => {
+                  console.log("[LOG] Comment changed:", e.target.value);
+                  setComment(e.target.value);
+                }}
                 className="w-full border border-gray-300 rounded-lg p-3 resize-none focus:ring-2 focus:ring-secondary focus:border-transparent"
                 placeholder="Share your experience with this service..."
               />
