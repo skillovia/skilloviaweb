@@ -20,7 +20,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { jwtDecode } from "jwt-decode";
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+console.log("Stripe Key:", import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const BookingForm = () => {
   const location = useLocation();
