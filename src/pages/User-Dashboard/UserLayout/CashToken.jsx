@@ -10,7 +10,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(process.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 // Payment form component
 const CheckoutForm = ({ clientSecret, onSuccess, onCancel }) => {
