@@ -74,7 +74,6 @@ const ProfileCard = () => {
     }
   };
 
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -228,13 +227,13 @@ const ProfileCard = () => {
         <div className="flex gap-8 text-sm">
           <Link to="/followers">
             <p className="font-semibold">{profileData.total_followers}</p>
-            <div className="text-gray-500">followers</div>
+            <div className="text-gray-500">following</div>
           </Link>
           <div>
             <Link to="/following" className="font-semibold">
               {profileData.total_following}
             </Link>
-            <div className="text-gray-500">following</div>
+            <div className="text-gray-500">followers</div>
           </div>
           <Link
             to="/settings/skill/add"
