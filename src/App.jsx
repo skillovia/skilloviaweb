@@ -63,7 +63,7 @@ import TokenHandler from "./TokenHandler";
 import OpenDisputePage from "./pages/Dispute-Review/Dispute/Dispute";
 import Review from "./pages/Dispute-Review/Review/Review";
 import Reauth from "./pages/User-Dashboard/UserLayout/Reauth";
-import Reauth from "./pages/User-Dashboard/UserLayout/Dashboards";
+import Dashboards from "./pages/User-Dashboard/UserLayout/Dashboards";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
