@@ -4,9 +4,7 @@ const Dashboards = () => {
   return (
     <UserLayout>
       <div>
-        <div>
-          <h2>Refresh page</h2>
-        </div>
+        <div></div>
       </div>
     </UserLayout>
   );
