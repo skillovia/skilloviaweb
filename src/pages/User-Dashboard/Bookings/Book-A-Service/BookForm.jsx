@@ -1,13 +1,6 @@
-import {
-  Upload,
-  X,
-  CreditCard,
-  Coins,
-  CheckCircle,
-  Loader2,
-} from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import { Upload, X, CreditCard, Coins, CheckCircle, Loader2, MapPin } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import UserLayout from "../../UserLayout/UserLayout";
 import BackButton from "../../../../componets/Back";
 import { loadStripe } from "@stripe/stripe-js";
@@ -16,12 +9,13 @@ import {
   useStripe,
   useElements,
   PaymentElement,
-  AddressElement,
 } from "@stripe/react-stripe-js";
 import { jwtDecode } from "jwt-decode";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-console.log("Stripe Key:", import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const GOOGLE_MAPS_API_KEY = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
+const stripePromise = loadStripe(
+  "pk_test_51QrcLQ09r1sd9IYht35RhBj1DoUQHGdeSUQx85N9gOzUW8vwBzurLss9Yq7SbeeioMr9HDi39f2gN3OV14oM7N9H00vEoA1iDS"
+);
 
 const BookingForm = () => {
   const location = useLocation();
@@ -29,16 +23,22 @@ const BookingForm = () => {
   const { user, skill } = location.state || {};
 
   const user_id = user?.id;
-  console.log("User ID:", user_id);
-
   const skill_id = skill;
-  console.log("Skill ID:", skill_id);
+
+  // Google Places Autocomplete state & refs
+  const bookingLocationInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+  const [placesApiLoaded, setPlacesApiLoaded] = useState(false);
+  const [placesApiLoading, setPlacesApiLoading] = useState(false);
+  const [geocodeError, setGeocodeError] = useState(null);
 
   const [formData, setFormData] = useState({
     description: "",
     location: "",
     date: "",
     image: null,
+    lon: null,
+    lat: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -57,19 +57,85 @@ const BookingForm = () => {
   });
   const [balanceLoading, setBalanceLoading] = useState(false);
 
+  // Load Google Places API
+  useEffect(() => {
+    if (!window.google && !placesApiLoading) {
+      setPlacesApiLoading(true);
+      const googleMapScript = document.createElement("script");
+      googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+      googleMapScript.async = true;
+      googleMapScript.defer = true;
+      googleMapScript.onload = () => {
+        setPlacesApiLoaded(true);
+        setPlacesApiLoading(false);
+      };
+      googleMapScript.onerror = () => {
+        setGeocodeError("Failed to load Google Maps API.");
+        setPlacesApiLoading(false);
+      };
+      document.body.appendChild(googleMapScript);
+      return () => {
+        if (document.body.contains(googleMapScript)) {
+          document.body.removeChild(googleMapScript);
+        }
+      };
+    } else if (window.google) {
+      setPlacesApiLoaded(true);
+    }
+  }, []);
+
+  // Helper for address components
+  const extractAddressComponents = (place, componentType) => {
+    if (!place.address_components) return null;
+    const component = place.address_components.find((comp) =>
+      comp.types.includes(componentType)
+    );
+    return component ? component.long_name : null;
+  };
+
+  // Init location autocomplete
+  useEffect(() => {
+    if (placesApiLoaded && bookingLocationInputRef.current) {
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+      try {
+        const autocomplete = new window.google.maps.places.Autocomplete(
+          bookingLocationInputRef.current,
+          {
+            types: ["geocode"],
+          }
+        );
+        autocompleteRef.current = autocomplete;
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (!place.geometry) {
+            setGeocodeError("No details available for this location");
+            return;
+          }
+          setFormData((prev) => ({
+            ...prev,
+            location: place.formatted_address || place.name || "",
+            lon: place.geometry.location.lng(),
+            lat: place.geometry.location.lat(),
+          }));
+          setGeocodeError(null);
+        });
+      } catch (err) {
+        setGeocodeError("Error initializing location autocomplete");
+      }
+    }
+  }, [placesApiLoaded]);
+
   const calculatePrice = () => {
-    return skill?.hourly_rate ? skill.hourly_rate : 9; // Just send GBP (e.g., £9)
+    return skill?.hourly_rate ? skill.hourly_rate : 9;
   };
 
   const fetchBalance = async () => {
     try {
       setBalanceLoading(true);
       const accessToken = localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error("Access token not found");
-      }
-
+      if (!accessToken) throw new Error("Access token not found");
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/wallet/balance`,
         {
@@ -78,11 +144,7 @@ const BookingForm = () => {
           },
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch balance");
-      }
-
+      if (!response.ok) throw new Error("Failed to fetch balance");
       const data = await response.json();
       setBalanceData({
         cash: data.balance,
@@ -97,7 +159,6 @@ const BookingForm = () => {
   };
 
   useEffect(() => {
-    // Fetch balance when the payment choice modal is shown
     if (showPaymentChoiceModal) {
       fetchBalance();
     }
@@ -108,6 +169,7 @@ const BookingForm = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "location" ? { lon: null, lat: null } : {}),
     }));
   };
 
@@ -138,7 +200,6 @@ const BookingForm = () => {
   const handlePaymentChoice = (method) => {
     setPaymentMethod(method);
     setShowPaymentChoiceModal(false);
-
     if (method === "account") {
       handleProceedToPayment();
     } else if (method === "sparktoken") {
@@ -148,17 +209,11 @@ const BookingForm = () => {
 
   const handleSparkTokenPayment = async () => {
     setLoading(true);
-
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
-
       const decodedToken = jwtDecode(accessToken);
-      const userId = decodedToken.id;
-
-      console.log("Decoded User ID:", userId);
-
-      const response = await fetch(
+      await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
         {
           method: "POST",
@@ -172,15 +227,15 @@ const BookingForm = () => {
             paymentMethod: "spark_token",
           }),
         }
-      );
-
-      const result = await response.json();
-      if (response.ok) {
-        alert("SparkToken payment successful!");
-        handleBookingSubmit(); // Or whatever your success handler is
-      } else {
-        alert(`Error: ${result.message}`);
-      }
+      ).then(async (response) => {
+        const result = await response.json();
+        if (response.ok) {
+          alert("SparkToken payment successful!");
+          handleBookingSubmit();
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      });
     } catch (error) {
       console.error("SparkToken payment error:", error);
       alert("Something went wrong. Please try again.");
@@ -191,15 +246,10 @@ const BookingForm = () => {
 
   const handleProceedToPayment = async () => {
     setLoading(true);
-
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
-
-      const decodedToken = jwtDecode(accessToken);
-      const userId = decodedToken.id;
-
-      const response = await fetch(
+      await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/stripe/payment/intent`,
         {
           method: "POST",
@@ -213,15 +263,15 @@ const BookingForm = () => {
             paymentMethod: "wallet",
           }),
         }
-      );
-
-      const result = await response.json();
-      if (response.ok) {
-        alert("Wallet payment successful!");
-        handleBookingSubmit(); // Or whatever your success handler is
-      } else {
-        alert(`Error: ${result.message}`);
-      }
+      ).then(async (response) => {
+        const result = await response.json();
+        if (response.ok) {
+          alert("Wallet payment successful!");
+          handleBookingSubmit();
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      });
     } catch (error) {
       console.error("Wallet payment error:", error);
       alert("Something went wrong. Please try again.");
@@ -232,27 +282,24 @@ const BookingForm = () => {
 
   const handleBookingSubmit = async (paymentIntentId) => {
     const accessToken = localStorage.getItem("accessToken");
-
     if (!accessToken) {
       throw new Error("Access token not found");
     }
-
     setLoading(true);
-
     const bookingData = new FormData();
     bookingData.append("skills_id", skill.skill_id);
     bookingData.append("booked_user_id", user_id);
     bookingData.append("title", `Booking for ${skill.skill_type}`);
     bookingData.append("description", formData.description);
     bookingData.append("booking_location", formData.location);
+    bookingData.append("booking_lon", formData.lon);
+    bookingData.append("booking_lat", formData.lat);
     bookingData.append("booking_date", formData.date);
     bookingData.append("payment_intent_id", paymentIntentId);
-    bookingData.append("payment_method", paymentMethod); // Add the payment method used
-
+    bookingData.append("payment_method", paymentMethod);
     if (formData.image) {
       bookingData.append("file", formData.image);
     }
-
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/bookings`,
@@ -264,14 +311,20 @@ const BookingForm = () => {
           body: bookingData,
         }
       );
-
       const result = await response.json();
       if (response.ok) {
         setPaymentSuccess(true);
         setShowPaymentModal(false);
         setSuccess(true);
-        setShowSuccessModal(true); // Show success modal
-        setFormData({ description: "", location: "", date: "", image: null });
+        setShowSuccessModal(true);
+        setFormData({
+          description: "",
+          location: "",
+          date: "",
+          image: null,
+          lon: null,
+          lat: null,
+        });
         setImagePreview(null);
       } else {
         alert(`Error: ${result.message}`);
@@ -284,19 +337,6 @@ const BookingForm = () => {
     }
   };
 
-  // Remove the auto-redirect effect since we want manual redirection now
-  // useEffect(() => {
-  //   if (success) {
-  //     const timer = setTimeout(() => {
-  //       setShowSuccessModal(false);
-  //       navigate("/bookings");
-  //     }, 3000); // Extended time to see success message
-  //
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [success, navigate]);
-
-  // Handler for when user clicks OK on success modal
   const handleSuccessConfirm = () => {
     setShowSuccessModal(false);
     navigate("/bookings");
@@ -318,7 +358,6 @@ const BookingForm = () => {
       USD: "$",
       EUR: "€",
     };
-
     const symbol = currencySymbols[currency.toUpperCase()] || currency;
     return `${symbol}${parseFloat(amount).toFixed(2)}`;
   };
@@ -340,11 +379,7 @@ const BookingForm = () => {
 
           {paymentSuccess && (
             <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg flex items-center">
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -381,14 +416,33 @@ const BookingForm = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="Search location"
-                className="w-full p-3 bg-input border border-gray rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Search location"
+                  ref={bookingLocationInputRef}
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  className="w-full p-3 bg-input border border-gray rounded-lg"
+                  autoComplete="off"
+                  disabled={placesApiLoading}
+                />
+                <MapPin className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Start typing to see address suggestions
+              </p>
+              {geocodeError && (
+                <div className="mt-2 text-xs text-yellow-600">
+                  {geocodeError}
+                </div>
+              )}
+              {formData.lon && formData.lat && (
+                <div className="text-xs text-gray-400 mt-2">
+                  Coordinates: {formData.lon.toFixed(6)}, {formData.lat.toFixed(6)}
+                </div>
+              )}
             </div>
 
             <div>
@@ -442,6 +496,7 @@ const BookingForm = () => {
         {showPaymentChoiceModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 px-4 flex items-center justify-center z-50">
             <div className="bg-input rounded-lg p-6 max-w-md w-full">
+
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Choose Payment Method</h3>
                 <button
@@ -451,8 +506,6 @@ const BookingForm = () => {
                   <X size={20} />
                 </button>
               </div>
-
-              {/* Balance information */}
               {balanceLoading ? (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg flex justify-center">
                   <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
@@ -468,13 +521,11 @@ const BookingForm = () => {
                   </div>
                   <div className="flex justify-between mt-1">
                     <span>SparkTokens:</span>
-                    <span className="font-bold">
-                      {balanceData.tokens} Tokens
-                    </span>
+                    <span className="font-bold">{balanceData.tokens} Tokens</span>
                   </div>
+
                 </div>
               )}
-
               <div className="space-y-4">
                 <button
                   onClick={() => handlePaymentChoice("account")}
@@ -513,13 +564,17 @@ const BookingForm = () => {
                 </button>
               </div>
 
-              {/* Insufficient funds message */}
-              {parseFloat(balanceData.cash) < calculatePrice() &&
-                balanceData.tokens < skill.spark_token && (
-                  <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center">
-                    Insufficient funds. Please top up your wallet or tokens.
+              <div className="fundacc">
+                    <Link to ="/user" className="bg-secondary py-2 px-3 rounded-md text-white flex justify-center my-4 w-full">Fund Account</Link>
                   </div>
-                )}
+              {(parseFloat(balanceData.cash) < calculatePrice() &&
+                balanceData.tokens < skill.spark_token) && (
+                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center">
+                  Insufficient funds. Please top up your wallet or tokens.
+                </div>
+                
+              )}
+              
             </div>
           </div>
         )}
@@ -537,7 +592,6 @@ const BookingForm = () => {
                   <X size={20} />
                 </button>
               </div>
-
               <div className="mb-6">
                 <p className="text-sm font-medium mb-2">
                   Service: {skill.skill_type}
@@ -547,7 +601,6 @@ const BookingForm = () => {
                 </p>
                 <div className="h-px bg-gray-200 w-full mb-4"></div>
               </div>
-
               <Elements
                 stripe={stripePromise}
                 options={{
@@ -566,7 +619,7 @@ const BookingForm = () => {
           </div>
         )}
 
-        {/* Updated Success Modal with OK button */}
+        {/* Success Modal with OK button */}
         {showSuccessModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full text-center">
@@ -598,13 +651,10 @@ const CheckoutForm = ({ onSuccess }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!stripe || !elements) {
       return;
     }
-
     setProcessing(true);
-
     try {
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
@@ -613,11 +663,9 @@ const CheckoutForm = ({ onSuccess }) => {
         },
         redirect: "if_required",
       });
-
       if (error) {
         setError(`Payment failed: ${error.message}`);
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        // Payment successful
         onSuccess(paymentIntent.id);
       } else {
         setError("Something went wrong with your payment. Please try again.");
@@ -633,9 +681,7 @@ const CheckoutForm = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement className="mb-6" />
-
       {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
-
       <button
         type="submit"
         disabled={!stripe || processing}
