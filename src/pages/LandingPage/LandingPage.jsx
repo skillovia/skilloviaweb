@@ -15,6 +15,10 @@ const LandingPage = () => {
 {/* <Loader /> */}
     <HomeLayout>
 
+
+<section className="overflow-hidden">
+
+
  
 
 
@@ -25,6 +29,7 @@ const LandingPage = () => {
 <HowSkilloviaWorks />
 <WhyLoveSkillovia />
 
+</section>
    
     </HomeLayout>
     </>

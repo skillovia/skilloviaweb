@@ -8,32 +8,51 @@ import Slider from "../Slider";
 const PersonalDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const emailFromState = location.state?.email || ""; // Add fallback empty string
-
+  const emailFromState = location.state?.email || "";
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
-    email: emailFromState, // Use the email from state
+    email: emailFromState,
     gender: "",
     password: "",
     phone: "",
   });
 
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMatch, setPasswordMatch] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
+    if (id === "confirmPassword") {
+      setConfirmPassword(value);
+      setPasswordMatch(formData.password === value);
+    } else if (id === "password") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+      setPasswordMatch(value === confirmPassword);
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (formData.password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -49,11 +68,8 @@ const PersonalDetails = () => {
         }
       );
 
-      console.log(response.data);
-
-      // Handle successful registration
       if (response.data) {
-        navigate("/success"); // or wherever you want to redirect after successful registration
+        navigate("/success");
       }
     } catch (err) {
       setError(
@@ -172,7 +188,7 @@ const PersonalDetails = () => {
               </select>
             </div>
 
-            <div className="mb-6 relative">
+            <div className="mb-4 relative">
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
@@ -192,16 +208,67 @@ const PersonalDetails = () => {
                 type="button"
                 onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                 className="absolute inset-y-0 right-0 top-5 pr-3 flex items-center text-sm leading-5"
+                tabIndex={-1}
               >
                 {isPasswordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
+            <div className="mb-6 relative">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type={isConfirmPasswordVisible ? "text" : "password"}
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                className={`mt-1 w-full p-2 border ${
+                  confirmPassword.length > 0
+                    ? passwordMatch
+                      ? "border-green-500"
+                      : "border-red-500"
+                    : "border-gray"
+                } bg-input rounded focus:ring-green-500 focus:border-green-500`}
+                required
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
+                }
+                className="absolute inset-y-0 right-0 top-5 pr-3 flex items-center text-sm leading-5"
+                tabIndex={-1}
+              >
+                {isConfirmPasswordVisible ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+              {confirmPassword.length > 0 && !passwordMatch && (
+                <span className="text-red-500 text-xs absolute -bottom-5 left-0">
+                  Passwords do not match
+                </span>
+              )}
+              {confirmPassword.length > 0 && passwordMatch && (
+                <span className="text-green-600 text-xs absolute -bottom-5 left-0">
+                  Passwords match
+                </span>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !passwordMatch}
               className={`w-full py-2 px-4 ${
-                loading ? "bg-gray-400" : "bg-primary hover:bg-green-600"
+                loading || !passwordMatch
+                  ? "bg-gray-400"
+                  : "bg-primary hover:bg-green-600"
               } text-secondary font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-green-500`}
             >
               {loading ? "Creating account..." : "Create account"}
