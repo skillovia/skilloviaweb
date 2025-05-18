@@ -22,7 +22,7 @@ const EditableProfile = ({
     lat: lat|| null
   });
 
-  // Refs for Google Places Autocomplete
+
   const locationInputRef = useRef(null);
   const streetInputRef = useRef(null);
   
@@ -30,13 +30,13 @@ const EditableProfile = ({
   const [placesApiLoaded, setPlacesApiLoaded] = useState(false);
   const [placesApiLoading, setPlacesApiLoading] = useState(false);
 
-  // Store autocomplete instances
+
   const autocompleteInstancesRef = useRef({
     location: null,
     street: null
   });
 
-  // Load Google Maps API - use environment variable for API key
+
   useEffect(() => {
     if (!window.google && !placesApiLoading && isEditing) {
       setPlacesApiLoading(true);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserPlus, Search, Users, MessageSquare } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const HowSkilloviaWorks = () => {
   const steps = [
@@ -25,38 +26,147 @@ const HowSkilloviaWorks = () => {
     }
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.4,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
+  const iconVariants = {
+    hidden: { scale: 0, rotate: -180 },
+    visible: {
+      scale: 1,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }
+    }
+  };
+
   return (
-    <div className="bg-darkSec min-h-screen text-white px-4 lg:px-[4rem] py-[4rem]">
-      <div className=" mx-auto">
-        <div className="mb-12">
-          <p className="text-sm mb-2">How It Works</p>
-          <h1 className="lg:text-[4rem] text-[1.9rem] font-bold lg:leading-[4.2rem]">
+    <motion.div 
+      className="bg-darkSec min-h-screen text-white px-4 lg:px-[4rem] py-[4rem]"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+    >
+      <div className="mx-auto">
+        <motion.div 
+          className="mb-12"
+          initial={{ opacity: 0, y: -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <motion.p 
+            className="text-sm mb-2"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            How It Works
+          </motion.p>
+          <motion.h1 
+            className="lg:text-[4rem] text-[1.9rem] font-bold lg:leading-[4.2rem]"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            viewport={{ once: true }}
+          >
             How Does<br />
             Skillovia Work?
-          </h1>
-        </div>
+          </motion.h1>
+        </motion.div>
 
-        <div className="space-y-12 lg:pl-[30rem]">
+        <motion.div 
+          className="space-y-12 lg:pl-[30rem]"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           {steps.map((step, index) => (
-            <div key={index} className="flex items-start gap-6">
-              <div className="bg-[#86E461] rounded-full p-3 mt-1">
+            <motion.div 
+              key={index} 
+              className="flex items-start gap-6"
+              variants={itemVariants}
+            >
+              <motion.div 
+                className="bg-[#86E461] rounded-full p-3 mt-1"
+                variants={iconVariants}
+                whileHover={{ 
+                  scale: 1.1,
+                  rotate: 10,
+                  transition: { duration: 0.3 }
+                }}
+              >
                 <div className="text-black">
                   {step.icon}
                 </div>
-              </div>
+              </motion.div>
               
-              <div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{step.description}</p>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.2 * index, duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <motion.h3 
+                  className="text-xl font-semibold mb-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + (0.1 * index), duration: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  {step.title}
+                </motion.h3>
+                <motion.p 
+                  className="text-gray-300 leading-relaxed"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: 0.2 + (0.1 * index), duration: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  {step.description}
+                </motion.p>
                 {index !== steps.length - 1 && (
-                  <div className="border-b border-gray-700 mt-12"></div>
+                  <motion.div 
+                    className="border-b border-gray-700 mt-12"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "100%" }}
+                    transition={{ delay: 0.3 + (0.1 * index), duration: 0.8 }}
+                    viewport={{ once: true }}
+                  ></motion.div>
                 )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -8,7 +8,7 @@ import { Star } from "lucide-react";
 
 const NearByDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Extract user ID from URL
+  const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

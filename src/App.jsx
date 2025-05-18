@@ -62,9 +62,6 @@ import GoogleAuthHandler from "./pages/GoogleAuthHandler";
 import TokenHandler from "./TokenHandler";
 import OpenDisputePage from "./pages/Dispute-Review/Dispute/Dispute";
 import Review from "./pages/Dispute-Review/Review/Review";
-import Dashboards from "./pages/User-Dashboard/UserLayout/Dashboards";
-import Reauth from "./pages/User-Dashboard/UserLayout/Reauth";
-
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -82,14 +79,6 @@ const router = createBrowserRouter([
   {
     path: "/success",
     element: <Success />,
-  },
-  {
-    path: "/reauth",
-    element: <Reauth />,
-  },
-  {
-    path: "/dashboards",
-    element: <Dashboards />,
   },
 
   {
@@ -480,7 +469,8 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
+  
+  
   {
     path: "/open-dispute",
     element: (
@@ -488,8 +478,9 @@ const router = createBrowserRouter([
         <OpenDisputePage />
       </ProtectedRoute>
     ),
-  },
-
+  },  
+  
+  
   {
     path: "/review",
     element: (

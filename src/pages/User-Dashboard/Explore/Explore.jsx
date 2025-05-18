@@ -19,52 +19,79 @@ const ExploreSection = () => {
   // User ID from token
   const [userId, setUserId] = useState(null);
 
-  // State options
-  const states = [
-    // { value: "lagos", label: "Lagos" },
-    // { value: "abuja", label: "Abuja" },
-    // { value: "rivers", label: "Rivers" },
-    // { value: "kano", label: "Kano" },
-    // { value: "oyo", label: "Oyo" },
-    // { value: "kaduna", label: "Kaduna" },
-    // { value: "enugu", label: "Enugu" },
-    // { value: "delta", label: "Delta" },
-    // { value: "anambra", label: "Anambra" },
-    // { value: "ogun", label: "Ogun" },
-    { value: "london", label: "London" },
-    { value: "manchester", label: "Manchester" },
-    { value: "birmingham", label: "Birmingham" },
-    { value: "Beeston", label: "Beeston" },
-    { value: "glasgow", label: "Glasgow" },
-    { value: "liverpool", label: "Liverpool" },
-    { value: "leeds", label: "Leeds" },
-    { value: "sheffield", label: "Sheffield" },
-    { value: "bradford", label: "Bradford" },
-    { value: "edinburgh", label: "Edinburgh" },
-    { value: "cardiff", label: "Cardiff" },
-    { value: "bristol", label: "Bristol" },
-    { value: "coventry", label: "Coventry" },
-    { value: "london", label: "Nottingham" },
-    { value: "leicester", label: "Leicester" },
-    { value: "Stoke-on-Trent", label: "Stoke-on-Trent" },
-    { value: "wolverhampton", label: "Wolverhampton" },
-    { value: "derby", label: "Derby" },
-    { value: "southampton", label: "Southampton" },
-    { value: "Newcastle upon Tyne", label: "Newcastle upon Tyne" },
-    { value: "Kingston upon Hull", label: "Kingston upon Hull" },
-    { value: "sunderland", label: "Sunderland" },
-    { value: "reading", label: "Reading" },
-    { value: "luton", label: "Luton" },
-    { value: "portsmouth", label: "Portsmouth" },
-    { value: "preston", label: "Preston" },
-    { value: "wigan", label: "Wigan" },
-    { value: "blackpool", label: "Blackpool" },
-    { value: "norwich", label: "Norwich" },
-    { value: "swindon", label: "Swindon" },
-    { value: "middlesbrough", label: "Middlesbrough" },
-  ];
+// UK Cities - Official List
+const states = [
+  { value: "aberdeen", label: "Aberdeen" },
+  { value: "armagh", label: "Armagh" },
+  { value: "bangor", label: "Bangor" },
+  { value: "bath", label: "Bath" },
+  { value: "belfast", label: "Belfast" },
+  { value: "birmingham", label: "Birmingham" },
+  { value: "bradford", label: "Bradford" },
+  { value: "brighton-and-hove", label: "Brighton & Hove" },
+  { value: "bristol", label: "Bristol" },
+  { value: "cambridge", label: "Cambridge" },
+  { value: "canterbury", label: "Canterbury" },
+  { value: "cardiff", label: "Cardiff" },
+  { value: "carlisle", label: "Carlisle" },
+  { value: "chelmsford", label: "Chelmsford" },
+  { value: "chester", label: "Chester" },
+  { value: "chichester", label: "Chichester" },
+  { value: "coventry", label: "Coventry" },
+  { value: "derby", label: "Derby" },
+  { value: "derry", label: "Derry" }, 
+  { value: "dundee", label: "Dundee" },
+  { value: "durham", label: "Durham" },
+  { value: "edinburgh", label: "Edinburgh" },
+  { value: "ely", label: "Ely" },
+  { value: "exeter", label: "Exeter" },
+  { value: "glasgow", label: "Glasgow" },
+  { value: "gloucester", label: "Gloucester" },
+  { value: "hereford", label: "Hereford" },
+  { value: "kingston-upon-hull", label: "Kingston upon Hull" },
+  { value: "inverness", label: "Inverness" },
+  { value: "lancaster", label: "Lancaster" },
+  { value: "leeds", label: "Leeds" },
+  { value: "leicester", label: "Leicester" },
+  { value: "lichfield", label: "Lichfield" },
+  { value: "lincoln", label: "Lincoln" },
+  { value: "liverpool", label: "Liverpool" },
+  { value: "london", label: "London" },
+  { value: "manchester", label: "Manchester" },
+  { value: "milton-keynes", label: "Milton Keynes" },
+  { value: "newcastle-upon-tyne", label: "Newcastle upon Tyne" },
+  { value: "newport", label: "Newport" },
+  { value: "newry", label: "Newry" },
+  { value: "norwich", label: "Norwich" },
+  { value: "nottingham", label: "Nottingham" },
+  { value: "oxford", label: "Oxford" },
+  { value: "perth", label: "Perth" },
+  { value: "peterborough", label: "Peterborough" },
+  { value: "plymouth", label: "Plymouth" },
+  { value: "portsmouth", label: "Portsmouth" },
+  { value: "preston", label: "Preston" },
+  { value: "ripon", label: "Ripon" },
+  { value: "salford", label: "Salford" },
+  { value: "salisbury", label: "Salisbury" },
+  { value: "sheffield", label: "Sheffield" },
+  { value: "southampton", label: "Southampton" },
+  { value: "st-albans", label: "St Albans" },
+  { value: "st-asaph", label: "St Asaph" },
+  { value: "st-davids", label: "St Davids" },
+  { value: "stirling", label: "Stirling" },
+  { value: "stoke-on-trent", label: "Stoke-on-Trent" },
+  { value: "sunderland", label: "Sunderland" },
+  { value: "swansea", label: "Swansea" },
+  { value: "truro", label: "Truro" },
+  { value: "wakefield", label: "Wakefield" },
+  { value: "wells", label: "Wells" },
+  { value: "westminster", label: "Westminster" },
+  { value: "wolverhampton", label: "Wolverhampton" },
+  { value: "winchester", label: "Winchester" },
+  { value: "worcester", label: "Worcester" },
+  { value: "york", label: "York" }
+];
 
-  // Distance options with their values in kilometers
   const distances = [
     { value: "all", label: "All Distances" },
     { value: "200", label: "0 - 5 miles" },
@@ -332,7 +359,7 @@ const ExploreSection = () => {
       <div className="max-w-4xl mx-auto px-4 rounded-lg">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Explore categories</h2>
+            <h2 className="text-lg font-semibold">Explore Skill</h2>
             <Link
               to="/explore-list"
               className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
@@ -398,7 +425,7 @@ const ExploreSection = () => {
             <div className="flex gap-4">
               <FilterDropdown
                 icon={MapPin}
-                label="State"
+                label="City"
                 value={stateFilter}
                 options={states}
                 onChange={(value) => {
