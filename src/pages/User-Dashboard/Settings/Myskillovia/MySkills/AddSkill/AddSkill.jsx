@@ -11,7 +11,6 @@ const skills = [
   "Make up",
   "Grocery Shopping",
   "Fashion Designer",
-  // Home services
   "House Cleaning",
   "Deep Cleaning",
   "Carpet Cleaning",
@@ -58,6 +57,13 @@ const experienceLevels = [
 
 const MAX_FILES = 4;
 
+// Conversion: 4 pounds = 2 spark tokens => 1 pound = 0.5 spark tokens
+const poundsToSparkTokens = (pounds) => {
+  const value = parseFloat(pounds);
+  if (isNaN(value)) return 0;
+  return value * 0.5;
+};
+
 const CustomBackButton = ({ onClick, label }) => (
   <button
     onClick={onClick}
@@ -67,6 +73,41 @@ const CustomBackButton = ({ onClick, label }) => (
     <span className="ml-1">{label}</span>
   </button>
 );
+
+function Modal({ open, onClose, onSubmit, value, onChange }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+        <h2 className="text-lg font-semibold mb-2">Add Custom Skill</h2>
+        <input
+          type="text"
+          className="border w-full p-2 rounded mb-4"
+          placeholder="Enter your skill"
+          value={value}
+          onChange={onChange}
+        />
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!value.trim()}
+            className={`px-4 py-2 rounded bg-primary text-secondary font-medium ${
+              !value.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
+            }`}
+          >
+            Add & Proceed
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AddSkill() {
   const navigate = useNavigate();
@@ -82,6 +123,8 @@ export default function AddSkill() {
     thumbnails: [],
   });
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [customSkillModal, setCustomSkillModal] = useState(false);
+  const [customSkillInput, setCustomSkillInput] = useState("");
 
   const filteredSkills = skills.filter((skill) =>
     skill.toLowerCase().includes(searchQuery.toLowerCase())
@@ -162,56 +205,44 @@ export default function AddSkill() {
     </div>
   );
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     setError(null);
 
-  //     if (
-  //       !formData.skill ||
-  //       !formData.experienceLevel ||
-  //       !formData.description ||
-  //       !formData.hourlyRate
-  //     ) {
-  //       throw new Error("Please fill in all required fields");
-  //     }
+  const handleAddCustomSkill = async () => {
+    if (!customSkillInput.trim()) return;
+    try {
+      setIsLoading(true);
+      setError(null);
+  
+      // 1. Send suggested skill to the API (simulate or use fetch)
+      // Replace the below fetch URL with your actual endpoint if needed.
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/suggestedskills`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ name: customSkillInput.trim() }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to suggest skill");
+      }
+  
+      // 2. Inform user about admin approval and redirect to /explore
+      alert(
+        "Your custom skill has been submitted for admin approval. An admin will review it within 2 days and get back to you. Redirecting to Explore."
+      );
+      navigate("/explore");
+    } catch (error) {
+      setError(error.message || "Failed to suggest skill. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setCustomSkillInput("");
+      setCustomSkillModal(false);
+    }
+  };
+  
 
-  //     const formDataToSend = new FormData();
-  //     formDataToSend.append("skill_type", formData.skill);
-  //     formDataToSend.append(
-  //       "experience_level",
-  //       formData.experienceLevel.toLowerCase()
-  //     );
-  //     formDataToSend.append("hourly_rate", formData.hourlyRate);
-  //     formDataToSend.append("description", formData.description);
-
-  //     formData.thumbnails.forEach((file) => {
-  //       formDataToSend.append("thumbnails", file);
-  //     });
-
-  //     const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills`, {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //       },
-  //       body: formDataToSend,
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || "Failed to add skill");
-  //     }
-
-  //     previewUrls.forEach((url) => URL.revokeObjectURL(url));
-
-  //     navigate("/settings/skills");
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error);
-  //     setError(error.message || "Failed to add skill. Please try again.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     try {
@@ -227,8 +258,8 @@ export default function AddSkill() {
         throw new Error("Please fill in all required fields");
       }
 
-      // Calculate Spark Token based on hourlyRate
-      const sparkToken = parseInt(formData.hourlyRate, 10); // Same logic as UI
+      // Use conversion for spark tokens
+      const sparkToken = poundsToSparkTokens(formData.hourlyRate);
 
       const formDataToSend = new FormData();
       formDataToSend.append("skill_type", formData.skill);
@@ -237,7 +268,7 @@ export default function AddSkill() {
         formData.experienceLevel.toLowerCase()
       );
       formDataToSend.append("hourly_rate", formData.hourlyRate);
-      formDataToSend.append("spark_token", sparkToken); // ✅ Include Spark Token
+      formDataToSend.append("spark_token", sparkToken);
       formDataToSend.append("description", formData.description);
 
       formData.thumbnails.forEach((file) => {
@@ -268,11 +299,24 @@ export default function AddSkill() {
     }
   };
 
+
+  const clearSkillSelection = () => {
+    setFormData((prev) => ({ ...prev, skill: "" }));
+    setSearchQuery("");
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <div className="w-full">
+            <Modal
+              open={customSkillModal}
+              onClose={() => setCustomSkillModal(false)}
+              onSubmit={handleAddCustomSkill}
+              value={customSkillInput}
+              onChange={(e) => setCustomSkillInput(e.target.value)}
+            />
             <div className="flex items-center mb-4">
               <CustomBackButton onClick={handleBack} label="Back to Skills" />
               <button
@@ -285,48 +329,54 @@ export default function AddSkill() {
                 Next, Experience level
               </button>
             </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Search skills"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-3 rounded-lg bg-input border-gray border"
-              />
-            </div>
             <h3 className="mb-4 text-lg font-medium">Select your skill</h3>
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-              {filteredSkills.map((skill) => (
-                <div
-                  key={skill}
-                  onClick={() => handleSkillSelect(skill)}
-                  className="flex items-center p-4 rounded-lg border border-gray bg-input cursor-pointer hover:bg-gray-100"
+            {formData.skill ? (
+              <div className="flex items-center bg-green-100 border border-green-300 px-4 py-3 rounded-lg mb-4">
+                <span className="font-medium capitalize text-green-800">{formData.skill}</span>
+                <button
+                  onClick={clearSkillSelection}
+                  className="ml-4 px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
                 >
-                  <span>{skill}</span>
-                  <div
-                    className={`ml-auto w-6 h-6 rounded-full border-2 ${
-                      formData.skill === skill
-                        ? "bg-green-500 border-green-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    {formData.skill === skill && (
-                      <div className="flex items-center justify-center h-full">
-                        <span className="text-white">✓</span>
-                      </div>
-                    )}
-                  </div>
+                  Change
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search skills"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-input border-gray border"
+                  />
                 </div>
-              ))}
-              {filteredSkills.length === 0 && (
-                <div className="text-center py-4 text-gray-500">
-                  No skills found matching your search
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                  {filteredSkills.map((skill) => (
+                    <div
+                      key={skill}
+                      onClick={() => handleSkillSelect(skill)}
+                      className="flex items-center p-4 rounded-lg border border-gray bg-input cursor-pointer hover:bg-gray-100"
+                    >
+                      <span>{skill}</span>
+                    </div>
+                  ))}
+                  {filteredSkills.length === 0 && (
+                    <div className="text-center py-4 text-gray-500 flex flex-col items-center">
+                      <div>No skills found matching your search</div>
+                      <button
+                        className="mt-4 px-4 py-2 rounded bg-primary text-secondary font-medium hover:bg-green-600"
+                        onClick={() => setCustomSkillModal(true)}
+                      >
+                        Can't find your skill? Add it
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         );
-
       case 2:
         return (
           <div className="w-full">
@@ -378,7 +428,6 @@ export default function AddSkill() {
             </div>
           </div>
         );
-
       case 3:
         return (
           <div className="w-full">
@@ -410,7 +459,6 @@ export default function AddSkill() {
             />
           </div>
         );
-
       case 4:
         return (
           <div className="w-full">
@@ -452,12 +500,11 @@ export default function AddSkill() {
             </div>
             <div className="mt-2 text-sm text-gray-500">
               {formData.hourlyRate
-                ? `${parseInt(formData.hourlyRate, 10)} Spark tokens`
+                ? `${poundsToSparkTokens(formData.hourlyRate)} Spark tokens`
                 : "0 Spark tokens"}
             </div>
           </div>
         );
-
       case 5:
         return (
           <div className="w-full">
@@ -497,7 +544,6 @@ export default function AddSkill() {
             </div>
           </div>
         );
-
       default:
         return null;
     }

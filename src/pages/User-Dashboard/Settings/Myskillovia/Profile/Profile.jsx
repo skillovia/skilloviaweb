@@ -3,7 +3,6 @@ import { Check, Loader2 } from "lucide-react";
 import UserLayout from "../../../UserLayout/UserLayout";
 import BackButton from "../../../../../componets/Back";
 import ProfilePhotoUpload from "./ProfileUpload";
-
 import { jwtDecode } from "jwt-decode";
 
 const Profile = () => {
@@ -21,12 +20,14 @@ const Profile = () => {
     weekendsInclusive: false,
     gender: "",
     password: "",
+    confirmPassword: "", // Added confirmPassword
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [apiError, setApiError] = useState("");
+  const [confirmError, setConfirmError] = useState(""); // For confirm password validation
 
   // Refs for Google Places Autocomplete
   const cityInputRef = useRef(null);
@@ -43,12 +44,7 @@ const Profile = () => {
     street: null,
   });
 
-  // const userId = localStorage.getItem('decodedToken')
-  //   ? JSON.parse(localStorage.getItem('decodedToken')).id
-  //   : null;
-
   const accessToken = localStorage.getItem("accessToken");
-
   const userId = accessToken ? jwtDecode(accessToken).id : null;
 
   // Load Google Maps API - use environment variable for API key
@@ -99,11 +95,9 @@ const Profile = () => {
   // Helper function to extract components from place object
   const extractAddressComponents = (place, componentType) => {
     if (!place.address_components) return null;
-
     const component = place.address_components.find((comp) =>
       comp.types.includes(componentType)
     );
-
     return component ? component.long_name : null;
   };
 
@@ -155,7 +149,6 @@ const Profile = () => {
   };
 
   // Initialize street address autocomplete
-  // Initialize street address autocomplete
   const initStreetAutocomplete = () => {
     if (!window.google || !streetInputRef.current) return;
 
@@ -184,15 +177,10 @@ const Profile = () => {
           return;
         }
 
-        // Log the full place object to see what we're getting
-        console.log("Full place object:", place);
-
         // Option 1: Use the formatted_address directly if available
         if (place.formatted_address) {
-          // Extract just the street part (before the city/state/zip)
           const addressParts = place.formatted_address.split(",");
-          const streetPart = addressParts[0]; // First part is typically the street address
-
+          const streetPart = addressParts[0];
           setFormData((prev) => ({
             ...prev,
             streetAddress: streetPart,
@@ -201,9 +189,8 @@ const Profile = () => {
           // Option 2: Extract and combine components
           const streetNumber = extractAddressComponents(place, "street_number");
           const streetName = extractAddressComponents(place, "route");
-          const subpremise = extractAddressComponents(place, "subpremise"); // For apt/suite numbers
+          const subpremise = extractAddressComponents(place, "subpremise");
 
-          // Build the street address with all components
           let fullStreetAddress = "";
           if (streetNumber) fullStreetAddress += streetNumber;
           if (streetName)
@@ -219,25 +206,20 @@ const Profile = () => {
           }
         }
 
-        // Continue with other components as before
         const postalCode = extractAddressComponents(place, "postal_code");
         const city =
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "sublocality") ||
           extractAddressComponents(place, "administrative_area_level_1");
 
-        // Update form data with any other found components
         setFormData((prev) => {
           const updates = {};
-
           if (postalCode) {
             updates.zipCode = postalCode;
           }
-
           if (city) {
             updates.city = city;
           }
-
           return { ...prev, ...updates };
         });
 
@@ -302,6 +284,7 @@ const Profile = () => {
             streetAddress: data.data.street || "",
             zipCode: data.data.zip_code || "",
             gender: data.data.gender || "",
+            // password and confirmPassword stay blank
           }));
         } else {
           setError(data.message || "Failed to load profile data");
@@ -317,12 +300,23 @@ const Profile = () => {
     fetchProfile();
   }, [userId]);
 
+  // Handle input changes, including confirm password logic
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    // Password confirmation validation
+    if (name === "confirmPassword" || (name === "password" && formData.confirmPassword)) {
+      const checkValue = name === "confirmPassword" ? value : formData.confirmPassword;
+      if (checkValue !== (name === "password" ? value : formData.password)) {
+        setConfirmError("Passwords do not match");
+      } else {
+        setConfirmError("");
+      }
+    }
   };
 
   const handleToggle = (name) => {
@@ -338,8 +332,16 @@ const Profile = () => {
       return;
     }
 
+    // Prevent submit if passwords don't match
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      setConfirmError("Passwords do not match");
+      setError("Please make sure the passwords match.");
+      return;
+    }
+
     setIsSaving(true);
     setError("");
+    setConfirmError("");
 
     try {
       const response = await fetch(
@@ -387,6 +389,7 @@ const Profile = () => {
     return (
       <button
         onClick={onChange}
+        type="button"
         className={`relative w-11 h-6 rounded-full transition-colors ${
           checked ? "bg-primary" : "bg-gray-500"
         }`}
@@ -456,7 +459,7 @@ const Profile = () => {
                 />
               </div>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
                 <h3 className="font-medium">Personal details</h3>
 
                 <div className="space-y-4">
@@ -545,6 +548,23 @@ const Profile = () => {
                       className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
                       placeholder="Enter new password"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded-md bg-input border-gray focus:outline-none focus:ring-1 focus:ring-green-400"
+                      placeholder="Confirm new password"
+                    />
+                    {formData.confirmPassword && confirmError && (
+                      <p className="text-xs text-red-500 mt-1">{confirmError}</p>
+                    )}
                   </div>
 
                   <div>

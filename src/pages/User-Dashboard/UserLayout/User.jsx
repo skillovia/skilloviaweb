@@ -4,7 +4,7 @@ import { IoMdSettings, IoMdWallet } from "react-icons/io";
 import UserLayout from "./UserLayout";
 import SlidingPockets from "./CashToken";
 import { Link } from "react-router-dom";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, CheckCircle, XCircle } from "lucide-react";
 import Bio from "./Bio";
 import { jwtDecode } from "jwt-decode";
 import { HiOutlineExternalLink } from "react-icons/hi";
@@ -16,52 +16,79 @@ const ProfileCard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
-
   const [skills, setSkills] = useState([]);
+
+  console.log("profileData:", profileData);
+  // Profile step logic
+  const steps = [
+    {
+      name: "Profile image",
+      completed: !!(profileData && profileData.photourl),
+      action: null, 
+      link: null,
+    },
+    {
+      name: "Add at least one skill",
+      completed: skills.length > 0,
+      action: null,
+      link: "/settings/skill/add",
+    },
+    {
+      name: "Complete KYC",
+      completed: !!(profileData && profileData.kyc_status === "verified"),
+      action: null,
+      link: "/settings/kyc",
+    },
+    {
+      name: "Add payment method",
+      completed: !!(profileData && profileData.payment_method),
+      action: null,
+      link: "/settings/payment",
+    },
+    {
+      name: "Link Stripe",
+      completed: !!(profileData && profileData.linked_account),
+      action: null,
+      link: "/create-stripe-account",
+    },
+    {
+      name: "Fill out bio",
+      completed: !!(profileData && profileData.bio && profileData.bio.length > 10),
+      action: null,
+      link: "/settings/profile",
+    },
+  ];
+  const completedSteps = steps.filter((s) => s.completed).length;
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    // Basic validation
     if (!file.type.startsWith("image/")) {
       alert("Please upload an image file");
       return;
     }
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("File size should be less than 5MB");
       return;
     }
-
     setUploading(true);
-
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found");
-      console.log(accessToken);
-
       const formData = new FormData();
       formData.append("photo", file);
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
-
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
           body: formData,
         }
       );
-
       if (!response.ok) throw new Error("Failed to upload image");
-
       const data = await response.json();
-
-      // Update profile data with new photo URL
       setProfileData((prev) => ({
         ...prev,
         photourl: data.photourl || data.data?.photourl,
@@ -74,52 +101,27 @@ const ProfileCard = () => {
     }
   };
 
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const accessToken = localStorage.getItem("accessToken");
-
-        if (!accessToken) {
-          throw new Error("❌ Access token not found");
-        }
-
-        const decodedToken = jwtDecode(accessToken); // ✅ Decode directly
-        console.log("🔑 Decoded Token:", decodedToken); // Debugging log
-
-        const user_id = decodedToken?.id; // ✅ Define user_id correctly
-        if (!user_id) {
-          throw new Error("❌ User ID not found in token");
-        }
-
+        if (!accessToken) throw new Error("❌ Access token not found");
+        const decodedToken = jwtDecode(accessToken);
+        const user_id = decodedToken?.id;
+        if (!user_id) throw new Error("❌ User ID not found in token");
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-
-        if (!response.ok) {
-          throw new Error("❌ Failed to fetch profile");
-        }
-
+        if (!response.ok) throw new Error("❌ Failed to fetch profile");
         const data = await response.json();
-        const updatedData = {
-          ...data.data,
-          photourl: data.data.photourl, // Ensure correct URL handling
-        };
-        setProfileData(updatedData);
-        console.log("✅ Updated profile data:", updatedData);
+        setProfileData({ ...data.data, photourl: data.data.photourl });
       } catch (err) {
-        console.error("❌ Error fetching profile:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
   useEffect(() => {
@@ -127,17 +129,9 @@ const ProfileCard = () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/skills/user/all`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch skills");
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch skills");
         const data = await response.json();
         setSkills(data.data || []);
       } catch (err) {
@@ -146,7 +140,6 @@ const ProfileCard = () => {
         setLoading(false);
       }
     };
-
     fetchSkills();
   }, []);
 
@@ -181,6 +174,48 @@ const ProfileCard = () => {
   return (
     <UserLayout>
       <div className="max-w-4xl px-4 space-y-4">
+        {/* Profile Completion Bar & Steps */}
+        <div className="bg-input border border-gray rounded-lg mb-6 p-4">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-green-900">
+              Profile completion: {completedSteps}/{steps.length}
+            </span>
+            <div className="w-56 h-3 bg-primary rounded-full overflow-hidden">
+              <div
+                className="h-full bg-secondary transition-all duration-300"
+                style={{
+                  width: `${(completedSteps / steps.length) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {steps.map((step, idx) => (
+              <div
+                key={step.name}
+                className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs 
+                  ${step.completed
+                    ? "bg-secondary text-white"
+                    : "bg-gray-100 text-gray-500 border border-gray-200"
+                  }`}
+              >
+                {step.completed ? (
+                  <CheckCircle className="w-4 h-4 text-white" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-gray-400" />
+                )}
+                {step.link && !step.completed ? (
+                  <Link to={step.link} className=" hover:text-green-700">
+                    {step.name}
+                  </Link>
+                ) : (
+                  <span>{step.name}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="flex justify-between items-start">
           <div className="text-lg font-semibold">Profile</div>
           <section className="flex space-x-4">
@@ -295,8 +330,6 @@ const ProfileCard = () => {
                   {skill.spark_token && ` - ${skill.spark_token} spark tokens`}
                 </p>
               </div>
-
-              {/* Thumbnails */}
             </div>
           ))}
 
