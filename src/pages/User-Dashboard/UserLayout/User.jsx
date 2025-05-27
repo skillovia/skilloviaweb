@@ -17,14 +17,64 @@ const ProfileCard = () => {
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [skills, setSkills] = useState([]);
+  const [profileError, setProfileError] = useState(null);
+  const [skillsError, setSkillsError] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [skillsLoading, setSkillsLoading] = useState(true);
 
   console.log("profileData:", profileData);
+  // Profile step logic
+  // const steps = [
+  //   {
+  //     name: "Profile image",
+  //     completed: !!(profileData && profileData.photourl),
+  //     action: null,
+  //     link: null,
+  //   },
+  //   {
+  //     name: "Add at least one skill",
+  //     completed: skills.length > 0,
+  //     action: null,
+  //     link: "/settings/skill/add",
+  //   },
+  //   {
+  //     name: "Complete KYC",
+  //     completed: !!(profileData && profileData.kyc_status === "verified"),
+  //     action: null,
+  //     link: "/settings/kyc",
+  //   },
+  //   {
+  //     name: "Add payment method",
+  //     completed: !!(profileData && profileData.payment_method),
+  //     action: null,
+  //     link: "/settings/payment",
+  //   },
+  //   {
+  //     name: "Link Stripe",
+  //     completed: !!(profileData && profileData.linked_account),
+  //     action: null,
+  //     link: "/create-stripe-account",
+  //   },
+  //   {
+  //     name: "Fill out bio",
+  //     completed: !!(
+  //       profileData &&
+  //       profileData.bio &&
+  //       profileData.bio.length > 10
+  //     ),
+  //     action: null,
+  //     link: "/settings/profile",
+  //   },
+  // ];
+  // const completedSteps = steps.filter((s) => s.completed).length;
+
+  // console.log("profileData:", profileData);
   // Profile step logic
   const steps = [
     {
       name: "Profile image",
       completed: !!(profileData && profileData.photourl),
-      action: null, 
+      action: null,
       link: null,
     },
     {
@@ -53,7 +103,11 @@ const ProfileCard = () => {
     },
     {
       name: "Fill out bio",
-      completed: !!(profileData && profileData.bio && profileData.bio.length > 10),
+      completed: !!(
+        profileData &&
+        profileData.bio &&
+        profileData.bio.length > 10
+      ),
       action: null,
       link: "/settings/profile",
     },
@@ -101,6 +155,76 @@ const ProfileCard = () => {
     }
   };
 
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const accessToken = localStorage.getItem("accessToken");
+  //       if (!accessToken) throw new Error("❌ Access token not found");
+  //       const decodedToken = jwtDecode(accessToken);
+  //       const user_id = decodedToken?.id;
+  //       if (!user_id) throw new Error("❌ User ID not found in token");
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //         { headers: { Authorization: `Bearer ${accessToken}` } }
+  //       );
+  //       if (!response.ok) throw new Error("❌ Failed to fetch profile");
+  //       const data = await response.json();
+  //       setProfileData({ ...data.data, photourl: data.data.photourl });
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
+  // useEffect(() => {
+  //   const fetchSkills = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/skills/user/all`,
+  //         { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
+  //       );
+  //       if (!response.ok) throw new Error("Failed to fetch skills");
+  //       const data = await response.json();
+  //       setSkills(data.data || []);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchSkills();
+  // }, []);
+
+  // if (loading) {
+  //   return (
+  //     <UserLayout>
+  //       <div className="flex justify-center items-center h-64">
+  //         <Loader2 className="animate-spin w-12 h-12 text-secondary" />
+  //       </div>
+  //     </UserLayout>
+  //   );
+  // }
+
+  // if (error) {
+  //   return (
+  //     <UserLayout>
+  //       <div className="max-w-4xl px-4 py-8 text-red-500">
+  //         Error loading profile: {error}
+  //       </div>
+  //     </UserLayout>
+  //   );
+  // }
+
+  // if (!profileData) {
+  //   return (
+  //     <UserLayout>
+  //       <div className="max-w-4xl px-4 py-8">No profile data available</div>
+  //     </UserLayout>
+  //   );
+  // }
+  // Fetch Profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -119,31 +243,38 @@ const ProfileCard = () => {
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false);
+        setProfileLoading(false);
       }
     };
     fetchProfile();
   }, []);
+
+  // Fetch Skills
   useEffect(() => {
     const fetchSkills = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/skills/user/all`,
-          { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
         );
         if (!response.ok) throw new Error("Failed to fetch skills");
         const data = await response.json();
         setSkills(data.data || []);
       } catch (err) {
-        setError(err.message);
+        setSkillsError(err.message);
       } finally {
-        setLoading(false);
+        setSkillsLoading(false);
       }
     };
     fetchSkills();
   }, []);
 
-  if (loading) {
+  // Handle Loading State
+  if (profileLoading || skillsLoading) {
     return (
       <UserLayout>
         <div className="flex justify-center items-center h-64">
@@ -153,16 +284,18 @@ const ProfileCard = () => {
     );
   }
 
-  if (error) {
+  // Handle Error State (only for profile)
+  if (profileError) {
     return (
       <UserLayout>
         <div className="max-w-4xl px-4 py-8 text-red-500">
-          Error loading profile: {error}
+          Error loading profile: {profileError}
         </div>
       </UserLayout>
     );
   }
 
+  // Handle No Data
   if (!profileData) {
     return (
       <UserLayout>
@@ -170,7 +303,6 @@ const ProfileCard = () => {
       </UserLayout>
     );
   }
-
   return (
     <UserLayout>
       <div className="max-w-4xl px-4 space-y-4">
@@ -194,9 +326,10 @@ const ProfileCard = () => {
               <div
                 key={step.name}
                 className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs 
-                  ${step.completed
-                    ? "bg-secondary text-white"
-                    : "bg-gray-100 text-gray-500 border border-gray-200"
+                  ${
+                    step.completed
+                      ? "bg-secondary text-white"
+                      : "bg-gray-100 text-gray-500 border border-gray-200"
                   }`}
               >
                 {step.completed ? (
