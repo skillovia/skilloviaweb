@@ -63,7 +63,15 @@ const UserSearch = () => {
     }
   };
 
+  // const handleUserClick = (userId) => {
+  //   navigate(`/user-profile/${userId}`);
+  // };
   const handleUserClick = (userId) => {
+    console.log("Navigating to user ID:", userId);
+    if (!userId) {
+      alert("Invalid user ID.");
+      return;
+    }
     navigate(`/user-profile/${userId}`);
   };
 
@@ -122,8 +130,8 @@ const UserSearch = () => {
           <div className="divide-y">
             {users.map((user, index) => (
               <div
-                key={user.id || index}
-                onClick={() => handleUserClick(user.id)}
+                key={user._id || index}
+                onClick={() => handleUserClick(user._id)}
                 className="flex items-center p-4 bg-input border border-gray cursor-pointer transition-colors"
               >
                 <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 mr-3 border border-gray-200">

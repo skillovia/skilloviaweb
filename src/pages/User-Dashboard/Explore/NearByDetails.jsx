@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Loader2, MessageCircleMore, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Loader2,
+  MessageCircleMore,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import UserLayout from "../UserLayout/UserLayout";
 import BackButton from "../../../componets/Back";
 import FollowButton from "../../../componets/FollowBtn";
@@ -9,6 +14,8 @@ import { Star } from "lucide-react";
 const NearByDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  console.log("userId:", id); // This should NEVER be undefined
+
   const [profile, setProfile] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,9 +120,9 @@ const NearByDetails = () => {
   };
 
   const toggleReviews = (skillId) => {
-    setExpandedSkills(prev => ({
+    setExpandedSkills((prev) => ({
       ...prev,
-      [skillId]: !prev[skillId]
+      [skillId]: !prev[skillId],
     }));
   };
 
@@ -179,7 +186,7 @@ const NearByDetails = () => {
 
   // Filter reviews by skill ID
   const getReviewsBySkill = (skillId) => {
-    return reviews.filter(review => review.skill_id === skillId);
+    return reviews.filter((review) => review.skill_id === skillId);
   };
 
   return (
@@ -231,10 +238,14 @@ const NearByDetails = () => {
             <h3 className="font-semibold mb-4">Skills</h3>
             <div className="space-y-4">
               {skills.map((skill) => {
-                const skillReviews = getReviewsBySkill(skill.id || skill.skill_id);
+                const skillReviews = getReviewsBySkill(
+                  skill.id || skill.skill_id
+                );
                 const isExpanded = expandedSkills[skill.id || skill.skill_id];
-                const displayedReviews = isExpanded ? skillReviews : skillReviews.slice(0, 1);
-                
+                const displayedReviews = isExpanded
+                  ? skillReviews
+                  : skillReviews.slice(0, 1);
+
                 return (
                   <div
                     key={skill.id || skill.skill_id}
@@ -249,17 +260,25 @@ const NearByDetails = () => {
                           Description: {skill.description}
                         </h4>
                         <p className="text-sm text-gray-600">
-                          Experience level: {skill.experience_level || "Unknown"}
+                          Experience level:{" "}
+                          {skill.experience_level || "Unknown"}
                         </p>
                         <h3 className="text-[14px] font-medium">
-                          hourly_rate: £{skill.hourly_rate} - {skill.spark_token}{" "}
-                          Spark Token
+                          hourly_rate: £{skill.hourly_rate} -{" "}
+                          {skill.spark_token} Spark Token
                         </h3>
                       </div>
                       <Link
                         to="/book-service"
                         state={{
-                          user: { id, firstname, lastname, email, bio, photourl },
+                          user: {
+                            id,
+                            firstname,
+                            lastname,
+                            email,
+                            bio,
+                            photourl,
+                          },
                           skill: {
                             ...skill,
                             thumbnail01: skill.thumbnail01,
@@ -273,39 +292,50 @@ const NearByDetails = () => {
                         Book
                       </Link>
                     </div>
-                    
+
                     {/* Reviews Section within each skill */}
                     <div className="mt-4 border-t pt-3 border-t-secondary">
                       <h4 className="text-sm font-medium mb-2">Reviews</h4>
-                      
+
                       {reviewsLoading ? (
                         <div className="flex justify-center items-center py-2">
                           <Loader2 className="animate-spin w-4 h-4 text-gray-500" />
                         </div>
                       ) : skillReviews.length === 0 ? (
-                        <p className="text-gray-500 text-sm italic">No reviews yet for this skill.</p>
+                        <p className="text-gray-500 text-sm italic">
+                          No reviews yet for this skill.
+                        </p>
                       ) : (
                         <>
                           <div className="space-y-3">
                             {displayedReviews.map((review) => (
-                              <div key={review.id} className="bg-gray-50 p-3 rounded">
+                              <div
+                                key={review.id}
+                                className="bg-gray-50 p-3 rounded"
+                              >
                                 <div className="flex justify-between items-start mb-1">
                                   <div className="flex items-center gap-1">
                                     {renderStars(review.rating)}
-                                    <span className="text-xs ml-1">({review.rating}/5)</span>
+                                    <span className="text-xs ml-1">
+                                      ({review.rating}/5)
+                                    </span>
                                   </div>
                                   <span className="text-xs text-gray-500">
                                     {formatDate(review.created_at)}
                                   </span>
                                 </div>
-                                <p className="text-sm text-gray-700">{review.comment}</p>
+                                <p className="text-sm text-gray-700">
+                                  {review.comment}
+                                </p>
                               </div>
                             ))}
                           </div>
-                          
+
                           {skillReviews.length > 1 && (
                             <button
-                              onClick={() => toggleReviews(skill.id || skill.skill_id)}
+                              onClick={() =>
+                                toggleReviews(skill.id || skill.skill_id)
+                              }
                               className="flex items-center gap-1 text-xs text-secondary font-bold mt-2 hover:underline"
                             >
                               {isExpanded ? (
@@ -316,7 +346,10 @@ const NearByDetails = () => {
                               ) : (
                                 <>
                                   <ChevronDown size={14} />
-                                  View {skillReviews.length - 1} more {skillReviews.length - 1 === 1 ? 'review' : 'reviews'}
+                                  View {skillReviews.length - 1} more{" "}
+                                  {skillReviews.length - 1 === 1
+                                    ? "review"
+                                    : "reviews"}
                                 </>
                               )}
                             </button>
