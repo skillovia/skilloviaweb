@@ -431,14 +431,14 @@ const ProfileCard = () => {
           {/* Skills List */}
           {skills.map((skill) => (
             <div
-              key={skill.id}
+              key={skill._id}
               className="mb-4 p-4 bg-input border border-gray rounded-lg"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <h2 className="font-medium">{skill.skill_type}</h2>
                 </div>
-                <Link to={`/settings/skills/${skill.id}`}>
+                <Link to={`/settings/skills/${skill._id}`}>
                   <span>
                     <HiOutlineExternalLink className="text-[1.5rem] text-secondary" />
                   </span>
