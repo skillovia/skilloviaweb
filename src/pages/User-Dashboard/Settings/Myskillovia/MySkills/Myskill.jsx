@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Plus, Edit, Star, Tag, Loader2 } from 'lucide-react';
-import UserLayout from '../../../UserLayout/UserLayout';
-import BackButton from '../../../../../componets/Back';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { ChevronLeft, Plus, Edit, Star, Tag, Loader2 } from "lucide-react";
+import UserLayout from "../../../UserLayout/UserLayout";
+import BackButton from "../../../../../componets/Back";
+import { Link } from "react-router-dom";
 import { HiOutlineExternalLink } from "react-icons/hi";
 import { IoBriefcaseOutline } from "react-icons/io5";
-import EmptyState from '../../../../../componets/EmptyState';
+import EmptyState from "../../../../../componets/EmptyState";
 
 const MySkillsPage = () => {
   const [skills, setSkills] = useState([]);
@@ -15,14 +15,17 @@ const MySkillsPage = () => {
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/skills/user/all`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/skills/user/all`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
-        });
-        
+        );
+
         if (!response.ok) {
-          throw new Error('Failed to fetch skills');
+          throw new Error("Failed to fetch skills");
         }
 
         const data = await response.json();
@@ -40,10 +43,10 @@ const MySkillsPage = () => {
   if (loading) {
     return (
       <UserLayout>
-      <div className="flex justify-center items-center h-64">
-             <Loader2 className="animate-spin w-12 h-12 text-secondary" />
-           </div>
-       </UserLayout>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="animate-spin w-12 h-12 text-secondary" />
+        </div>
+      </UserLayout>
     );
   }
 
@@ -62,8 +65,11 @@ const MySkillsPage = () => {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <header className="flex items-center justify-between mb-6">
-          <BackButton label='My Skills' />
-          <Link to="/settings/skill/add" className="px-4 py-2 text-secondary bg-primary rounded-full flex items-center gap-2">
+          <BackButton label="My Skills" />
+          <Link
+            to="/settings/skill/add"
+            className="px-4 py-2 text-secondary bg-primary rounded-full flex items-center gap-2"
+          >
             <Plus className="w-4 h-4" />
             Add a skill
           </Link>
@@ -71,15 +77,20 @@ const MySkillsPage = () => {
 
         {/* Skills List */}
         {skills.map((skill) => (
-          <div key={skill.id} className="mb-4 p-4 bg-input border border-gray rounded-lg">
+          <div
+            // key={skill.id}
+            key={skill._id}
+            className="mb-4 p-4 bg-input border border-gray rounded-lg"
+          >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <h2 className="font-medium">{skill.skill_type}</h2>
-             
               </div>
-              <Link to={`/settings/skills/${skill.id}`}>
-              <span><HiOutlineExternalLink className='text-[1.5rem] text-secondary' /></span>
-        
+              {/*} <Link to={`/settings/skills/${skill.id}`}>*/}
+              <Link to={`/settings/skills/${skill._id}`}>
+                <span>
+                  <HiOutlineExternalLink className="text-[1.5rem] text-secondary" />
+                </span>
               </Link>
             </div>
 
@@ -90,7 +101,7 @@ const MySkillsPage = () => {
             </div>
 
             <p className="text-gray-600 mb-4 text-[13px]">
-              {skill.description || 'No description provided'}
+              {skill.description || "No description provided"}
             </p>
 
             {/* Hourly Rate */}
@@ -103,9 +114,17 @@ const MySkillsPage = () => {
             </div>
 
             {/* Thumbnails */}
-            {(skill.thumbnail01 || skill.thumbnail02 || skill.thumbnail03 || skill.thumbnail04) && (
+            {(skill.thumbnail01 ||
+              skill.thumbnail02 ||
+              skill.thumbnail03 ||
+              skill.thumbnail04) && (
               <div className="mt-4 grid grid-cols-2 lg:flex gap-2 lg:flex-wrap">
-                {[skill.thumbnail01, skill.thumbnail02, skill.thumbnail03, skill.thumbnail04]
+                {[
+                  skill.thumbnail01,
+                  skill.thumbnail02,
+                  skill.thumbnail03,
+                  skill.thumbnail04,
+                ]
                   .filter(Boolean)
                   .map((thumbnail, index) => (
                     <img
@@ -121,16 +140,15 @@ const MySkillsPage = () => {
         ))}
 
         {skills.length === 0 && (
-     <div className="min-h-[400px] flex items-center justify-center  rounded-lg shadow-sm">
-     <EmptyState
-   title= 'No Skills Added Yet'
-   description= 'Start adding your professional skills to showcase your expertise.'
-   icon={() => (
-    <IoBriefcaseOutline className='text-[4rem] text-text' />
-  )}
-
-     />
-   </div>
+          <div className="min-h-[400px] flex items-center justify-center  rounded-lg shadow-sm">
+            <EmptyState
+              title="No Skills Added Yet"
+              description="Start adding your professional skills to showcase your expertise."
+              icon={() => (
+                <IoBriefcaseOutline className="text-[4rem] text-text" />
+              )}
+            />
+          </div>
         )}
       </div>
     </UserLayout>
