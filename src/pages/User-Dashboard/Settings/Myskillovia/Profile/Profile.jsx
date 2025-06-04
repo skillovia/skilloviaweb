@@ -5,7 +5,14 @@ import BackButton from "../../../../../componets/Back";
 import ProfilePhotoUpload from "./ProfileUpload";
 import { jwtDecode } from "jwt-decode";
 
+const ensureHttps = (url) => {
+  if (!url) return null;
+  return url.startsWith("http") ? url : `https://${url}`;
+};
+// const Profile = ({ photoPreview, setPhotoPreview, setSelectedFile }) => {
 const Profile = () => {
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     expertVisibility: true,
     firstName: "",
@@ -309,8 +316,12 @@ const Profile = () => {
     }));
 
     // Password confirmation validation
-    if (name === "confirmPassword" || (name === "password" && formData.confirmPassword)) {
-      const checkValue = name === "confirmPassword" ? value : formData.confirmPassword;
+    if (
+      name === "confirmPassword" ||
+      (name === "password" && formData.confirmPassword)
+    ) {
+      const checkValue =
+        name === "confirmPassword" ? value : formData.confirmPassword;
       if (checkValue !== (name === "password" ? value : formData.password)) {
         setConfirmError("Passwords do not match");
       } else {
@@ -326,14 +337,82 @@ const Profile = () => {
     }));
   };
 
+  // const handleSubmit = async () => {
+  //   if (!userId) {
+  //     setError("User ID not found");
+  //     return;
+  //   }
+
+  //   // Prevent submit if passwords don't match
+  //   if (
+  //     formData.password &&
+  //     formData.confirmPassword &&
+  //     formData.password !== formData.confirmPassword
+  //   ) {
+  //     setConfirmError("Passwords do not match");
+  //     setError("Please make sure the passwords match.");
+  //     return;
+  //   }
+
+  //   setIsSaving(true);
+  //   setError("");
+  //   setConfirmError("");
+
+  //   try {
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //         },
+  //         body: JSON.stringify({
+  //           email: formData.email,
+  //           firstname: formData.firstName,
+  //           lastname: formData.lastName,
+  //           gender: formData.gender,
+  //           password: formData.password,
+  //           location: formData.city,
+  //           street: formData.streetAddress,
+  //           zip_code: formData.zipCode,
+  //           website: formData.website,
+  //         }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     if (data.status === "success") {
+  //       console.log("Profile updated successfully");
+  //     } else {
+  //       setError(data.message || "Failed to update profile");
+  //     }
+  //   } catch (err) {
+  //     setError("Something went wrong while updating profile");
+  //     console.error("Error updating profile:", err);
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
+
+  // Custom Toggle Switch Component
+
   const handleSubmit = async () => {
     if (!userId) {
       setError("User ID not found");
       return;
     }
 
-    // Prevent submit if passwords don't match
-    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+    // Validate passwords match
+    if (
+      formData.password &&
+      formData.confirmPassword &&
+      formData.password !== formData.confirmPassword
+    ) {
       setConfirmError("Passwords do not match");
       setError("Please make sure the passwords match.");
       return;
@@ -344,6 +423,45 @@ const Profile = () => {
     setConfirmError("");
 
     try {
+      // 1. Upload profile photo if a new one was selected
+      if (selectedFile) {
+        const formDataPhoto = new FormData();
+        formDataPhoto.append("photo", selectedFile);
+
+        const photoResponse = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            body: formDataPhoto,
+          }
+        );
+
+        const photoData = await photoResponse.json();
+        if (photoData.status === "success") {
+          // Update preview and localStorage
+          const photoUrl = ensureHttps(photoData.data.photo);
+          setPhotoPreview(photoUrl);
+
+          const currentProfile = JSON.parse(
+            localStorage.getItem("userProfile") || "{}"
+          );
+          const updatedProfile = {
+            ...currentProfile,
+            photourl: photoData.data.photo,
+          };
+          localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+
+          window.dispatchEvent(new Event("profileUpdated"));
+        } else {
+          setError("Failed to upload profile photo.");
+          return;
+        }
+      }
+
+      // 2. Update the rest of the profile fields
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
         {
@@ -373,6 +491,7 @@ const Profile = () => {
       const data = await response.json();
       if (data.status === "success") {
         console.log("Profile updated successfully");
+        // You can show a success message or toast here
       } else {
         setError(data.message || "Failed to update profile");
       }
@@ -384,7 +503,6 @@ const Profile = () => {
     }
   };
 
-  // Custom Toggle Switch Component
   const Toggle = ({ checked, onChange }) => {
     return (
       <button
@@ -445,7 +563,11 @@ const Profile = () => {
             )}
 
             <div className="mb-8">
-              <ProfilePhotoUpload />
+              <ProfilePhotoUpload
+                photoPreview={photoPreview}
+                setPhotoPreview={setPhotoPreview}
+                setSelectedFile={setSelectedFile}
+              />
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="font-medium mb-1">Expert visibility</h3>
@@ -459,7 +581,13 @@ const Profile = () => {
                 />
               </div>
 
-              <form className="space-y-6" onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
+              <form
+                className="space-y-6"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}
+              >
                 <h3 className="font-medium">Personal details</h3>
 
                 <div className="space-y-4">
@@ -563,7 +691,9 @@ const Profile = () => {
                       placeholder="Confirm new password"
                     />
                     {formData.confirmPassword && confirmError && (
-                      <p className="text-xs text-red-500 mt-1">{confirmError}</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        {confirmError}
+                      </p>
                     )}
                   </div>
 
