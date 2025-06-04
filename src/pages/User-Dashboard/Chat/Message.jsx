@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, Search, Send, Loader2 } from "lucide-react";
 import UserLayout from "../UserLayout/UserLayout";
 import ChatMobile from "./MessageMobile/ChatMobile";
+import { jwtDecode } from "jwt-decode"; // Ensure jwt-decode is imported
 
 const MessagingInterface = () => {
   const [messages, setMessages] = useState([]);

@@ -96,29 +96,29 @@ const ChatMobile = () => {
           !error &&
           users.map((user) => (
             <div
-              key={user.id}
+              key={user?.id}
               onClick={() => handleUserClick(user)}
               className="flex items-center p-4 border-b border-gray cursor-pointer hover:bg-gray-50 transition-colors duration-200"
             >
               <img
-                src={user.photoUrl}
-                alt={user.name}
+                src={user?.photoUrl}
+                alt={user?.name}
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div className="ml-4 flex-1">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-gray-900">{user.name}</h3>
+                  <h3 className="font-medium text-gray-900">{user?.name}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">{user.time}</span>
+                    <span className="text-sm text-gray-500">{user?.time}</span>
                     {user.unreadCount > 0 && (
                       <span className="bg-green-500 text-white text-sm font-medium px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                        {user.unreadCount}
+                        {user?.unreadCount}
                       </span>
                     )}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 truncate mt-1">
-                  {user.message}
+                  {user?.message}
                 </p>
               </div>
             </div>
