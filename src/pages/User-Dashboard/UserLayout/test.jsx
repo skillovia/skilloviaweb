@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { HiCurrencyPound, HiSparkles } from 'react-icons/hi';
-import { IoMdWallet } from 'react-icons/io';
-import { Loader2, X, CreditCard } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import React, { useState, useEffect } from "react";
+import { HiCurrencyPound, HiSparkles } from "react-icons/hi";
+import { IoMdWallet } from "react-icons/io";
+import { Loader2, X, CreditCard } from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  useStripe,
+  useElements,
+  PaymentElement,
+} from "@stripe/react-stripe-js";
 
 // Initialize Stripe with your publishable key
-const stripePromise = loadStripe(
-  "pk_test_51QrcLQ09r1sd9IYht35RhBj1DoUQHGdeSUQx85N9gOzUW8vwBzurLss9Yq7SbeeioMr9HDi39f2gN3OV14oM7N9H00vEoA1iDS"
-);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,7 +19,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
   const [balanceData, setBalanceData] = useState({
     cash: cash_balance || 0,
     tokens: spark_token_balance || 0,
-    currency: 'gbp'
+    currency: "gbp",
   });
   const [showFundModal, setShowFundModal] = useState(false);
   const [fundAmount, setFundAmount] = useState(50);
@@ -28,7 +31,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
     try {
       setLoading(true);
       const accessToken = localStorage.getItem("accessToken");
-      
+
       if (!accessToken) {
         throw new Error("Access token not found");
       }
@@ -50,7 +53,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
       setBalanceData({
         cash: data.balance,
         tokens: data.spark_tokens,
-        currency: data.currency
+        currency: data.currency,
       });
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -67,12 +70,12 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
   const handleFundAccount = () => {
     setShowFundModal(true);
   };
-  
+
   const createPaymentIntent = async () => {
     try {
       setLoading(true);
       const accessToken = localStorage.getItem("accessToken");
-      
+
       if (!accessToken) {
         throw new Error("Access token not found");
       }
@@ -81,15 +84,15 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/wallet/fund/intent`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             amount: fundAmount,
-            currency: 'gbp'
-          })
+            currency: "gbp",
+          }),
         }
       );
 
@@ -99,7 +102,6 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
 
       const data = await response.json();
       setClientSecret(data.clientSecret);
-      
     } catch (error) {
       console.error("Error creating payment intent:", error);
       alert("Something went wrong. Please try again.");
@@ -119,7 +121,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
     try {
       setLoading(true);
       const accessToken = localStorage.getItem("accessToken");
-      
+
       if (!accessToken) {
         throw new Error("Access token not found");
       }
@@ -128,15 +130,15 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/wallet/fund/complete`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             paymentIntentId: paymentIntentId,
-            amount: fundAmount
-          })
+            amount: fundAmount,
+          }),
         }
       );
 
@@ -147,13 +149,12 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
       // Refresh balance and show success
       fetchBalance();
       setPaymentSuccess(true);
-      
+
       // Close modal after delay
       setTimeout(() => {
         setShowFundModal(false);
         setPaymentSuccess(false);
       }, 3000);
-      
     } catch (error) {
       console.error("Error completing funding:", error);
       alert("Something went wrong. Please try again.");
@@ -164,17 +165,17 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
 
   const pockets = [
     {
-      title: 'Cash balance',
+      title: "Cash balance",
       amount: balanceData.cash,
       icon: <HiCurrencyPound className="text-secondary" />,
-      bgColor: 'bg-primary'
+      bgColor: "bg-primary",
     },
     {
-      title: 'Spark tokens',
+      title: "Spark tokens",
       amount: balanceData.tokens,
       icon: <HiSparkles className="text-black/40" />,
-      bgColor: 'bg-book'
-    }
+      bgColor: "bg-book",
+    },
   ];
 
   return (
@@ -194,7 +195,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
           <span>Fund Account</span>
         </button>
       </div>
-      
+
       <div className="relative">
         <div className="overflow-x-auto hide-scrollbar">
           <div className="flex gap-3 w-max">
@@ -208,28 +209,30 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
                   {pocket.icon}
                 </div>
                 <div className="flex items-baseline gap-1 mt-1">
-                  {index === 0 && <span className="text-xl font-semibold">£</span>}
+                  {index === 0 && (
+                    <span className="text-xl font-semibold">£</span>
+                  )}
                   <span className="text-xl font-semibold">{pocket.amount}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        
+
         <div className="flex justify-center gap-1 mt-3">
           <button
             onClick={() => setIsScrolled(false)}
             className={`w-2 h-2 rounded-full transition-colors duration-200
-              ${!isScrolled ? 'bg-gray-800' : 'bg-gray-300'}`}
+              ${!isScrolled ? "bg-gray-800" : "bg-gray-300"}`}
           />
           <button
             onClick={() => setIsScrolled(true)}
             className={`w-2 h-2 rounded-full transition-colors duration-200
-              ${isScrolled ? 'bg-gray-800' : 'bg-gray-300'}`}
+              ${isScrolled ? "bg-gray-800" : "bg-gray-300"}`}
           />
         </div>
       </div>
-      
+
       {/* Fund Modal */}
       {showFundModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -247,17 +250,33 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
             {paymentSuccess ? (
               <div className="text-center p-6">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium mb-2">Payment Successful!</h3>
-                <p className="text-gray-600">Your account has been funded successfully.</p>
+                <h3 className="text-lg font-medium mb-2">
+                  Payment Successful!
+                </h3>
+                <p className="text-gray-600">
+                  Your account has been funded successfully.
+                </p>
               </div>
             ) : (
               <>
                 <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">Amount to Fund (£)</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Amount to Fund (£)
+                  </label>
                   <div className="flex items-center">
                     <input
                       type="number"
@@ -273,7 +292,9 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
                   <div className="h-px bg-gray-200 w-full mb-4"></div>
                   <div className="flex justify-between text-sm mb-4">
                     <span>Amount to fund:</span>
-                    <span className="font-medium">£{fundAmount.toFixed(2)}</span>
+                    <span className="font-medium">
+                      £{fundAmount.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
@@ -298,7 +319,7 @@ const SlidingPockets = ({ cash_balance, spark_token_balance }) => {
           </div>
         </div>
       )}
-      
+
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;

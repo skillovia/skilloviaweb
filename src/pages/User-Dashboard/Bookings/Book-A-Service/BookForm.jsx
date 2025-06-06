@@ -1,4 +1,12 @@
-import { Upload, X, CreditCard, Coins, CheckCircle, Loader2, MapPin } from "lucide-react";
+import {
+  Upload,
+  X,
+  CreditCard,
+  Coins,
+  CheckCircle,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import UserLayout from "../../UserLayout/UserLayout";
@@ -13,9 +21,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
-const stripePromise = loadStripe(
-  "pk_test_51QrcLQ09r1sd9IYht35RhBj1DoUQHGdeSUQx85N9gOzUW8vwBzurLss9Yq7SbeeioMr9HDi39f2gN3OV14oM7N9H00vEoA1iDS"
-);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const BookingForm = () => {
   const location = useLocation();
@@ -56,7 +62,6 @@ const BookingForm = () => {
     currency: "GBP",
   });
   const [balanceLoading, setBalanceLoading] = useState(false);
-
   // Load Google Places API
   useEffect(() => {
     if (!window.google && !placesApiLoading) {
@@ -97,7 +102,9 @@ const BookingForm = () => {
   useEffect(() => {
     if (placesApiLoaded && bookingLocationInputRef.current) {
       if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        window.google.maps.event.clearInstanceListeners(
+          autocompleteRef.current
+        );
       }
       try {
         const autocomplete = new window.google.maps.places.Autocomplete(
@@ -297,9 +304,8 @@ const BookingForm = () => {
     bookingData.append("booking_date", formData.date);
     bookingData.append("payment_intent_id", paymentIntentId);
     bookingData.append("payment_method", paymentMethod);
-    if (formData.image) {
-      bookingData.append("file", formData.image);
-    }
+    bookingData.append("thumbnails", formData.image);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/bookings`,
@@ -379,7 +385,11 @@ const BookingForm = () => {
 
           {paymentSuccess && (
             <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -440,7 +450,8 @@ const BookingForm = () => {
               )}
               {formData.lon && formData.lat && (
                 <div className="text-xs text-gray-400 mt-2">
-                  Coordinates: {formData.lon.toFixed(6)}, {formData.lat.toFixed(6)}
+                  Coordinates: {formData.lon.toFixed(6)},{" "}
+                  {formData.lat.toFixed(6)}
                 </div>
               )}
             </div>
@@ -496,7 +507,6 @@ const BookingForm = () => {
         {showPaymentChoiceModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 px-4 flex items-center justify-center z-50">
             <div className="bg-input rounded-lg p-6 max-w-md w-full">
-
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Choose Payment Method</h3>
                 <button
@@ -521,9 +531,10 @@ const BookingForm = () => {
                   </div>
                   <div className="flex justify-between mt-1">
                     <span>SparkTokens:</span>
-                    <span className="font-bold">{balanceData.tokens} Tokens</span>
+                    <span className="font-bold">
+                      {balanceData.tokens} Tokens
+                    </span>
                   </div>
-
                 </div>
               )}
               <div className="space-y-4">
@@ -565,16 +576,19 @@ const BookingForm = () => {
               </div>
 
               <div className="fundacc">
-                    <Link to ="/user" className="bg-secondary py-2 px-3 rounded-md text-white flex justify-center my-4 w-full">Fund Account</Link>
+                <Link
+                  to="/user"
+                  className="bg-secondary py-2 px-3 rounded-md text-white flex justify-center my-4 w-full"
+                >
+                  Fund Account
+                </Link>
+              </div>
+              {parseFloat(balanceData.cash) < calculatePrice() &&
+                balanceData.tokens < skill.spark_token && (
+                  <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center">
+                    Insufficient funds. Please top up your wallet or tokens.
                   </div>
-              {(parseFloat(balanceData.cash) < calculatePrice() &&
-                balanceData.tokens < skill.spark_token) && (
-                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center">
-                  Insufficient funds. Please top up your wallet or tokens.
-                </div>
-                
-              )}
-              
+                )}
             </div>
           </div>
         )}
