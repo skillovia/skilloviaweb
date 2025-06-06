@@ -10,7 +10,81 @@ const SkillDetails = () => {
   const [skill, setSkill] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  // Fetch reviews for the skill
+  // const fetchReviews = async () => {
+  //   try {
+  //     const res = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/reviews/skill/${id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //         },
+  //       }
+  //     );
+  //     const data = await res.json();
+  //     if (data.status === "success") {
+  //       setReviews(data.data);
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to load reviews", err);
+  //   }
+  // };
 
+  // fetchReviews();
+  // const userId = localStorage.getItem("userId"); // assuming you store the logged-in user's ID
+
+  // useEffect(() => {
+  //   const fetchReviews = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/reviews/skill/${id}/user/${userId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //           },
+  //         }
+  //       );
+  //       const data = await res.json();
+  //       if (data.status === "success") {
+  //         setReviews(data.data);
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to load reviews", err);
+  //     }
+  //   };
+
+  //   if (userId) fetchReviews();
+  // }, [id, userId]);
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/reviews/skill/${id}/user`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        console.log("Review fetch response:", data); // 💡 debug here
+
+        if (data.status === "success") {
+          setReviews(data.data);
+          console.log("Fetched reviews:", data.data); // 💡 debug here
+        } else {
+          console.warn("Unexpected response format:", data);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews", err);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
   useEffect(() => {
     const fetchSkillDetails = async () => {
       try {
@@ -161,12 +235,43 @@ const SkillDetails = () => {
         </div>
 
         {/* Reviews Section - Placeholder */}
-        <div>
+        {/*}  <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-medium">Reviews (0)</h2>
             <button className="text-secondary text-sm">See all</button>
           </div>
           <div className="text-center py-8 text-gray-500">No reviews yet</div>
+        </div>*/}
+
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-medium">Reviews ({reviews.length})</h2>
+            <button className="text-secondary text-sm">See all</button>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No reviews yet</div>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div
+                  key={review._id}
+                  className="p-4 border rounded-lg shadow-sm bg-white"
+                >
+                  <div className="text-sm text-gray-700 font-semibold">
+                    {review.reviewerId?.email}
+                  </div>
+                  <div className="text-yellow-500 text-sm">
+                    Rating: {review.rating} / 5
+                  </div>
+                  <p className="text-gray-600 text-sm mt-1">{review.comment}</p>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {new Date(review.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </UserLayout>
