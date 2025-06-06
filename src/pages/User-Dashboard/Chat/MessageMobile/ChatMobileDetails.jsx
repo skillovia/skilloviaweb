@@ -3,6 +3,8 @@ import { ArrowLeft, Loader2, Send } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserLayout from "../../UserLayout/UserLayout";
 
+import { jwtDecode } from "jwt-decode"; // Ensure jwt-decode is imported
+
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -269,7 +271,9 @@ const ChatInterface = () => {
                     {msg.content}
                   </div>
                   <span className="text-xs text-gray-500 mt-1">
-                    {new Date(msg.created_at).toLocaleTimeString()}
+                    {new Date(
+                      Number(msg.createdAt?.$date?.$numberLong)
+                    ).toLocaleTimeString()}
                   </span>
                 </div>
               ))
@@ -343,8 +347,14 @@ const ChatInterface = () => {
                 >
                   {msg.content}
                 </div>
-                <span className="text-xs text-gray-500 mt-1">
+                {/*<span className="text-xs text-gray-500 mt-1">
                   {new Date(msg.created_at).toLocaleTimeString()}
+                </span>*/}
+
+                <span className="text-xs text-gray-500 mt-1">
+                  {new Date(
+                    Number(msg.createdAt?.$date?.$numberLong)
+                  ).toLocaleTimeString()}
                 </span>
               </div>
             ))
