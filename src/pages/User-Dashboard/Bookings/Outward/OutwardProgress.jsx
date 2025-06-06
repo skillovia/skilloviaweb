@@ -140,17 +140,26 @@ const OutwardProgress = () => {
     return [
       {
         status: "Booking request sent",
-        timestamp: bookingDetails?.created_at || "-",
+        // timestamp: bookingDetails?.createdAt || "-",
+        timestamp: bookingDetails?.createdAt
+          ? new Date(bookingDetails.createdAt).toLocaleString()
+          : "-",
         hasCheck: currentStep >= 1, // Always checked as it's the first step
       },
       {
         status: "Booking request confirmed",
-        timestamp: bookingDetails?.updated_at || "-",
+        // timestamp: bookingDetails?.updated_at || "-",
+        timestamp: bookingDetails?.updatedAt
+          ? new Date(bookingDetails.updatedAt).toLocaleString()
+          : "-",
         hasCheck: currentStep >= 2, // Checked for accepted, in_progress, completed
       },
       {
         status: "Payment confirmed",
-        timestamp: bookingDetails?.updated_at || "-",
+        // timestamp: bookingDetails?.updated_at || "-",
+        timestamp: bookingDetails?.updatedAt
+          ? new Date(bookingDetails.updatedAt).toLocaleString()
+          : "-",
         hasCheck: currentStep >= 2, // Checked same time as confirmation
       },
       {
