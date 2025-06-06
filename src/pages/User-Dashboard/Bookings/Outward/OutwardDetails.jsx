@@ -229,7 +229,7 @@ const OutwardDetails = () => {
           id={bookingDetails.id}
           title={bookingDetails.title}
           description={bookingDetails.description}
-          date={bookingDetails.booking_date}
+          date={new Date(bookingDetails.booking_date).toLocaleDateString()}
           status={bookingDetails.status}
           location={bookingDetails.booking_location}
           fileUrl={bookingDetails.file_url}
