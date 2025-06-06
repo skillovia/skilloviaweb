@@ -35,11 +35,13 @@ const OutwardProgress = () => {
         }
 
         const bookingData = await bookingResponse.json();
-        const numericId = parseInt(id);
+        // const numericId = parseInt(id);
+        // const booking = bookingData.data.find(
+        //   (booking) => booking.id === numericId
+        // );
         const booking = bookingData.data.find(
-          (booking) => booking.id === numericId
+          (booking) => booking.id === id // compare with string id directly
         );
-
         if (!booking) {
           throw new Error("Booking not found");
         }
@@ -80,13 +82,23 @@ const OutwardProgress = () => {
       // Update local booking status
       setBookingDetails((prev) => ({
         ...prev,
-        status: action === "accept" ? "accepted" : action === "in-progress" ? "in_progress" : "completed",
+        status:
+          action === "accept"
+            ? "accepted"
+            : action === "in-progress"
+            ? "in_progress"
+            : "completed",
       }));
 
       // Show success message and redirect
-      const actionVerb = action === "in-progress" ? "started" : action === "complete" ? "completed" : "accepted";
+      const actionVerb =
+        action === "in-progress"
+          ? "started"
+          : action === "complete"
+          ? "completed"
+          : "accepted";
       alert(`Booking ${actionVerb} successfully`);
-      
+
       if (action === "complete") {
         navigate("/bookings");
       }
@@ -105,8 +117,8 @@ const OutwardProgress = () => {
           bookingId: bookingDetails.id,
           bookedUserId: bookingDetails.booked_user_id,
           bookingTitle: bookingDetails.title,
-          description: bookingDetails.description
-        }
+          description: bookingDetails.description,
+        },
       });
     } else {
       alert("Cannot open dispute: Missing booking information");
@@ -153,10 +165,10 @@ const OutwardProgress = () => {
       },
     ];
   };
-  
+
   const renderActionButton = () => {
     if (!bookingDetails) return null;
-    
+
     switch (bookingDetails.status) {
       case "pending":
         // Return a disabled button when status is pending
@@ -201,7 +213,7 @@ const OutwardProgress = () => {
         return null;
     }
   };
-  
+
   if (loading) {
     return (
       <UserLayout>
@@ -283,7 +295,7 @@ const OutwardProgress = () => {
         </div>
         <div className="flex gap-4 my-6">
           {renderActionButton()}
-          
+
           {bookingDetails && bookingDetails.status !== "completed" && (
             <button
               onClick={handleOpenDispute}
