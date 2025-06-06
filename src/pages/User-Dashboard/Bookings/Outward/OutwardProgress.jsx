@@ -164,12 +164,18 @@ const OutwardProgress = () => {
       },
       {
         status: "Service in progress",
-        timestamp: bookingDetails?.booking_date || "-",
+        // timestamp: bookingDetails?.booking_date || "-",
+        timestamp: bookingDetails?.booking_date
+          ? new Date(bookingDetails.booking_date).toLocaleString()
+          : "-",
         hasCheck: currentStep >= 3, // Checked for in_progress, completed
       },
       {
         status: "Service completed",
-        timestamp: bookingDetails?.updated_at || "-",
+        // timestamp: bookingDetails?.updated_at || "-",
+        timestamp: bookingDetails?.updatedAt
+          ? new Date(bookingDetails.updatedAt).toLocaleString()
+          : "-",
         hasCheck: currentStep >= 4, // Only checked when completed
       },
     ];
