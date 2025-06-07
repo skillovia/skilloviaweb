@@ -42,7 +42,7 @@ const BookingForm = () => {
     description: "",
     location: "",
     date: "",
-    image: null,
+    thumbnails: [], // array of File
     lon: null,
     lat: null,
   });
@@ -294,6 +294,61 @@ const BookingForm = () => {
     }
   };
 
+  // const handleBookingSubmit = async (paymentIntentId) => {
+  //   const accessToken = localStorage.getItem("accessToken");
+  //   if (!accessToken) {
+  //     throw new Error("Access token not found");
+  //   }
+  //   setLoading(true);
+  //   const bookingData = new FormData();
+  //   bookingData.append("skills_id", skill.skill_id);
+  //   bookingData.append("booked_user_id", user_id);
+  //   bookingData.append("title", `Booking for ${skill.skill_type}`);
+  //   bookingData.append("description", formData.description);
+  //   bookingData.append("booking_location", formData.location);
+  //   bookingData.append("booking_lon", formData.lon);
+  //   bookingData.append("booking_lat", formData.lat);
+  //   bookingData.append("booking_date", formData.date);
+  //   bookingData.append("payment_intent_id", paymentIntentId);
+  //   bookingData.append("payment_method", paymentMethod);
+  //   bookingData.append("thumbnails", formData.image);
+
+  //   try {
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/bookings`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //         body: bookingData,
+  //       }
+  //     );
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       setPaymentSuccess(true);
+  //       setShowPaymentModal(false);
+  //       setSuccess(true);
+  //       setShowSuccessModal(true);
+  //       setFormData({
+  //         description: "",
+  //         location: "",
+  //         date: "",
+  //         image: null,
+  //         lon: null,
+  //         lat: null,
+  //       });
+  //       setImagePreview(null);
+  //     } else {
+  //       alert(`Error: ${result.message}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting booking:", error);
+  //     alert("Something went wrong. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleBookingSubmit = async (paymentIntentId) => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
@@ -311,8 +366,10 @@ const BookingForm = () => {
     bookingData.append("booking_date", formData.date);
     bookingData.append("payment_intent_id", paymentIntentId);
     bookingData.append("payment_method", paymentMethod);
-    bookingData.append("thumbnails", formData.image);
 
+    formData.thumbnails.forEach((file) => {
+      bookingData.append("thumbnails[]", file);
+    });
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/bookings`,
@@ -334,11 +391,11 @@ const BookingForm = () => {
           description: "",
           location: "",
           date: "",
-          image: null,
+          thumbnails: [],
           lon: null,
           lat: null,
         });
-        setImagePreview(null);
+        setImagePreview([]);
       } else {
         alert(`Error: ${result.message}`);
       }
@@ -349,7 +406,6 @@ const BookingForm = () => {
       setLoading(false);
     }
   };
-
   const handleSuccessConfirm = () => {
     setShowSuccessModal(false);
     navigate("/bookings");
