@@ -495,6 +495,7 @@ const BookingForm = () => {
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={formData.thumbnails.length >= 4}
                 />
               </div>
               {imagePreview && imagePreview.length > 0 && (
