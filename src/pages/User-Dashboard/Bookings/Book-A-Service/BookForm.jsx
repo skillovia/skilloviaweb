@@ -211,12 +211,30 @@ const BookingForm = () => {
     setShowPaymentChoiceModal(true);
   };
 
+  // const handlePaymentChoice = (method) => {
+  //   setPaymentMethod(method);
+  //   setShowPaymentChoiceModal(false);
+  //   if (method === "account") method = "wallet";
+  //   if (method === "account") {
+  //     handleProceedToPayment();
+  //   } else if (method === "sparktoken") {
+  //     handleSparkTokenPayment();
+  //   }
+  // };
+
   const handlePaymentChoice = (method) => {
-    setPaymentMethod(method);
+    const paymentMethodToUse = method === "account" ? "wallet" : method;
+
+    // Fix: convert "sparktoken" to "spark_token"
+    const normalizedPaymentMethod =
+      paymentMethodToUse === "sparktoken" ? "spark_token" : paymentMethodToUse;
+
+    setPaymentMethod(normalizedPaymentMethod);
     setShowPaymentChoiceModal(false);
-    if (method === "account") {
+
+    if (normalizedPaymentMethod === "wallet") {
       handleProceedToPayment();
-    } else if (method === "sparktoken") {
+    } else if (normalizedPaymentMethod === "spark_token") {
       handleSparkTokenPayment();
     }
   };
@@ -232,7 +250,7 @@ const BookingForm = () => {
         {
           method: "POST",
           headers: {
-            // "Content-Type": "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
@@ -268,7 +286,7 @@ const BookingForm = () => {
         {
           method: "POST",
           headers: {
-            // "Content-Type": "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
@@ -368,7 +386,8 @@ const BookingForm = () => {
     bookingData.append("payment_method", paymentMethod);
 
     formData.thumbnails.forEach((file) => {
-      bookingData.append("thumbnails[]", file);
+      // bookingData.append("thumbnails[]", file);
+      bookingData.append("thumbnails", file);
     });
     try {
       const response = await fetch(
