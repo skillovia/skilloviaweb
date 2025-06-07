@@ -141,10 +141,13 @@ const Profile = () => {
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "administrative_area_level_1") ||
           place.name;
+        // Try to extract postal code from city autocomplete (unreliable, but in case)
+        const postalCode = extractAddressComponents(place, "postal_code");
 
         setFormData((prev) => ({
           ...prev,
           city: cityName || "",
+          zipCode: postalCode || prev.zipCode, // Only update if available
         }));
 
         setApiError("");
@@ -722,7 +725,8 @@ const Profile = () => {
                           autoComplete="off"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          Start typing to see suggestions
+                          Start typing and select your address from the list to
+                          auto-fill your ZIP code.
                         </p>
                       </div>
 
@@ -741,7 +745,8 @@ const Profile = () => {
                           autoComplete="off"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          Start typing to see suggestions
+                          Start typing and select your address from the list to
+                          auto-fill your ZIP code.
                         </p>
                       </div>
 

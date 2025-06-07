@@ -75,7 +75,7 @@ const ProfileCard = () => {
       name: "Profile image",
       completed: !!(profileData && profileData.photourl),
       action: null,
-      link: null,
+      link: "/settings/profile",
     },
     {
       name: "Add at least one skill",

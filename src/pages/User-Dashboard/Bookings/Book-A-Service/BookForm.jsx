@@ -181,16 +181,23 @@ const BookingForm = () => {
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }));
-      setImagePreview(URL.createObjectURL(file));
-    }
+    const files = Array.from(e.target.files);
+    // Only allow maximum 4 images
+    const thumbnails = [...formData.thumbnails, ...files].slice(0, 4);
+    setFormData((prev) => ({
+      ...prev,
+      thumbnails,
+    }));
+    setImagePreview(thumbnails.map((file) => URL.createObjectURL(file)));
   };
-
+  const handleRemoveThumbnail = (idx) => {
+    const newThumbnails = formData.thumbnails.filter((_, i) => i !== idx);
+    setFormData((prev) => ({
+      ...prev,
+      thumbnails: newThumbnails,
+    }));
+    setImagePreview(newThumbnails.map((file) => URL.createObjectURL(file)));
+  };
   const validateForm = () => {
     if (!formData.description || !formData.location || !formData.date) {
       alert("Please fill in all required fields.");
@@ -469,7 +476,7 @@ const BookingForm = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                Upload Image
+                Upload Images (max 4)
               </label>
               <div
                 onClick={() => document.getElementById("imageUpload").click()}
@@ -477,9 +484,9 @@ const BookingForm = () => {
               >
                 <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                 <p className="text-sm text-gray-600">
-                  {formData.image
-                    ? formData.image.name
-                    : "Click to upload image"}
+                  {formData.thumbnails.length > 0
+                    ? `${formData.thumbnails.length} image(s) selected`
+                    : "Click to upload up to 4 images"}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">SVG, PNG, or JPG</p>
                 <input
@@ -490,15 +497,30 @@ const BookingForm = () => {
                   className="hidden"
                 />
               </div>
-              {imagePreview && (
-                <div className="mt-4">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="max-w-full h-auto rounded-lg"
-                  />
+              {imagePreview && imagePreview.length > 0 && (
+                <div className="mt-4 flex gap-4 flex-wrap">
+                  {imagePreview.map((src, idx) => (
+                    <div key={idx} className="relative w-24 h-24">
+                      <img
+                        src={src}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="object-cover rounded-lg w-full h-full"
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow hover:bg-gray-100"
+                        onClick={() => handleRemoveThumbnail(idx)}
+                        tabIndex={-1}
+                      >
+                        <X size={16} className="text-red-500" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
+              <p className="text-xs text-gray-500 mt-2">
+                Maximum 4 images allowed.
+              </p>
             </div>
           </div>
         </div>

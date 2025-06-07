@@ -469,8 +469,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  
-  
+
   {
     path: "/open-dispute",
     element: (
@@ -478,9 +477,8 @@ const router = createBrowserRouter([
         <OpenDisputePage />
       </ProtectedRoute>
     ),
-  },  
-  
-  
+  },
+
   {
     path: "/review",
     element: (
