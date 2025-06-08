@@ -50,7 +50,7 @@ const BookingForm = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPaymentChoiceModal, setShowPaymentChoiceModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -554,7 +554,9 @@ const BookingForm = () => {
                 Upload Images (max 4)
               </label>
               <div
-                onClick={() => document.getElementById("imageUpload").click()}
+                onClick={() =>
+                  document.getElementById("thumbnailsUpload").click()
+                }
                 className="bg-input border border-gray rounded-lg p-8 text-center cursor-pointer"
               >
                 <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
@@ -565,7 +567,7 @@ const BookingForm = () => {
                 </p>
                 <p className="text-xs text-gray-400 mt-1">SVG, PNG, or JPG</p>
                 <input
-                  id="imageUpload"
+                  id="thumbnailsUpload"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
