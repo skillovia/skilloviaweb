@@ -570,6 +570,7 @@ const BookingForm = () => {
                   id="thumbnailsUpload"
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageUpload}
                   className="hidden"
                   disabled={formData.thumbnails.length >= 4}
