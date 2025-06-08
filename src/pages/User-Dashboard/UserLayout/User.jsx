@@ -103,11 +103,7 @@ const ProfileCard = () => {
     },
     {
       name: "Fill out bio",
-      completed: !!(
-        profileData &&
-        profileData.bio &&
-        profileData.bio.length > 10
-      ),
+      completed: !!(profileData && profileData.bio),
       action: null,
       link: "/settings/profile",
     },
@@ -396,13 +392,14 @@ const ProfileCard = () => {
         <div className="flex gap-8 text-sm">
           <Link to="/followers">
             <p className="font-semibold">{profileData.total_followers}</p>
-            <div className="text-gray-500">followers</div>
+            <div className="text-gray-500">following</div>
           </Link>
           <div>
             <Link to="/following" className="font-semibold">
-              {profileData.total_following}
+              <p className="font-semibold"> {profileData.total_following}</p>
+
+              <div className="text-gray-500">followers</div>
             </Link>
-            <div className="text-gray-500">following</div>
           </div>
           <Link
             to="/settings/skill/add"
