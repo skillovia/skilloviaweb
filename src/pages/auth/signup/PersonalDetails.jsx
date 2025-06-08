@@ -16,6 +16,7 @@ const PersonalDetails = () => {
     gender: "",
     password: "",
     phone: "",
+    referred_by: "",
   });
 
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,7 +24,8 @@ const PersonalDetails = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -65,6 +67,7 @@ const PersonalDetails = () => {
           lastname: formData.lastname,
           gender: formData.gender,
           password: formData.password,
+          referred_by: formData.referred_by, // Send referred_by to backend
         }
       );
 
@@ -187,6 +190,25 @@ const PersonalDetails = () => {
                 <option value="other">Other</option>
               </select>
             </div>
+
+            {/* Referred By Field */}
+            <div className="mb-4">
+              <label
+                htmlFor="referred_by"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Referred By (optional)
+              </label>
+              <input
+                type="text"
+                id="referred_by"
+                value={formData.referred_by}
+                onChange={handleChange}
+                placeholder="Referral code or name"
+                className="mt-1 w-full p-2 border border-gray bg-input rounded focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+            {/* End referred by */}
 
             <div className="mb-4 relative">
               <label
