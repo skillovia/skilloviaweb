@@ -7,6 +7,8 @@ import { ChevronRight, Loader2, MapPin, Route, UserX } from "lucide-react";
 const ExploreSection = () => {
   const [nearbyPeople, setNearbyPeople] = useState([]);
   const [categories, setCategories] = useState([]);
+  console.log("Categories:", categories);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(false);
   const [error, setError] = useState("");
@@ -387,9 +389,12 @@ const ExploreSection = () => {
                 categories.map((category) => (
                   <Link
                     key={category.id}
+                    // to={`/explore-list?category=${encodeURIComponent(
+                    //   category.title
+                    // )}`}
                     to={`/explore-list?category=${encodeURIComponent(
                       category.title
-                    )}`}
+                    )}&id=${category._id}`}
                     className="group cursor-pointer flex flex-col items-center p-2 rounded-md border bg-input border-gray flex-shrink-0"
                   >
                     <div className="w-36 h-36 mb-2 overflow-hidden rounded-lg">
