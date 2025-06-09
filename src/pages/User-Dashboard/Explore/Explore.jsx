@@ -19,78 +19,78 @@ const ExploreSection = () => {
   // User ID from token
   const [userId, setUserId] = useState(null);
 
-// UK Cities - Official List
-const states = [
-  { value: "aberdeen", label: "Aberdeen" },
-  { value: "armagh", label: "Armagh" },
-  { value: "bangor", label: "Bangor" },
-  { value: "bath", label: "Bath" },
-  { value: "belfast", label: "Belfast" },
-  { value: "birmingham", label: "Birmingham" },
-  { value: "bradford", label: "Bradford" },
-  { value: "brighton-and-hove", label: "Brighton & Hove" },
-  { value: "bristol", label: "Bristol" },
-  { value: "cambridge", label: "Cambridge" },
-  { value: "canterbury", label: "Canterbury" },
-  { value: "cardiff", label: "Cardiff" },
-  { value: "carlisle", label: "Carlisle" },
-  { value: "chelmsford", label: "Chelmsford" },
-  { value: "chester", label: "Chester" },
-  { value: "chichester", label: "Chichester" },
-  { value: "coventry", label: "Coventry" },
-  { value: "derby", label: "Derby" },
-  { value: "derry", label: "Derry" }, 
-  { value: "dundee", label: "Dundee" },
-  { value: "durham", label: "Durham" },
-  { value: "edinburgh", label: "Edinburgh" },
-  { value: "ely", label: "Ely" },
-  { value: "exeter", label: "Exeter" },
-  { value: "glasgow", label: "Glasgow" },
-  { value: "gloucester", label: "Gloucester" },
-  { value: "hereford", label: "Hereford" },
-  { value: "kingston-upon-hull", label: "Kingston upon Hull" },
-  { value: "inverness", label: "Inverness" },
-  { value: "lancaster", label: "Lancaster" },
-  { value: "leeds", label: "Leeds" },
-  { value: "leicester", label: "Leicester" },
-  { value: "lichfield", label: "Lichfield" },
-  { value: "lincoln", label: "Lincoln" },
-  { value: "liverpool", label: "Liverpool" },
-  { value: "london", label: "London" },
-  { value: "manchester", label: "Manchester" },
-  { value: "milton-keynes", label: "Milton Keynes" },
-  { value: "newcastle-upon-tyne", label: "Newcastle upon Tyne" },
-  { value: "newport", label: "Newport" },
-  { value: "newry", label: "Newry" },
-  { value: "norwich", label: "Norwich" },
-  { value: "nottingham", label: "Nottingham" },
-  { value: "oxford", label: "Oxford" },
-  { value: "perth", label: "Perth" },
-  { value: "peterborough", label: "Peterborough" },
-  { value: "plymouth", label: "Plymouth" },
-  { value: "portsmouth", label: "Portsmouth" },
-  { value: "preston", label: "Preston" },
-  { value: "ripon", label: "Ripon" },
-  { value: "salford", label: "Salford" },
-  { value: "salisbury", label: "Salisbury" },
-  { value: "sheffield", label: "Sheffield" },
-  { value: "southampton", label: "Southampton" },
-  { value: "st-albans", label: "St Albans" },
-  { value: "st-asaph", label: "St Asaph" },
-  { value: "st-davids", label: "St Davids" },
-  { value: "stirling", label: "Stirling" },
-  { value: "stoke-on-trent", label: "Stoke-on-Trent" },
-  { value: "sunderland", label: "Sunderland" },
-  { value: "swansea", label: "Swansea" },
-  { value: "truro", label: "Truro" },
-  { value: "wakefield", label: "Wakefield" },
-  { value: "wells", label: "Wells" },
-  { value: "westminster", label: "Westminster" },
-  { value: "wolverhampton", label: "Wolverhampton" },
-  { value: "winchester", label: "Winchester" },
-  { value: "worcester", label: "Worcester" },
-  { value: "york", label: "York" }
-];
+  // UK Cities - Official List
+  const states = [
+    { value: "aberdeen", label: "Aberdeen" },
+    { value: "armagh", label: "Armagh" },
+    { value: "bangor", label: "Bangor" },
+    { value: "bath", label: "Bath" },
+    { value: "belfast", label: "Belfast" },
+    { value: "birmingham", label: "Birmingham" },
+    { value: "bradford", label: "Bradford" },
+    { value: "brighton-and-hove", label: "Brighton & Hove" },
+    { value: "bristol", label: "Bristol" },
+    { value: "cambridge", label: "Cambridge" },
+    { value: "canterbury", label: "Canterbury" },
+    { value: "cardiff", label: "Cardiff" },
+    { value: "carlisle", label: "Carlisle" },
+    { value: "chelmsford", label: "Chelmsford" },
+    { value: "chester", label: "Chester" },
+    { value: "chichester", label: "Chichester" },
+    { value: "coventry", label: "Coventry" },
+    { value: "derby", label: "Derby" },
+    { value: "derry", label: "Derry" },
+    { value: "dundee", label: "Dundee" },
+    { value: "durham", label: "Durham" },
+    { value: "edinburgh", label: "Edinburgh" },
+    { value: "ely", label: "Ely" },
+    { value: "exeter", label: "Exeter" },
+    { value: "glasgow", label: "Glasgow" },
+    { value: "gloucester", label: "Gloucester" },
+    { value: "hereford", label: "Hereford" },
+    { value: "kingston-upon-hull", label: "Kingston upon Hull" },
+    { value: "inverness", label: "Inverness" },
+    { value: "lancaster", label: "Lancaster" },
+    { value: "leeds", label: "Leeds" },
+    { value: "leicester", label: "Leicester" },
+    { value: "lichfield", label: "Lichfield" },
+    { value: "lincoln", label: "Lincoln" },
+    { value: "liverpool", label: "Liverpool" },
+    { value: "london", label: "London" },
+    { value: "manchester", label: "Manchester" },
+    { value: "milton-keynes", label: "Milton Keynes" },
+    { value: "newcastle-upon-tyne", label: "Newcastle upon Tyne" },
+    { value: "newport", label: "Newport" },
+    { value: "newry", label: "Newry" },
+    { value: "norwich", label: "Norwich" },
+    { value: "nottingham", label: "Nottingham" },
+    { value: "oxford", label: "Oxford" },
+    { value: "perth", label: "Perth" },
+    { value: "peterborough", label: "Peterborough" },
+    { value: "plymouth", label: "Plymouth" },
+    { value: "portsmouth", label: "Portsmouth" },
+    { value: "preston", label: "Preston" },
+    { value: "ripon", label: "Ripon" },
+    { value: "salford", label: "Salford" },
+    { value: "salisbury", label: "Salisbury" },
+    { value: "sheffield", label: "Sheffield" },
+    { value: "southampton", label: "Southampton" },
+    { value: "st-albans", label: "St Albans" },
+    { value: "st-asaph", label: "St Asaph" },
+    { value: "st-davids", label: "St Davids" },
+    { value: "stirling", label: "Stirling" },
+    { value: "stoke-on-trent", label: "Stoke-on-Trent" },
+    { value: "sunderland", label: "Sunderland" },
+    { value: "swansea", label: "Swansea" },
+    { value: "truro", label: "Truro" },
+    { value: "wakefield", label: "Wakefield" },
+    { value: "wells", label: "Wells" },
+    { value: "westminster", label: "Westminster" },
+    { value: "wolverhampton", label: "Wolverhampton" },
+    { value: "winchester", label: "Winchester" },
+    { value: "worcester", label: "Worcester" },
+    { value: "york", label: "York" },
+  ];
 
   const distances = [
     { value: "all", label: "All Distances" },
@@ -243,7 +243,7 @@ const states = [
         }
 
         const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/skills/get/categories`,
+          `${import.meta.env.VITE_BASE_URL}/admin/skills/get/published`,
           {
             method: "GET",
             headers: {
@@ -396,15 +396,18 @@ const states = [
                       <img
                         src={
                           category.thumbnail
-                            ? `https://${category.thumbnail}`
+                            ? category.thumbnail
                             : "https://i.pinimg.com/736x/4c/85/31/4c8531dbc05c77cb7a5893297977ac89.jpg"
                         }
-                        alt={category.name}
+                        alt={category.title}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
                     </div>
                     <p className="text-sm text-left text-gray-800">
                       {category.title}
+                    </p>
+                    <p className="text-xs text-left text-gray-600">
+                      {category.description}
                     </p>
                   </Link>
                 ))
