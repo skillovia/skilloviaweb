@@ -102,10 +102,16 @@ export default function AddSkill() {
 
         const data = await response.json();
         // Extract titles from the data array
+        // const publishedSkills = data.data
+        //   .filter((skill) => skill.status === "published")
+        //   .map((skill) => skill.title)
+        //   .sort();
         const publishedSkills = data.data
           .filter((skill) => skill.status === "published")
-          .map((skill) => skill.title)
-          .sort();
+          .map((skill) => ({
+            id: skill._id,
+            title: skill.title,
+          }));
 
         setSkills(publishedSkills);
       } catch (err) {
@@ -125,11 +131,15 @@ export default function AddSkill() {
   // };
 
   const filteredSkills = skills.filter((skill) =>
-    skill.toLowerCase().includes(searchQuery.toLowerCase())
+    skill.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSkillSelect = (skill) => {
-    setFormData((prev) => ({ ...prev, skill }));
+  const handleSkillSelect = (skillObj) => {
+    setFormData((prev) => ({
+      ...prev,
+      skill: skillObj.title, // store title for display
+      selectedSkillId: skillObj.id, // store ID to send to backend
+    }));
   };
 
   const handleExperienceSelect = (level) => {
@@ -260,7 +270,11 @@ export default function AddSkill() {
       const sparkToken = poundsToSparkTokens(formData.hourlyRate);
 
       const formDataToSend = new FormData();
-      formDataToSend.append("skill_type", formData.skill);
+      // formDataToSend.append("skill_type", formData.skill);
+      // formDataToSend.append("title", formData.skill);
+      // formDataToSend.append("skillCategoryId", formData.skill);
+      formDataToSend.append("skillCategoryId", formData.selectedSkillId);
+
       formDataToSend.append(
         "experience_level",
         formData.experienceLevel.toLowerCase()
@@ -351,15 +365,16 @@ export default function AddSkill() {
                   />
                 </div>
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                  {filteredSkills.map((skill) => (
+                  {filteredSkills.map((skillObj) => (
                     <div
-                      key={skill}
-                      onClick={() => handleSkillSelect(skill)}
+                      key={skillObj.id}
+                      onClick={() => handleSkillSelect(skillObj)}
                       className="flex items-center p-4 rounded-lg border border-gray bg-input cursor-pointer hover:bg-gray-100"
                     >
-                      <span>{skill}</span>
+                      <span>{skillObj.title}</span>
                     </div>
                   ))}
+
                   {filteredSkills.length === 0 && (
                     <div className="text-center py-4 text-gray-500 flex flex-col items-center">
                       <div>No skills found matching your search</div>
