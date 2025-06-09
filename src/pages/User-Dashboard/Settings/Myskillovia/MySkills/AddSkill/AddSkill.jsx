@@ -1,53 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserLayout from "../../../../UserLayout/UserLayout";
 import { ChevronLeft } from "lucide-react";
-
-const skills = [
-  "Electrical Services",
-  "Laundry",
-  "Fast Foods",
-  "Food Bowls",
-  "Make up",
-  "Grocery Shopping",
-  "Fashion Designer",
-  "House Cleaning",
-  "Deep Cleaning",
-  "Carpet Cleaning",
-  "Gutter Cleaning",
-  "Pressure Washing",
-  "Pool Cleaning and Maintenance",
-  "Garage Organization",
-  "Decluttering Services",
-  "Chimney Sweeping",
-  "Upholstery Cleaning",
-  "Tiling (Floor/Wall)",
-  "Drywall Installation and Repair",
-  "Kitchen Remodeling",
-  "Bathroom Remodeling",
-  "Flooring Installation",
-  "HVAC Repairs and Installation",
-  "Cabinet Installation",
-  "Home Theater Setup",
-  "Smart Home Installation",
-  "Insulation Installation",
-  "Lawn Mowing",
-  "Landscaping",
-  "Tree Trimming and Removal",
-  "Garden Maintenance",
-  "Fence Repair and Installation",
-  "Deck Maintenance and Repairs",
-  "Power Washing",
-  "Pest Control Services",
-  "Snow Removal",
-  "Sprinkler System Installation and Repair",
-  "Plumbing",
-  "Electrical Repairs",
-  "Handyman Services",
-  "Pool Cleaning",
-  "Roofing Repairs",
-  "Painting (Interior/Exterior)",
-].sort();
 
 const experienceLevels = [
   { title: "Beginner", description: "I'm learning basics and exploring" },
@@ -98,7 +52,9 @@ function Modal({ open, onClose, onSubmit, value, onChange }) {
             onClick={onSubmit}
             disabled={!value.trim()}
             className={`px-4 py-2 rounded bg-primary text-secondary font-medium ${
-              !value.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
+              !value.trim()
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-green-600"
             }`}
           >
             Add & Proceed
@@ -115,6 +71,7 @@ export default function AddSkill() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [skills, setSkills] = useState([]); // <-- Store fetched skills here
   const [formData, setFormData] = useState({
     skill: "",
     experienceLevel: "",
@@ -125,6 +82,47 @@ export default function AddSkill() {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [customSkillModal, setCustomSkillModal] = useState(false);
   const [customSkillInput, setCustomSkillInput] = useState("");
+
+  // Fetch published skills on component mount
+  useEffect(() => {
+    async function fetchSkills() {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BASE_URL}/admin/skills/get/published`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch skills");
+        }
+
+        const data = await response.json();
+        // Extract titles from the data array
+        const publishedSkills = data.data
+          .filter((skill) => skill.status === "published")
+          .map((skill) => skill.title)
+          .sort();
+
+        setSkills(publishedSkills);
+      } catch (err) {
+        console.error(err);
+        setError("Could not load skills. Please try again later.");
+      }
+    }
+
+    fetchSkills();
+  }, []);
+  // const filteredSkills = skills.filter((skill) =>
+  //   skill.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+
+  // const handleSkillSelect = (skill) => {
+  //   setFormData((prev) => ({ ...prev, skill }));
+  // };
 
   const filteredSkills = skills.filter((skill) =>
     skill.toLowerCase().includes(searchQuery.toLowerCase())
@@ -205,29 +203,31 @@ export default function AddSkill() {
     </div>
   );
 
-
   const handleAddCustomSkill = async () => {
     if (!customSkillInput.trim()) return;
     try {
       setIsLoading(true);
       setError(null);
-  
+
       // 1. Send suggested skill to the API (simulate or use fetch)
       // Replace the below fetch URL with your actual endpoint if needed.
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/suggestedskills`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify({ name: customSkillInput.trim() }),
-      });
-  
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/suggestedskills`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({ name: customSkillInput.trim() }),
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to suggest skill");
       }
-  
+
       // 2. Inform user about admin approval and redirect to /explore
       alert(
         "Your custom skill has been submitted for admin approval. An admin will review it within 2 days and get back to you. Redirecting to Explore."
@@ -241,8 +241,6 @@ export default function AddSkill() {
       setCustomSkillModal(false);
     }
   };
-  
-
 
   const handleSubmit = async () => {
     try {
@@ -299,7 +297,6 @@ export default function AddSkill() {
     }
   };
 
-
   const clearSkillSelection = () => {
     setFormData((prev) => ({ ...prev, skill: "" }));
     setSearchQuery("");
@@ -332,7 +329,9 @@ export default function AddSkill() {
             <h3 className="mb-4 text-lg font-medium">Select your skill</h3>
             {formData.skill ? (
               <div className="flex items-center bg-green-100 border border-green-300 px-4 py-3 rounded-lg mb-4">
-                <span className="font-medium capitalize text-green-800">{formData.skill}</span>
+                <span className="font-medium capitalize text-green-800">
+                  {formData.skill}
+                </span>
                 <button
                   onClick={clearSkillSelection}
                   className="ml-4 px-2 py-1 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200"
