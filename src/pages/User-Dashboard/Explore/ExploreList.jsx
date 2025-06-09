@@ -186,7 +186,7 @@ import React, { useState, useEffect } from "react";
 import { Loader2, Search, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 import UserLayout from "../UserLayout/UserLayout"; // Your layout wrapper
-
+import BackButton from "../../../componets/Back";
 const ExploreList = () => {
   const [skills, setSkills] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -248,9 +248,9 @@ const ExploreList = () => {
 
   return (
     <UserLayout>
-      <div className="max-w-4xl mx-auto px-4 rounded-lg">
-        <div className="mb-8 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Explore Skills</h2>
+      <div className="max-w-4xl mx-auto ">
+        <div className="flex items-center gap-3 p-4 ">
+          <BackButton label="Explore" />
         </div>
 
         {isLoading && (
