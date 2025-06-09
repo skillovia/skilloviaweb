@@ -85,7 +85,8 @@ const ProfileCard = () => {
     },
     {
       name: "Complete KYC",
-      completed: !!(profileData && profileData.kyc_status === "verified"),
+      completed: !!(profileData && profileData.kyc_status === "approved"),
+
       action: null,
       link: "/settings/kyc",
     },

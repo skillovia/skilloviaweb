@@ -124,7 +124,8 @@ const Verify = () => {
     },
     {
       name: "Complete KYC",
-      completed: !!(profileData && profileData.kyc_status === "verified"),
+      completed: !!(profileData && profileData.kyc_status === "approved"),
+
       link: "/settings/kyc",
     },
     {
