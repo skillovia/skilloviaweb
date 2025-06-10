@@ -61,6 +61,7 @@ import CreateStripeAccount from "./pages/Stripe/CreateS";
 import GoogleAuthHandler from "./pages/GoogleAuthHandler";
 import TokenHandler from "./TokenHandler";
 import OpenDisputePage from "./pages/Dispute-Review/Dispute/Dispute";
+import ExploreAllCategories from "./pages/User-Dashboard/Explore/ExploreViewAll";
 import Review from "./pages/Dispute-Review/Review/Review";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
@@ -175,7 +176,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
+  {
+    path: "/explore-all",
+    element: (
+      <ProtectedRoute>
+        <ExploreAllCategories />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/explore-profile",
     element: (
