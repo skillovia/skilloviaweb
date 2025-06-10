@@ -220,6 +220,18 @@ const ExploreList = () => {
         No one is currently offering skills in {categoryName}. Check back later
         or try searching for a different category.
       </p>
+
+      <section className="btn">
+        <Link to="/explore-all">
+          <button
+            className="btn btn-primary border-2 block border-secondary text-secondary rounded-lg
+    my-4 px-6 py-2 hover:bg-secondary hover:text-white transition-colors duration-200
+    "
+          >
+            Explore More Categories
+          </button>
+        </Link>
+      </section>
     </div>
   );
 
