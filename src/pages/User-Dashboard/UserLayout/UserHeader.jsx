@@ -237,7 +237,7 @@ const UserHeader = () => {
             <MapPin className="h-5 w-5 text-secondary" />
             <section className="block">
               <p className="font-semibold capitalize leading-[12px] text-secondary text-[14px] block">
-                {profileData?.location || "Not set"}
+                {profileData?.locationName || "Not set"}
               </p>
               <span className="text-[12px] text-secondary truncate max-w-[100px] capitalize sm:max-w-none">
                 {profileData?.street || "Not set"}{" "}
