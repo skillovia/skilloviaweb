@@ -12,6 +12,7 @@ const UserHeader = () => {
     bookings: [],
     followers: [],
     followees: [],
+    message: [],
   });
   const [notificationDropdown, setNotificationDropdown] = useState(false);
 
@@ -122,28 +123,34 @@ const UserHeader = () => {
       }
 
       // Fetch different types of notifications concurrently
-      const [bookingsRes, followersRes, followeesRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/bookings`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/follower`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-        fetch(`${import.meta.env.VITE_BASE_URL}/notifications/followees`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      ]);
+      const [bookingsRes, followersRes, followeesRes, messageRes] =
+        await Promise.all([
+          fetch(`${import.meta.env.VITE_BASE_URL}/notifications/bookings`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+          fetch(`${import.meta.env.VITE_BASE_URL}/notifications/follower`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+          fetch(`${import.meta.env.VITE_BASE_URL}/notifications/followees`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+          fetch(`${import.meta.env.VITE_BASE_URL}/notifications/message`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }),
+        ]);
 
       // Parse responses
       const bookingsData = await bookingsRes.json();
       const followersData = await followersRes.json();
       const followeesData = await followeesRes.json();
+      const messageData = await messageRes.json();
 
       // Update notifications state
       setNotifications({
         bookings: bookingsData.data || [],
         followers: followersData.data || [],
         followees: followeesData.data || [],
+        message: messageData.data || [],
       });
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -155,7 +162,8 @@ const UserHeader = () => {
     return (
       notifications.bookings.length +
       notifications.followers.length +
-      notifications.followees.length
+      notifications.followees.length +
+      notifications.message.length
     );
   };
 
@@ -170,6 +178,7 @@ const UserHeader = () => {
       ...notifications.bookings.map((n) => ({ ...n, type: "bookings" })),
       ...notifications.followers.map((n) => ({ ...n, type: "followers" })),
       ...notifications.followees.map((n) => ({ ...n, type: "followees" })),
+      ...notifications.message.map((n) => ({ ...n, type: "message" })),
     ];
 
     return (
