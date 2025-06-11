@@ -63,6 +63,8 @@ import TokenHandler from "./TokenHandler";
 import OpenDisputePage from "./pages/Dispute-Review/Dispute/Dispute";
 import ExploreAllCategories from "./pages/User-Dashboard/Explore/ExploreViewAll";
 import Review from "./pages/Dispute-Review/Review/Review";
+import TermsAndConditions from "./pages/User-Dashboard/Settings/Legal-Support/Terms&Condition";
+import PrivacyPolicy from "./pages/User-Dashboard/Settings/Legal-Support/PrivacyPolicy";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -76,7 +78,23 @@ const router = createBrowserRouter([
   //   path: "/ex",
   //   element: <ExamplePage/>,
   // },
+  {
+    path: "/terms",
+    element: (
+      <ProtectedRoute>
+        <TermsAndConditions />
+      </ProtectedRoute>
+    ),
+  },
 
+  {
+    path: "/policy",
+    element: (
+      <ProtectedRoute>
+        <PrivacyPolicy />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/success",
     element: <Success />,

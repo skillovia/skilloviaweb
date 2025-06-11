@@ -309,11 +309,11 @@ const PersonalDetails = () => {
 
           <p className="mt-2 text-center text-xs text-gray-500">
             By continuing to use Skillovia, you agree to our{" "}
-            <a href="#" className="text-green-500 hover:underline">
+            <a href="/terms" className="text-green-500 hover:underline">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-green-500 hover:underline">
+            <a href="/privacy" className="text-green-500 hover:underline">
               Privacy Policy
             </a>
             .

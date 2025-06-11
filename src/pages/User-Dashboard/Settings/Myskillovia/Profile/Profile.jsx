@@ -485,6 +485,8 @@ const Profile = () => {
             street: formData.streetAddress,
             zip_code: formData.zipCode,
             website: formData.website,
+            lat: formData.lat, // <- Add this
+            lon: formData.lon,
           }),
         }
       );

@@ -143,11 +143,11 @@ const Otp = () => {
 
           <div className="text-xs text-gray-500 mt-6">
             By continuing to use Skillovia, you agree to our{" "}
-            <a href="#" className="text-green-600 hover:text-green-700">
+            <a href="/terms" className="text-green-600 hover:text-green-700">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-green-600 hover:text-green-700">
+            <a href="/privacy" className="text-green-600 hover:text-green-700">
               Privacy Policy
             </a>
           </div>
