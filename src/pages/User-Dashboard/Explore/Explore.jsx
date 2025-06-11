@@ -881,8 +881,8 @@ const ExploreSection = () => {
             <div className="flex gap-8 overflow-x-auto pb-4">
               {nearbyPeople.map((person) => (
                 <Link
-                  key={person.id}
-                  to={`/user-profile/${person.id}`}
+                  key={person.i_d}
+                  to={`/user-profile/${person._id}`}
                   className="flex flex-col items-center flex-shrink-0 hover:opacity-90 transition-opacity"
                 >
                   <div className="w-24 h-24 mb-2 overflow-hidden rounded-full">
