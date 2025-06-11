@@ -545,6 +545,7 @@ const ExploreSection = () => {
   // UK Cities - Official List
   const states = [
     { value: "aberdeen", label: "Aberdeen" },
+    { value: "lagos", label: "Lagos" },
     { value: "armagh", label: "Armagh" },
     { value: "bangor", label: "Bangor" },
     { value: "bath", label: "Bath" },
