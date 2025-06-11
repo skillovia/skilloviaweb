@@ -187,7 +187,8 @@ const UserHeader = () => {
           <h3 className="font-semibold">Notifications</h3>
           {allNotifications.map((notification) => (
             <div
-              key={`${notification.type}-${notification.id}`}
+              // key={`${notification.type}-${notification.id}`}
+              key={`${notification.type}-${notification._id}`}
               className="p-2 bg-input border border-gray my-2 rounded-md"
             >
               <p className="text-secondary text-[13px] font-semibold">
