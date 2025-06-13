@@ -525,9 +525,12 @@ const ExploreSection = () => {
           // url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
           //   userPosition.longitude
           // }/${userPosition.latitude}/${distanceFilter}?state=${stateFilter}`;
+          // url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
+          //   userPosition.latitude
+          // }/${userPosition.longitude}/${distanceFilter}?state=${stateFilter}`;
           url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
-            userPosition.latitude
-          }/${userPosition.longitude}/${distanceFilter}?state=${stateFilter}`;
+            userPosition.lat
+          }/${userPosition.lon}/${distanceFilter}?state=${stateFilter}`;
 
           console.log("📡 Fetching nearby people:", url);
         }
