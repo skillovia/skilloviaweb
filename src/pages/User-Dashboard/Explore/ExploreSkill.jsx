@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Loader2, MapPin, Route, UserX } from "lucide-react";
 
 function shuffleArray(array) {
- 
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -17,14 +16,15 @@ export default function ExploreSkill({
   isCategoriesLoading,
   categoriesError,
 }) {
-
-  const randomCategories = categories ? shuffleArray(categories).slice(0, 4) : [];
+  const randomCategories = categories
+    ? shuffleArray(categories).slice(0, 4)
+    : [];
 
   return (
     <div className="md:mb-6 relative">
       {/* Background gradient decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-pink-50/30 rounded-3xl -z-10"></div>
-      
+
       <div className="flex justify-between items-center mb-3 relative z-10">
         <div className="flex items-center space-x-2">
           <h2 className="text-[15px] font-bold">Explore Skills</h2>
@@ -71,11 +71,10 @@ export default function ExploreSkill({
                     className="group cursor-pointer flex-shrink-0 w-48 flex flex-col transition-all duration-300 hover:-translate-y-1"
                     style={{
                       background: `linear-gradient(135deg, ${
-                        ['#667eea', '#764ba2', '#f093fb', '#f5576c'][index % 4]
-                      }10, white)`
+                        ["#667eea", "#764ba2", "#f093fb", "#f5576c"][index % 4]
+                      }10, white)`,
                     }}
                   >
-                   
                     <div className="relative w-full h-32 mb-4 overflow-hidden rounded-xl border-2 border-secondary p-2">
                       <img
                         src={
@@ -90,12 +89,11 @@ export default function ExploreSkill({
                       <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
                       {/* Title on top of overlay */}
                       <div className="absolute bottom-2 left-3 right-3 z-20">
-                        <h3 className="text-base font-bold capitalize text-white drop-shadow-md">{category.title}</h3>
+                        <h3 className="text-base font-bold capitalize text-white drop-shadow-md">
+                          {category.title}
+                        </h3>
                       </div>
-                   
                     </div>
-                 
-                
                   </Link>
                 ))
               ) : (
@@ -118,7 +116,6 @@ export default function ExploreSkill({
                   )}&id=${category._id}`}
                   className="group cursor-pointer flex flex-col hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden"
                 >
-               
                   <div className="relative w-full h-40 mb-3 overflow-hidden rounded-xl border-4 border-secondary p-2">
                     <img
                       src={
@@ -129,17 +126,21 @@ export default function ExploreSkill({
                       alt={category.title}
                       className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-110"
                     />
-                  
+
                     <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
-                
+
                     <div className="absolute bottom-3 left-4 right-4 z-20">
-                      <h3 className="text-lg font-bold text-white drop-shadow-md capitalize">{category.title}</h3>
+                      <h3 className="text-lg font-bold text-white drop-shadow-md capitalize">
+                        {category.title}
+                      </h3>
+                      <h3 className="text-base font-bold capitalize text-white drop-shadow-md">
+                        {category.description}
+                      </h3>
                       {/* <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed ">
                       {category.description}
                     </p> */}
                     </div>
                   </div>
-             
                 </Link>
               ))
             ) : (
@@ -151,7 +152,7 @@ export default function ExploreSkill({
           </div>
         </>
       )}
-      
+
       {/* Custom scrollbar styles */}
       <style jsx>{`
         .scrollbar-hide {
