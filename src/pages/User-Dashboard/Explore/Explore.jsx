@@ -545,7 +545,7 @@ const ExploreSection = () => {
   // UK Cities - Official List
   const states = [
     { value: "aberdeen", label: "Aberdeen" },
-    { value: "lagos", label: "Lagos" },
+    { value: "leeds", label: "Leeds" },
     { value: "armagh", label: "Armagh" },
     { value: "bangor", label: "Bangor" },
     { value: "bath", label: "Bath" },
@@ -575,12 +575,12 @@ const ExploreSection = () => {
     { value: "kingston-upon-hull", label: "Kingston upon Hull" },
     { value: "inverness", label: "Inverness" },
     { value: "lancaster", label: "Lancaster" },
-    { value: "leeds", label: "Leeds" },
     { value: "leicester", label: "Leicester" },
     { value: "lichfield", label: "Lichfield" },
     { value: "lincoln", label: "Lincoln" },
     { value: "liverpool", label: "Liverpool" },
     { value: "london", label: "London" },
+    { value: "lagos", label: "Lagos" },
     { value: "manchester", label: "Manchester" },
     { value: "milton-keynes", label: "Milton Keynes" },
     { value: "newcastle-upon-tyne", label: "Newcastle upon Tyne" },
@@ -616,12 +616,19 @@ const ExploreSection = () => {
     { value: "york", label: "York" },
   ];
 
+  // const distances = [
+  //   { value: "all", label: "All Distances" },
+  //   { value: "200", label: "0 - 5 miles" },
+  //   { value: "500", label: "6 - 10 miles" },
+  //   { value: "1000", label: "11 - 20 miles" },
+  //   { value: "2000", label: "20+ miles" },
+  // ];
   const distances = [
     { value: "all", label: "All Distances" },
-    { value: "200", label: "0 - 5 miles" },
-    { value: "500", label: "6 - 10 miles" },
-    { value: "1000", label: "11 - 20 miles" },
-    { value: "2000", label: "20+ miles" },
+    { value: "8000", label: "0 - 5 miles" }, // 8 km
+    { value: "16000", label: "6 - 10 miles" }, // 16 km
+    { value: "32000", label: "11 - 20 miles" }, // 32 km
+    { value: "64000", label: "20+ miles" }, // 64 km
   ];
 
   const FilterDropdown = ({ icon: Icon, label, value, options, onChange }) => (
@@ -740,13 +747,69 @@ const ExploreSection = () => {
     fetchCategories();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchPeople = async () => {
+  //     // Don't fetch if we don't have position data yet
+  //     if (!userPosition) {
+  //       return;
+  //     }
+
+  //     setIsLoading(true);
+  //     setError("");
+
+  //     try {
+  //       const accessToken = localStorage.getItem("accessToken");
+
+  //       if (!accessToken) {
+  //         throw new Error("Authentication required");
+  //       }
+
+  //       let url;
+
+  //       if (distanceFilter === "all") {
+  //         // Use a very large radius (1,000,000 meters) and apply state filter
+  //         url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
+  //           userPosition.latitude
+  //         }/${userPosition.longitude}/1000000?state=${stateFilter}`;
+  //       } else {
+  //         // If distance filter is active, use the /nearby endpoint with coordinates and distance
+  //         //   url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
+  //         //     userPosition.latitude
+  //         //   }/${userPosition.longitude}/${distanceFilter}`;
+  //         // }
+  //         url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
+  //           userPosition.latitude
+  //         }/${userPosition.longitude}/${distanceFilter}?state=${stateFilter}`;
+  //       }
+  //       const response = await fetch(url, {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+
+  //       const data = await response.json();
+
+  //       if (data.status === "success") {
+  //         // Ensure we set an empty array if data.data is null or undefined
+  //         setNearbyPeople(data.data || []);
+  //       } else {
+  //         throw new Error(data.message || "Failed to fetch people");
+  //       }
+  //     } catch (err) {
+  //       setError("Unable to load people. Please try again later.");
+  //       // Set to empty array when there's an error
+  //       setNearbyPeople([]);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchPeople();
+  // }, [stateFilter, distanceFilter, userPosition]); // Re-fetch when filters or position change
   useEffect(() => {
     const fetchPeople = async () => {
-      // Don't fetch if we don't have position data yet
-      if (!userPosition) {
-        return;
-      }
-
       setIsLoading(true);
       setError("");
 
@@ -760,15 +823,20 @@ const ExploreSection = () => {
         let url;
 
         if (distanceFilter === "all") {
-          // If no distance filter, use the state filter
+          // ✅ Use the /within/:address endpoint based on selected city (stateFilter)
           url = `${
             import.meta.env.VITE_BASE_URL
           }/users/people/within/${stateFilter}`;
         } else {
-          // If distance filter is active, use the /nearby endpoint with coordinates and distance
+          // ✅ Use the /nearby/:lat/:lon/:radius?state=city endpoint
+          // Make sure we have userPosition
+          if (!userPosition) {
+            return;
+          }
+
           url = `${import.meta.env.VITE_BASE_URL}/users/people/nearby/${
             userPosition.latitude
-          }/${userPosition.longitude}/${distanceFilter}`;
+          }/${userPosition.longitude}/${distanceFilter}?state=${stateFilter}`;
         }
 
         const response = await fetch(url, {
@@ -782,14 +850,12 @@ const ExploreSection = () => {
         const data = await response.json();
 
         if (data.status === "success") {
-          // Ensure we set an empty array if data.data is null or undefined
           setNearbyPeople(data.data || []);
         } else {
           throw new Error(data.message || "Failed to fetch people");
         }
       } catch (err) {
         setError("Unable to load people. Please try again later.");
-        // Set to empty array when there's an error
         setNearbyPeople([]);
       } finally {
         setIsLoading(false);
@@ -797,7 +863,7 @@ const ExploreSection = () => {
     };
 
     fetchPeople();
-  }, [stateFilter, distanceFilter, userPosition]); // Re-fetch when filters or position change
+  }, [stateFilter, distanceFilter, userPosition]);
 
   // If we're still waiting for user position, show loading
   if (!userPosition) {

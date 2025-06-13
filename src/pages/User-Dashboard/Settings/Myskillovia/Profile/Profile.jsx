@@ -132,22 +132,35 @@ const Profile = () => {
       cityAutocomplete.addListener("place_changed", () => {
         const place = cityAutocomplete.getPlace();
 
-        if (!place.geometry) {
-          setApiError("No details available for this location");
+        // if (!place.geometry) {
+        //   setApiError("No details available for this location");
+        //   return;
+        // }
+        if (!place.geometry || !place.geometry.location) {
+          setApiError("No geometry data found for the city.");
           return;
         }
-
         const cityName =
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "administrative_area_level_1") ||
           place.name;
         // Try to extract postal code from city autocomplete (unreliable, but in case)
         const postalCode = extractAddressComponents(place, "postal_code");
+        // Get latitude and longitude
+        const lat = place.geometry.location.lat();
+        const lon = place.geometry.location.lng();
 
+        // setFormData((prev) => ({
+        //   ...prev,
+        //   city: cityName || "",
+        //   zipCode: postalCode || prev.zipCode, // Only update if available
+        // }));
         setFormData((prev) => ({
           ...prev,
           city: cityName || "",
-          zipCode: postalCode || prev.zipCode, // Only update if available
+          zipCode: postalCode || prev.zipCode,
+          lat,
+          lon,
         }));
 
         setApiError("");
@@ -182,18 +195,30 @@ const Profile = () => {
       addressAutocomplete.addListener("place_changed", () => {
         const place = addressAutocomplete.getPlace();
 
-        if (!place.geometry) {
-          setApiError("No details available for this address");
+        // if (!place.geometry) {
+        //   setApiError("No details available for this address");
+        //   return;
+        // }
+        if (!place.geometry || !place.geometry.location) {
+          setApiError("No geometry data found for this address.");
           return;
         }
+        const lat = place.geometry.location.lat();
+        const lon = place.geometry.location.lng();
 
         // Option 1: Use the formatted_address directly if available
         if (place.formatted_address) {
           const addressParts = place.formatted_address.split(",");
           const streetPart = addressParts[0];
+          // setFormData((prev) => ({
+          //   ...prev,
+          //   streetAddress: streetPart,
+          // }));
           setFormData((prev) => ({
             ...prev,
             streetAddress: streetPart,
+            lat,
+            lon,
           }));
         } else {
           // Option 2: Extract and combine components
@@ -208,22 +233,40 @@ const Profile = () => {
           if (subpremise)
             fullStreetAddress += (fullStreetAddress ? ", " : "") + subpremise;
 
+          //   if (fullStreetAddress) {
+          //     setFormData((prev) => ({
+          //       ...prev,
+          //       streetAddress: fullStreetAddress,
+          //     }));
+          //   }
+          // }
           if (fullStreetAddress) {
             setFormData((prev) => ({
               ...prev,
               streetAddress: fullStreetAddress,
+              lat,
+              lon,
             }));
           }
         }
-
         const postalCode = extractAddressComponents(place, "postal_code");
         const city =
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "sublocality") ||
           extractAddressComponents(place, "administrative_area_level_1");
 
+        // setFormData((prev) => {
+        //   const updates = {};
+        //   if (postalCode) {
+        //     updates.zipCode = postalCode;
+        //   }
+        //   if (city) {
+        //     updates.city = city;
+        //   }
+        //   return { ...prev, ...updates };
+        // });
         setFormData((prev) => {
-          const updates = {};
+          const updates = { lat, lon }; // ensure lat/lon included even if no city/postal found
           if (postalCode) {
             updates.zipCode = postalCode;
           }
@@ -232,7 +275,6 @@ const Profile = () => {
           }
           return { ...prev, ...updates };
         });
-
         setApiError("");
       });
     } catch (err) {
@@ -290,8 +332,8 @@ const Profile = () => {
             lastName: data.data.lastname || "",
             email: data.data.email || "",
             website: data.data.website || "",
-            city: data.data.location || "",
-            // city: data.data.locationName || "",
+            // city: data.data.location || "",
+            city: data.data.locationName || "",
             streetAddress: data.data.street || "",
             zipCode: data.data.zip_code || "",
             gender: data.data.gender || "",
@@ -480,8 +522,8 @@ const Profile = () => {
             lastname: formData.lastName,
             gender: formData.gender,
             password: formData.password,
-            location: formData.city,
-            // locationName: formData.city,
+            // location: formData.city,
+            locationName: formData.city,
             street: formData.streetAddress,
             zip_code: formData.zipCode,
             website: formData.website,
