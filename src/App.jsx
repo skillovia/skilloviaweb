@@ -65,6 +65,8 @@ import ExploreAllCategories from "./pages/User-Dashboard/Explore/ExploreViewAll"
 import Review from "./pages/Dispute-Review/Review/Review";
 import TermsAndConditions from "./pages/User-Dashboard/Settings/Legal-Support/Terms&Condition";
 import PrivacyPolicy from "./pages/User-Dashboard/Settings/Legal-Support/PrivacyPolicy";
+import Privacy from "./pages/faq/Privacy";
+import Terms from "./pages/faq/Terms";
 // import BookingDetails from "./pages/User-Dashboard/Bookings/BookingDetails";
 
 const router = createBrowserRouter([
@@ -86,6 +88,10 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+    path: "/terms-and-condition",
+    element: <Terms />,
+  },
 
   {
     path: "/policy",
@@ -94,6 +100,10 @@ const router = createBrowserRouter([
         <PrivacyPolicy />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/privacy-policy",
+    element: <Privacy />,
   },
   {
     path: "/success",

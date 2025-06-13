@@ -1,5 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
+import costEffectiveImg from "./c3.png";
+import strongerCommunitiesImg from "./c2.png";
+import ecoFriendlyImg from "./c1.png";
 
 const WhatisSkillovia = () => {
   const sections = [
@@ -9,6 +12,7 @@ const WhatisSkillovia = () => {
       bgColor: "bg-primary",
       textColor: "text-gray-800",
       icon: "💰",
+      image: costEffectiveImg,
     },
     {
       title: "Stronger Communities",
@@ -16,6 +20,7 @@ const WhatisSkillovia = () => {
       bgColor: "bg-yellow-300",
       textColor: "text-gray-800",
       icon: "🤝",
+      image: strongerCommunitiesImg,
     },
     {
       title: "Eco-Friendly",
@@ -23,6 +28,7 @@ const WhatisSkillovia = () => {
       bgColor: "bg-darkSec",
       textColor: "text-white",
       icon: "🌱",
+      image: ecoFriendlyImg,
     },
   ];
 
@@ -148,7 +154,7 @@ const WhatisSkillovia = () => {
             <div className="relative overflow-hidden h-64">
               <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-black/20 to-transparent z-10"></div>
               <motion.img
-                src="https://res.cloudinary.com/dmhvsyzch/image/upload/v1735327698/Section_image_wtvp13.png"
+                src={section.image}
                 alt={`${section.title} illustration`}
                 className="w-full h-full object-cover"
                 initial={{ scale: 1.2 }}
@@ -156,6 +162,7 @@ const WhatisSkillovia = () => {
                 transition={{ duration: 0.8 }}
                 whileHover={{ scale: 1.1, transition: { duration: 0.7 } }}
               />
+
               <motion.div
                 className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent"
                 initial={{ y: 30, opacity: 0 }}
