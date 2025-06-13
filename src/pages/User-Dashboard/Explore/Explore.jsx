@@ -64,8 +64,6 @@ const ExploreSection = () => {
     { value: "lincoln", label: "Lincoln" },
     { value: "liverpool", label: "Liverpool" },
     { value: "london", label: "London" },
-    { value: "lagos", label: "Lagos" },
-
     { value: "winchester", label: "Winchester" },
     { value: "worcester", label: "Worcester" },
     { value: "york", label: "York" },
