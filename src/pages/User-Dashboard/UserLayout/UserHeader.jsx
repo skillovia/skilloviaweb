@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, MapPin, Bell, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { markNotificationAsSeen } from "./notifications"; // adjust the path
 
 const UserHeader = () => {
   const navigate = useNavigate();
@@ -180,14 +181,49 @@ const UserHeader = () => {
       ...notifications.followees.map((n) => ({ ...n, type: "followees" })),
       ...notifications.message.map((n) => ({ ...n, type: "message" })),
     ];
+    const handleMarkAsSeen = async (notification) => {
+      try {
+        if (notification.markAsSeen === "NO") {
+          const token = localStorage.getItem("accessToken");
+          const updated = await markNotificationAsSeen(notification._id, token);
+
+          setNotifications((prev) => {
+            const updateList = (list) =>
+              list.map((n) =>
+                n._id === updated._id ? { ...n, markAsSeen: "YES" } : n
+              );
+
+            return {
+              bookings: updateList(prev.bookings),
+              followers: updateList(prev.followers),
+              followees: updateList(prev.followees),
+              message: updateList(prev.message),
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Failed to mark as seen:", err.message);
+      }
+    };
+
+    const getTotalNotificationCount = () => {
+      const unseen = [
+        ...notifications.bookings,
+        ...notifications.followers,
+        ...notifications.followees,
+        ...notifications.message,
+      ].filter((n) => n.markAsSeen === "NO");
+
+      return unseen.length;
+    };
 
     return (
       <div className="lg:absolute right-0 mt-5 lg:w-80 fixed w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
         <div className="px-4 py-4 b rounded-b-2xl">
           <h3 className="font-semibold">Notifications</h3>
-          {allNotifications.map((notification) => (
+          {/*}  {allNotifications.map((notification) => (
             <div
-              // key={`${notification.type}-${notification.id}`}
+          
               key={`${notification.type}-${notification._id}`}
               className="p-2 bg-input border border-gray my-2 rounded-md"
             >
@@ -196,6 +232,20 @@ const UserHeader = () => {
                 {notification.title}{" "}
               </p>
               <p className="text-[12px]"> {notification.description} </p>
+            </div>
+          ))}*/}
+          {allNotifications.map((notification) => (
+            <div
+              key={`${notification.type}-${notification._id}`}
+              onClick={() => handleMarkAsSeen(notification)}
+              className={`p-2 cursor-pointer border border-gray my-2 rounded-md ${
+                notification.markAsSeen === "NO" ? "bg-red-50" : "bg-input"
+              }`}
+            >
+              <p className="text-secondary text-[13px] font-semibold">
+                {notification.title}
+              </p>
+              <p className="text-[12px]">{notification.description}</p>
             </div>
           ))}
         </div>
