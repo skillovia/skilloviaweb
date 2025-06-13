@@ -96,11 +96,16 @@ const ProfileCard = () => {
       action: null,
       link: "/settings/payment",
     },
+    // {
+    //   name: "Link Stripe",
+    //   completed: !!(profileData && profileData.linked_account),
+    //   action: null,
+    //   link: "/create-stripe-account",
+    // },
     {
-      name: "Link Stripe",
-      completed: !!(profileData && profileData.linked_account),
-      action: null,
-      link: "/create-stripe-account",
+      name: "Add Location", // ✅ NEW STEP
+      completed: !!(profileData && profileData.locationName),
+      link: "/settings/profile", // or a separate route if you have one
     },
     {
       name: "Fill out bio",

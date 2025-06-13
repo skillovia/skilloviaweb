@@ -116,7 +116,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const BookService = () => {
   const location = useLocation();
-  const { user, skill } = location.state || {};
+  const { user, skill, skill_type } = location.state || {};
 
   // Loading state when booking
   const [loading, setLoading] = useState(false);
@@ -150,7 +150,7 @@ const BookService = () => {
   const handleBookClick = () => {
     setLoading(true);
   };
-
+  console.log("Skill object:", skill);
   return (
     <UserLayout>
       <div className="max-w-4xl mx-auto px-4 rounded-lg">
@@ -158,7 +158,7 @@ const BookService = () => {
           <BackButton label={skill.skill_type} />
           <Link
             to="/book-form"
-            state={{ user, skill, skillId: skill_id }}
+            state={{ user, skill, skillId: skill._id }}
             className={`ml-auto px-4 py-1 rounded-full ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
