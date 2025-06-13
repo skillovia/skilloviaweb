@@ -159,20 +159,29 @@ const UserHeader = () => {
     }
   };
 
-  const getTotalNotificationCount = () => {
-    return (
-      notifications.bookings.length +
-      notifications.followers.length +
-      notifications.followees.length +
-      notifications.message.length
-    );
-  };
+  // const getTotalNotificationCount = () => {
+  //   return (
+  //     notifications.bookings.length +
+  //     notifications.followers.length +
+  //     notifications.followees.length +
+  //     notifications.message.length
+  //   );
+  // };
 
   useEffect(() => {
     fetchProfile();
     fetchNotifications();
   }, []);
+  const getTotalNotificationCount = () => {
+    const unseen = [
+      ...notifications.bookings,
+      ...notifications.followers,
+      ...notifications.followees,
+      ...notifications.message,
+    ].filter((n) => n.markAsSeen === "NO");
 
+    return unseen.length;
+  };
   // Render notifications dropdown
   const renderNotificationsDropdown = () => {
     const allNotifications = [
@@ -204,17 +213,6 @@ const UserHeader = () => {
       } catch (err) {
         console.error("Failed to mark as seen:", err.message);
       }
-    };
-
-    const getTotalNotificationCount = () => {
-      const unseen = [
-        ...notifications.bookings,
-        ...notifications.followers,
-        ...notifications.followees,
-        ...notifications.message,
-      ].filter((n) => n.markAsSeen === "NO");
-
-      return unseen.length;
     };
 
     return (
