@@ -450,6 +450,7 @@ import BackButton from "../../../../componets/Back";
 import BookCard from "../BookCard";
 import { Loader2, MessageCircleMore, X, CheckCircle } from "lucide-react";
 import DynamicGoogleMap from "../../../../componets/Map/Map";
+import FloatingChatButton from "../../../../componets/FloatingChat";
 
 const InwardDetails = () => {
   const { id } = useParams();
@@ -648,6 +649,7 @@ const InwardDetails = () => {
 
   return (
     <UserLayout>
+      <FloatingChatButton onClick={handleChatClick} />
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center gap-2 mb-6">
           <BackButton label="Booking Progress" />
