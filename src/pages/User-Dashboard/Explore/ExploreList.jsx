@@ -264,12 +264,12 @@ const ExploreList = () => {
           {!isLoading && !error && skills?.length === 0 && <EmptyState />}
 
           {skills?.map((skill) => (
-            <Link to={`/user-profile/${skill.userId?._id}`}
+            <div
               key={skill._id}
               className="flex items-center justify-between border border-gray bg-input p-4 rounded-lg hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-3">
-                <div to={`/user-profile/${skill.userId?._id}`}>
+                <Link to={`/user-profile/${skill.userId?._id}`}>
                   <img
                     src={
                       skill.userId?.photourl
@@ -279,7 +279,7 @@ const ExploreList = () => {
                     alt={skill.userId?.firstname}
                     className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                   />
-                </div>
+                </Link>
                 <div>
                   <h3 className="font-medium">
                     {skill.userId?.firstname} {skill.userId?.lastname}
@@ -293,7 +293,7 @@ const ExploreList = () => {
                 </div>
               </div>
               <FollowButton userId={skill.userId?._id} />
-            </Link>
+            </div>
           ))}
         </div>
       </div>

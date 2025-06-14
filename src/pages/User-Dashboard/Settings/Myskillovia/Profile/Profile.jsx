@@ -383,13 +383,76 @@ const Profile = () => {
     }));
   };
 
+  // const handleSubmit = async () => {
+  //   if (!userId) {
+  //     setError("User ID not found");
+  //     return;
+  //   }
+
+  //   // Prevent submit if passwords don't match
+  //   if (
+  //     formData.password &&
+  //     formData.confirmPassword &&
+  //     formData.password !== formData.confirmPassword
+  //   ) {
+  //     setConfirmError("Passwords do not match");
+  //     setError("Please make sure the passwords match.");
+  //     return;
+  //   }
+
+  //   setIsSaving(true);
+  //   setError("");
+  //   setConfirmError("");
+
+  //   try {
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //         },
+  //         body: JSON.stringify({
+  //           email: formData.email,
+  //           firstname: formData.firstName,
+  //           lastname: formData.lastName,
+  //           gender: formData.gender,
+  //           password: formData.password,
+  //           location: formData.city,
+  //           street: formData.streetAddress,
+  //           zip_code: formData.zipCode,
+  //           website: formData.website,
+  //         }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     if (data.status === "success") {
+  //       console.log("Profile updated successfully");
+  //     } else {
+  //       setError(data.message || "Failed to update profile");
+  //     }
+  //   } catch (err) {
+  //     setError("Something went wrong while updating profile");
+  //     console.error("Error updating profile:", err);
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
+
+  // Custom Toggle Switch Component
 
   const handleSubmit = async () => {
     if (!userId) {
       setError("User ID not found");
       return;
     }
-  
+
     // Validate passwords match
     if (
       formData.password &&
@@ -400,17 +463,17 @@ const Profile = () => {
       setError("Please make sure the passwords match.");
       return;
     }
-  
+
     setIsSaving(true);
     setError("");
     setConfirmError("");
-  
+
     try {
       // 1. Upload profile photo if a new one was selected
       if (selectedFile) {
         const formDataPhoto = new FormData();
         formDataPhoto.append("photo", selectedFile);
-  
+
         const photoResponse = await fetch(
           `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
           {
@@ -421,13 +484,13 @@ const Profile = () => {
             body: formDataPhoto,
           }
         );
-  
+
         const photoData = await photoResponse.json();
         if (photoData.status === "success") {
           // Update preview and localStorage
           const photoUrl = ensureHttps(photoData.data.photo);
           setPhotoPreview(photoUrl);
-  
+
           const currentProfile = JSON.parse(
             localStorage.getItem("userProfile") || "{}"
           );
@@ -436,14 +499,14 @@ const Profile = () => {
             photourl: photoData.data.photo,
           };
           localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-  
+
           window.dispatchEvent(new Event("profileUpdated"));
         } else {
           setError("Failed to upload profile photo.");
           return;
         }
       }
-  
+
       // 2. Update the rest of the profile fields
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
@@ -459,46 +522,24 @@ const Profile = () => {
             lastname: formData.lastName,
             gender: formData.gender,
             password: formData.password,
+            // location: formData.city,
             locationName: formData.city,
             street: formData.streetAddress,
             zip_code: formData.zipCode,
             website: formData.website,
-            lat: formData.lat,
+            lat: formData.lat, // <- Add this
             lon: formData.lon,
           }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
-  
+
       const data = await response.json();
       if (data.status === "success") {
-        // --- START: Update localStorage for city, street, zip code, etc ---
-        const currentProfile = JSON.parse(
-          localStorage.getItem("userProfile") || "{}"
-        );
-        const updatedProfile = {
-          ...currentProfile,
-          city: formData.city,
-          locationName: formData.city, // in case you use either key
-          street: formData.streetAddress,
-          zipCode: formData.zipCode,
-          zip_code: formData.zipCode, // in case you use either key
-          lat: formData.lat,
-          lon: formData.lon,
-          website: formData.website,
-          firstname: formData.firstName,
-          lastname: formData.lastName,
-          gender: formData.gender,
-          email: formData.email,
-        };
-        localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-  
-        window.dispatchEvent(new Event("profileUpdated"));
-        // --- END: Update localStorage for city, street, zip code, etc ---
-  
+        console.log("Profile updated successfully");
         // You can show a success message or toast here
       } else {
         setError(data.message || "Failed to update profile");
@@ -510,6 +551,7 @@ const Profile = () => {
       setIsSaving(false);
     }
   };
+
   const Toggle = ({ checked, onChange }) => {
     return (
       <button

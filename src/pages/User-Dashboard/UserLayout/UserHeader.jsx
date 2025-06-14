@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, MapPin, Bell, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { markNotificationAsSeen } from "./notifications"; // adjust the path
 
 const UserHeader = () => {
   const navigate = useNavigate();
@@ -30,17 +31,64 @@ const UserHeader = () => {
     return `https://${url}`;
   };
 
+  // const fetchProfile = async () => {
+  //   try {
+  //     const decodedToken = JSON.parse(localStorage.getItem("decodedToken"));
+  //     const user_id = decodedToken?.id;
+
+  //     if (!user_id) {
+  //       throw new Error("User ID not found in token");
+  //     }
+
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found");
+  //     }
+
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch profile");
+  //     }
+
+  //     const data = await response.json();
+  //     const updatedData = {
+  //       ...data.data,
+  //       photourl: ensureHttps(data.data.photourl),
+  //     };
+  //     setProfileData(updatedData);
+  //   } catch (err) {
+  //     console.error("Error fetching profile:", err);
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchProfile = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
+
       if (!accessToken) {
         throw new Error("❌ Access token not found in localStorage");
       }
-      const decodedToken = jwtDecode(accessToken);
+
+      const decodedToken = jwtDecode(accessToken); // ✅ Decode the token
+      console.log("🔑 Decoded Token:", decodedToken); // Debugging log
+
       const user_id = decodedToken?.id;
       if (!user_id) {
         throw new Error("❌ User ID not found in token");
       }
+
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
         {
@@ -49,9 +97,11 @@ const UserHeader = () => {
           },
         }
       );
+
       if (!response.ok) {
         throw new Error("❌ Failed to fetch profile");
       }
+
       const data = await response.json();
       const updatedData = {
         ...data.data,
@@ -65,13 +115,15 @@ const UserHeader = () => {
       setLoading(false);
     }
   };
-
   const fetchNotifications = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
+
       if (!accessToken) {
         throw new Error("Access token not found");
       }
+
+      // Fetch different types of notifications concurrently
       const [bookingsRes, followersRes, followeesRes, messageRes] =
         await Promise.all([
           fetch(`${import.meta.env.VITE_BASE_URL}/notifications/bookings`, {
@@ -87,10 +139,14 @@ const UserHeader = () => {
             headers: { Authorization: `Bearer ${accessToken}` },
           }),
         ]);
+
+      // Parse responses
       const bookingsData = await bookingsRes.json();
       const followersData = await followersRes.json();
       const followeesData = await followeesRes.json();
       const messageData = await messageRes.json();
+
+      // Update notifications state
       setNotifications({
         bookings: bookingsData.data || [],
         followers: followersData.data || [],
@@ -103,31 +159,30 @@ const UserHeader = () => {
     }
   };
 
-  const getTotalNotificationCount = () => {
-    return (
-      notifications.bookings.length +
-      notifications.followers.length +
-      notifications.followees.length +
-      notifications.message.length
-    );
-  };
+  // const getTotalNotificationCount = () => {
+  //   return (
+  //     notifications.bookings.length +
+  //     notifications.followers.length +
+  //     notifications.followees.length +
+  //     notifications.message.length
+  //   );
+  // };
 
-  // Listen for profile updates from anywhere in the app
   useEffect(() => {
     fetchProfile();
     fetchNotifications();
-
-    const handleProfileUpdated = () => {
-      setLoading(true);
-      fetchProfile();
-    };
-    window.addEventListener("profileUpdated", handleProfileUpdated);
-    return () => {
-      window.removeEventListener("profileUpdated", handleProfileUpdated);
-    };
-    // eslint-disable-next-line
   }, []);
+  const getTotalNotificationCount = () => {
+    const unseen = [
+      ...notifications.bookings,
+      ...notifications.followers,
+      ...notifications.followees,
+      ...notifications.message,
+    ].filter((n) => n.markAsSeen === "NO");
 
+    return unseen.length;
+  };
+  // Render notifications dropdown
   const renderNotificationsDropdown = () => {
     const allNotifications = [
       ...notifications.bookings.map((n) => ({ ...n, type: "bookings" })),
@@ -135,14 +190,55 @@ const UserHeader = () => {
       ...notifications.followees.map((n) => ({ ...n, type: "followees" })),
       ...notifications.message.map((n) => ({ ...n, type: "message" })),
     ];
+    const handleMarkAsSeen = async (notification) => {
+      try {
+        if (notification.markAsSeen === "NO") {
+          const token = localStorage.getItem("accessToken");
+          const updated = await markNotificationAsSeen(notification._id, token);
+
+          setNotifications((prev) => {
+            const updateList = (list) =>
+              list.map((n) =>
+                n._id === updated._id ? { ...n, markAsSeen: "YES" } : n
+              );
+
+            return {
+              bookings: updateList(prev.bookings),
+              followers: updateList(prev.followers),
+              followees: updateList(prev.followees),
+              message: updateList(prev.message),
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Failed to mark as seen:", err.message);
+      }
+    };
+
     return (
-      <div className="lg:absolute right-0 mt-5 lg:w-80 fixed h-[20rem] overflow-y-auto w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
+      <div className="lg:absolute right-0 mt-5 lg:w-80 fixed w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
         <div className="px-4 py-4 b rounded-b-2xl">
           <h3 className="font-semibold">Notifications</h3>
+          {/*}  {allNotifications.map((notification) => (
+            <div
+          
+              key={`${notification.type}-${notification._id}`}
+              className="p-2 bg-input border border-gray my-2 rounded-md"
+            >
+              <p className="text-secondary text-[13px] font-semibold">
+                {" "}
+                {notification.title}{" "}
+              </p>
+              <p className="text-[12px]"> {notification.description} </p>
+            </div>
+          ))}*/}
           {allNotifications.map((notification) => (
             <div
               key={`${notification.type}-${notification._id}`}
-              className="p-2 bg-input border border-gray my-2 rounded-md"
+              onClick={() => handleMarkAsSeen(notification)}
+              className={`p-2 cursor-pointer border border-gray my-2 rounded-md ${
+                notification.markAsSeen === "NO" ? "bg-red-50" : "bg-input"
+              }`}
             >
               <p className="text-secondary text-[13px] font-semibold">
                 {notification.title}
@@ -190,7 +286,7 @@ const UserHeader = () => {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4 lg:space-x-9">
+        <div className="flex items-center gap-4">
           {/* Location */}
           <Link
             to="/settings/profile"
@@ -210,22 +306,21 @@ const UserHeader = () => {
 
           {/* Notification Bell */}
           <div className="relative">
-            <section  onClick={toggleNotifications} className="not bg-red border-2  h-8 w-8 lg:w-10 lg:h-10 rounded-full flex justify-center items-center border-secondary">
-              <Bell
-               
-                className="h-6 w-6 text-secondary cursor-pointer"
-              />
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                {getTotalNotificationCount()}
-              </span>
-            </section>
+            <Bell
+              className="h-6 w-6 text-gray-700 cursor-pointer"
+              onClick={toggleNotifications}
+            />
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {getTotalNotificationCount()}
+            </span>
+
             {notificationDropdown && renderNotificationsDropdown()}
           </div>
 
-          {/* Profile Photo */}
+          {/* Profile - Updated section */}
           <div className="relative">
             <Link to="/user" className="flex space-x-2">
-              <div className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white cursor-pointer relative">
+              <div className="h-8 w-8 rounded-full bg-gray-200 border-2 border-white cursor-pointer relative">
                 {loading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Loader2 className="animate-spin w-4 h-4 text-secondary" />
