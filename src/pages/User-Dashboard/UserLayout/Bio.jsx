@@ -3,7 +3,6 @@ import { Pencil, Check, X, Loader, MapPin } from "lucide-react";
 
 const EditableProfile = ({
   initialBio,
-  // location,
   location = {},
   street,
   zip_code,
@@ -16,7 +15,6 @@ const EditableProfile = ({
   const [geocodeError, setGeocodeError] = useState(null);
   const [formData, setFormData] = useState({
     bio: initialBio || "",
-    // location: location || '',
     locationName: "",
     street: street || "",
     zip_code: zip_code || "",
@@ -39,35 +37,25 @@ const EditableProfile = ({
   useEffect(() => {
     if (!window.google && !placesApiLoading && isEditing) {
       setPlacesApiLoading(true);
-
-      // Get API key
       const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
-
       if (!apiKey) {
         setGeocodeError("Google Maps API key is missing.");
         setPlacesApiLoading(false);
         return;
       }
-
       const googleMapScript = document.createElement("script");
       googleMapScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       googleMapScript.async = true;
       googleMapScript.defer = true;
-
       googleMapScript.onload = () => {
         setPlacesApiLoaded(true);
         setPlacesApiLoading(false);
       };
-
       googleMapScript.onerror = () => {
-        setGeocodeError(
-          "Failed to load Google Maps API. Please check your internet connection and API key."
-        );
+        setGeocodeError("Failed to load Google Maps API. Please check your internet connection and API key.");
         setPlacesApiLoading(false);
       };
-
       document.body.appendChild(googleMapScript);
-
       return () => {
         if (document.body.contains(googleMapScript)) {
           document.body.removeChild(googleMapScript);
@@ -78,56 +66,39 @@ const EditableProfile = ({
     }
   }, [isEditing]);
 
-  // Helper function to extract components from place object
   const extractAddressComponents = (place, componentType) => {
     if (!place.address_components) return null;
-
     const component = place.address_components.find((comp) =>
       comp.types.includes(componentType)
     );
-
     return component ? component.long_name : null;
   };
 
-  // Initialize city/location autocomplete
   const initLocationAutocomplete = () => {
     if (!window.google || !locationInputRef.current) return;
-
     try {
-      // Clean up previous instance if it exists
       if (autocompleteInstancesRef.current.location) {
-        google.maps.event.clearInstanceListeners(
-          autocompleteInstancesRef.current.location
-        );
+        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.location);
       }
-
       const locationAutocomplete = new window.google.maps.places.Autocomplete(
         locationInputRef.current,
-        {
-          types: ["(cities)"],
-        }
+        { types: ["(cities)"] }
       );
-
       autocompleteInstancesRef.current.location = locationAutocomplete;
-
       locationAutocomplete.addListener("place_changed", () => {
         const place = locationAutocomplete.getPlace();
-
         if (!place.geometry) {
           setGeocodeError("No details available for this location");
           return;
         }
-
         const cityName =
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "administrative_area_level_1") ||
           place.name;
-
         setFormData((prev) => ({
           ...prev,
           locationName: cityName || "",
         }));
-
         setGeocodeError("");
       });
     } catch (err) {
@@ -136,58 +107,40 @@ const EditableProfile = ({
     }
   };
 
-  // Initialize street address autocomplete
   const initStreetAutocomplete = () => {
     if (!window.google || !streetInputRef.current) return;
-
     try {
-      // Clean up previous instance if it exists
       if (autocompleteInstancesRef.current.street) {
-        google.maps.event.clearInstanceListeners(
-          autocompleteInstancesRef.current.street
-        );
+        google.maps.event.clearInstanceListeners(autocompleteInstancesRef.current.street);
       }
-
       const addressAutocomplete = new window.google.maps.places.Autocomplete(
         streetInputRef.current,
-        {
-          types: ["address"],
-        }
+        { types: ["address"] }
       );
-
       autocompleteInstancesRef.current.street = addressAutocomplete;
-
       addressAutocomplete.addListener("place_changed", () => {
         const place = addressAutocomplete.getPlace();
-
         if (!place.geometry) {
           setGeocodeError("No details available for this address");
           return;
         }
-
-        // Extract the street part
         if (place.formatted_address) {
           const addressParts = place.formatted_address.split(",");
-          const streetPart = addressParts[0]; // First part is typically the street address
-
+          const streetPart = addressParts[0];
           setFormData((prev) => ({
             ...prev,
             street: streetPart,
           }));
         } else {
-          // Extract and combine components
           const streetNumber = extractAddressComponents(place, "street_number");
           const streetName = extractAddressComponents(place, "route");
-          const subpremise = extractAddressComponents(place, "subpremise"); // For apt/suite numbers
-
-          // Build the street address with all components
+          const subpremise = extractAddressComponents(place, "subpremise");
           let fullStreetAddress = "";
           if (streetNumber) fullStreetAddress += streetNumber;
           if (streetName)
             fullStreetAddress += (fullStreetAddress ? " " : "") + streetName;
           if (subpremise)
             fullStreetAddress += (fullStreetAddress ? ", " : "") + subpremise;
-
           if (fullStreetAddress) {
             setFormData((prev) => ({
               ...prev,
@@ -195,35 +148,21 @@ const EditableProfile = ({
             }));
           }
         }
-
-        // Get other address components
         const postalCode = extractAddressComponents(place, "postal_code");
         const city =
           extractAddressComponents(place, "locality") ||
           extractAddressComponents(place, "sublocality") ||
           extractAddressComponents(place, "administrative_area_level_1");
-
-        // Update form data with any other found components
         setFormData((prev) => {
           const updates = {};
-
-          if (postalCode) {
-            updates.zip_code = postalCode;
-          }
-
-          if (city) {
-            updates.locationName = city;
-          }
-
-          // Set longitude and latitude
+          if (postalCode) updates.zip_code = postalCode;
+          if (city) updates.locationName = city;
           if (place.geometry && place.geometry.location) {
             updates.lon = place.geometry.location.lng();
             updates.lat = place.geometry.location.lat();
           }
-
           return { ...prev, ...updates };
         });
-
         setGeocodeError("");
       });
     } catch (err) {
@@ -232,7 +171,6 @@ const EditableProfile = ({
     }
   };
 
-  // Initialize autocomplete after API loads
   useEffect(() => {
     if (placesApiLoaded && isEditing) {
       initLocationAutocomplete();
@@ -240,7 +178,6 @@ const EditableProfile = ({
     }
   }, [placesApiLoaded, isEditing]);
 
-  // Re-initialize autocomplete if inputs are recreated
   useEffect(() => {
     if (placesApiLoaded && locationInputRef.current && isEditing) {
       initLocationAutocomplete();
@@ -253,10 +190,8 @@ const EditableProfile = ({
     }
   }, [streetInputRef.current, placesApiLoaded, isEditing]);
 
-  // Geocoding effect to convert address to coordinates using Google Geocoding API
   useEffect(() => {
     const geocodeAddress = async () => {
-      // Only attempt geocoding if we have a complete address and no coordinates yet
       if (
         formData.street &&
         formData.locationName &&
@@ -264,31 +199,22 @@ const EditableProfile = ({
         (!formData.lon || !formData.lat)
       ) {
         try {
-          // Use Google Geocoding API
           const apiKey = "AIzaSyChFAjrSODzkkKl_TaCCslNXdHwIWR-_uw";
           const address = `${formData.street}, ${formData.locationName}, ${formData.zip_code}`;
-
           const response = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
               address
             )}&key=${apiKey}`
           );
-
           const data = await response.json();
-          console.log(data);
-
           if (data.status === "OK" && data.results.length > 0) {
             const { lat, lng } = data.results[0].geometry.location;
-
-            console.log("Geocoded Coordinates:", { lon: lng, lat });
-
             setFormData((prev) => ({
               ...prev,
               lon: lng,
               lat,
               formatted_address: data.results[0].formatted_address,
             }));
-
             setGeocodeError(null);
           } else {
             setGeocodeError("Could not find coordinates for this address");
@@ -311,29 +237,23 @@ const EditableProfile = ({
         }
       }
     };
-
-    // Only run geocoding when in editing mode and address fields are filled
     if (isEditing) {
       geocodeAddress();
     }
   }, [formData.street, formData.locationName, formData.zip_code, isEditing]);
 
+  // -----> MODIFIED handleUpdate to update localStorage after success
   const handleUpdate = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const accessToken = localStorage.getItem("accessToken");
-
-      // Extract longitude and latitude from formData
       const { lon, lat, ...otherFormData } = formData;
-
       const payload = {
         ...otherFormData,
         lon,
         lat,
       };
-
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/users/profile/update/bio`,
         {
@@ -345,15 +265,24 @@ const EditableProfile = ({
           body: JSON.stringify(payload),
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || "Failed to update profile");
       }
-
-      console.log("Saved Bio:", payload.bio);
-      console.log("Saved Location:", payload.locationName);
-
+      // --- UPDATE LOCAL STORAGE with new bio/location ---
+      const currentProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+      const updatedProfile = {
+        ...currentProfile,
+        bio: formData.bio,
+        locationName: formData.locationName,
+        street: formData.street,
+        zip_code: formData.zip_code,
+        lon: formData.lon,
+        lat: formData.lat,
+      };
+      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+      window.dispatchEvent(new Event("profileUpdated"));
+      // -------------------------------------------------
       setIsEditing(false);
     } catch (error) {
       console.error("Profile update failed:", {
@@ -375,7 +304,7 @@ const EditableProfile = ({
     setFormData((prev) => ({
       ...prev,
       bio: initialBio || "",
-      locationName: locationName || "",
+      locationName: location?.locationName || "",
       street: street || "",
       zip_code: zip_code || "",
       lon: lon || null,
@@ -409,26 +338,22 @@ const EditableProfile = ({
             </button>
           </div>
         </div>
-
         {error && (
           <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">
             {error}
           </div>
         )}
-
         {geocodeError && (
           <div className="p-3 bg-yellow-100 border border-yellow-200 text-yellow-700 rounded-md text-sm">
             {geocodeError}
           </div>
         )}
-
         {placesApiLoading && (
           <div className="p-3 bg-blue-50 border border-blue-100 text-blue-600 rounded-md text-sm flex items-center">
             <Loader className="w-4 h-4 animate-spin mr-2" />
             Loading location services...
           </div>
         )}
-
         <div className="space-y-3">
           <textarea
             value={formData.bio}
@@ -440,7 +365,6 @@ const EditableProfile = ({
             rows={3}
             disabled={isLoading}
           />
-
           <div>
             <input
               type="text"
@@ -461,7 +385,6 @@ const EditableProfile = ({
               Start typing to see city suggestions
             </p>
           </div>
-
           <div>
             <input
               type="text"
@@ -479,7 +402,6 @@ const EditableProfile = ({
               Start typing to see address suggestions
             </p>
           </div>
-
           <input
             type="text"
             value={formData.zip_code}
@@ -490,7 +412,6 @@ const EditableProfile = ({
             placeholder="ZIP Code"
             disabled={isLoading}
           />
-
           {formData.lon && formData.lat && (
             <div className="text-sm text-gray-500">
               Coordinates: {formData.lon.toFixed(4)}, {formData.lat.toFixed(4)}
