@@ -5,7 +5,6 @@ import Verify from "../Verify/Verify";
 import { ChevronRight, Loader2, MapPin, Route, UserX } from "lucide-react";
 import ExploreSkill from "./ExploreSkill"; // Import the new component
 import { jwtDecode } from "jwt-decode";
-import FloatingChatButton from "../../../componets/FloatingChat";
 const ExploreSection = () => {
   const [nearbyPeople, setNearbyPeople] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -579,23 +578,8 @@ const ExploreSection = () => {
     );
   }
 
-  const handleChatClick = () => {
-    if (clientProfile) {
-      navigate(`/chat/${id}`, {
-        state: {
-          userId: id,
-          userName: `${clientProfile.firstname} ${clientProfile.lastname}`,
-          userPhoto: clientProfile.photourl
-            ? `https://${clientProfile.photourl}`
-            : null,
-        },
-      });
-    }
-  };
-
   return (
     <UserLayout>
-      <FloatingChatButton onClick={handleChatClick} />
       <Verify />
       <div className="max-w-4xl mx-auto px-4 rounded-lg">
         <ExploreSkill

@@ -23,53 +23,7 @@ const ProfileCard = () => {
   const [skillsLoading, setSkillsLoading] = useState(true);
 
   console.log("profileData:", profileData);
-  // Profile step logic
-  // const steps = [
-  //   {
-  //     name: "Profile image",
-  //     completed: !!(profileData && profileData.photourl),
-  //     action: null,
-  //     link: null,
-  //   },
-  //   {
-  //     name: "Add at least one skill",
-  //     completed: skills.length > 0,
-  //     action: null,
-  //     link: "/settings/skill/add",
-  //   },
-  //   {
-  //     name: "Complete KYC",
-  //     completed: !!(profileData && profileData.kyc_status === "verified"),
-  //     action: null,
-  //     link: "/settings/kyc",
-  //   },
-  //   {
-  //     name: "Add payment method",
-  //     completed: !!(profileData && profileData.payment_method),
-  //     action: null,
-  //     link: "/settings/payment",
-  //   },
-  //   {
-  //     name: "Link Stripe",
-  //     completed: !!(profileData && profileData.linked_account),
-  //     action: null,
-  //     link: "/create-stripe-account",
-  //   },
-  //   {
-  //     name: "Fill out bio",
-  //     completed: !!(
-  //       profileData &&
-  //       profileData.bio &&
-  //       profileData.bio.length > 10
-  //     ),
-  //     action: null,
-  //     link: "/settings/profile",
-  //   },
-  // ];
-  // const completedSteps = steps.filter((s) => s.completed).length;
-
-  // console.log("profileData:", profileData);
-  // Profile step logic
+ 
   const steps = [
     {
       name: "Profile image",
@@ -83,6 +37,12 @@ const ProfileCard = () => {
       action: null,
       link: "/settings/skill/add",
     },
+
+    {
+      name: "Set location",
+      completed: !!(profileData && profileData.locationName),
+      link: "/settings/profile",
+    },
     {
       name: "Complete KYC",
       completed: !!(profileData && profileData.kyc_status === "approved"),
@@ -90,22 +50,12 @@ const ProfileCard = () => {
       action: null,
       link: "/settings/kyc",
     },
+
     {
-      name: "Add payment method",
-      completed: !!(profileData && profileData.payment_method),
+      name: "Link Stripe",
+      completed: !!(profileData && profileData.linked_account),
       action: null,
-      link: "/settings/payment",
-    },
-    // {
-    //   name: "Link Stripe",
-    //   completed: !!(profileData && profileData.linked_account),
-    //   action: null,
-    //   link: "/create-stripe-account",
-    // },
-    {
-      name: "Add Location", // ✅ NEW STEP
-      completed: !!(profileData && profileData.locationName),
-      link: "/settings/profile", // or a separate route if you have one
+      link: "/create-stripe-account",
     },
     {
       name: "Fill out bio",
@@ -116,117 +66,8 @@ const ProfileCard = () => {
   ];
   const completedSteps = steps.filter((s) => s.completed).length;
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert("File size should be less than 5MB");
-      return;
-    }
-    setUploading(true);
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("Access token not found");
-      const formData = new FormData();
-      formData.append("photo", file);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/users/profile/upload`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${accessToken}` },
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("Failed to upload image");
-      const data = await response.json();
-      setProfileData((prev) => ({
-        ...prev,
-        photourl: data.photourl || data.data?.photourl,
-      }));
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      alert("Failed to upload image. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
 
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const accessToken = localStorage.getItem("accessToken");
-  //       if (!accessToken) throw new Error("❌ Access token not found");
-  //       const decodedToken = jwtDecode(accessToken);
-  //       const user_id = decodedToken?.id;
-  //       if (!user_id) throw new Error("❌ User ID not found in token");
-  //       const response = await fetch(
-  //         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
-  //         { headers: { Authorization: `Bearer ${accessToken}` } }
-  //       );
-  //       if (!response.ok) throw new Error("❌ Failed to fetch profile");
-  //       const data = await response.json();
-  //       setProfileData({ ...data.data, photourl: data.data.photourl });
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchProfile();
-  // }, []);
-  // useEffect(() => {
-  //   const fetchSkills = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${import.meta.env.VITE_BASE_URL}/skills/user/all`,
-  //         { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }
-  //       );
-  //       if (!response.ok) throw new Error("Failed to fetch skills");
-  //       const data = await response.json();
-  //       setSkills(data.data || []);
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchSkills();
-  // }, []);
-
-  // if (loading) {
-  //   return (
-  //     <UserLayout>
-  //       <div className="flex justify-center items-center h-64">
-  //         <Loader2 className="animate-spin w-12 h-12 text-secondary" />
-  //       </div>
-  //     </UserLayout>
-  //   );
-  // }
-
-  // if (error) {
-  //   return (
-  //     <UserLayout>
-  //       <div className="max-w-4xl px-4 py-8 text-red-500">
-  //         Error loading profile: {error}
-  //       </div>
-  //     </UserLayout>
-  //   );
-  // }
-
-  // if (!profileData) {
-  //   return (
-  //     <UserLayout>
-  //       <div className="max-w-4xl px-4 py-8">No profile data available</div>
-  //     </UserLayout>
-  //   );
-  // }
-  // Fetch Profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -361,7 +202,7 @@ const ProfileCard = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="relative group">
+          <Link to="/settings/profile" className="relative group">
             <img
               src={
                 profileData.photourl ||
@@ -374,19 +215,8 @@ const ProfileCard = () => {
                 e.target.src = "/default-avatar.png";
               }}
             />
-            <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={uploading}
-              />
-              <span className="text-white text-xs">
-                {uploading ? "Uploading..." : "Change"}
-              </span>
-            </label>
-          </div>
+            
+          </Link>
           <div>
             <div className="font-semibold">
               {profileData.firstname} {profileData.lastname}
@@ -439,7 +269,19 @@ const ProfileCard = () => {
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <h2 className="font-medium">{skill.skill_type}</h2>
+                <h2 className="font-medium">
+          
+          {console.log('Current skill:', skill)}
+          {console.log('skill_type value:', skill.skill_type)}
+          
+          
+          {skill.skill_type ? 
+            String(skill.skill_type).trim() : 
+            skill.skillType ? 
+              String(skill.skillType).trim() : 
+              "No Skill Type"
+          }
+        </h2>
                 </div>
                 <Link to={`/settings/skills/${skill._id}`}>
                   <span>

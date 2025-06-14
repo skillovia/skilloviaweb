@@ -841,14 +841,10 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, skill, skillId, skill_type } = location.state || {};
+  const { user, skill } = location.state || {};
 
   const user_id = user?.id;
-  const skill_id = skillId; // ✅ Use the passed ID instead
-
-  console.log("this is the skill id on firm", skillId);
-  console.log("Skill ID:", skill_id); // Check it
-  console.log("Skill Type:", skill?.skill_type); // Check it
+  const skill_id = skill;
 
   // Google Places Autocomplete state & refs
   const bookingLocationInputRef = useRef(null);

@@ -21,7 +21,12 @@ const Payment = () => {
           >
             <div className="flex items-center gap-3">
               <CreditCard className="text-gray-600" />
-              <span className="text-gray-800 font-medium">Billing</span>
+              <div>
+                <span className="text-gray-800 font-medium">Billing</span>
+                <div className="text-xs text-gray-500">
+                  View and manage your  payment methods, and billing details.
+                </div>
+              </div>
             </div>
             <ChevronRight className="text-gray-400" />
           </button>
@@ -33,18 +38,21 @@ const Payment = () => {
           >
             <div className="flex items-center gap-3">
               <Building2 className="text-gray-600" />
-              <span className="text-gray-800 font-medium">Get Paid</span>
+              <div>
+                <span className="text-gray-800 font-medium">Get Paid</span>
+                <div className="text-xs text-gray-500">
+                  Set up and manage your payout methods to receive payments.
+                </div>
+              </div>
             </div>
             <ChevronRight className="text-gray-400" />
           </button>
 
           <section className="pt-10">
-
-
-          <Link to="/create-stripe-account" className="flex items-center justify-center bg-secondary border border-gray-300 rounded-md px-4 py-2 text-white hover:text-gray-700">
-    <IoMdWallet className="mr-1 text-white" />
-    <span>Setup Connect Wallet </span>
-  </Link>
+            <Link to="/create-stripe-account" className="flex items-center justify-center bg-secondary border border-gray-300 rounded-md px-4 py-2 text-white hover:text-gray-700">
+              <IoMdWallet className="mr-1 text-white" />
+              <span>Setup Connect Wallet </span>
+            </Link>
           </section>
         </div>
       </div>
