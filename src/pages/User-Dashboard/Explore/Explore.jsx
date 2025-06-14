@@ -579,6 +579,20 @@ const ExploreSection = () => {
     );
   }
 
+  const handleChatClick = () => {
+    if (clientProfile) {
+      navigate(`/chat/${id}`, {
+        state: {
+          userId: id,
+          userName: `${clientProfile.firstname} ${clientProfile.lastname}`,
+          userPhoto: clientProfile.photourl
+            ? `https://${clientProfile.photourl}`
+            : null,
+        },
+      });
+    }
+  };
+
   return (
     <UserLayout>
       <FloatingChatButton onClick={handleChatClick} />
