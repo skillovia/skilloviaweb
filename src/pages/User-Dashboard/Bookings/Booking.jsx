@@ -279,16 +279,12 @@ const BookingCard = ({
                       ? `/outward-progress/${id}`
                       : `/inward-details/${id}`
                   }
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded transition"
                   title={`${
                     type.charAt(0).toUpperCase() + type.slice(1)
                   } Booking Details`}
                 >
-                  {type === "outward" ? (
-                    <ArrowUpRight className="w-4 h-4 text-gray-600" />
-                  ) : (
-                    <ArrowDownLeft className="w-4 h-4 text-gray-600" />
-                  )}
+                  View Details
                 </Link>
               </div>
             </div>
