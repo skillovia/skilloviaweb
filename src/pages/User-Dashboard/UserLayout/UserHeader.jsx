@@ -137,6 +137,30 @@ const UserHeader = () => {
       ...notifications.followees.map((n) => ({ ...n, type: "followees" })),
       ...notifications.message.map((n) => ({ ...n, type: "message" })),
     ];
+    const handleMarkAsSeen = async (notification) => {
+      try {
+        if (notification.markAsSeen === "NO") {
+          const token = localStorage.getItem("accessToken");
+          const updated = await markNotificationAsSeen(notification._id, token);
+
+          setNotifications((prev) => {
+            const updateList = (list) =>
+              list.map((n) =>
+                n._id === updated._id ? { ...n, markAsSeen: "YES" } : n
+              );
+
+            return {
+              bookings: updateList(prev.bookings),
+              followers: updateList(prev.followers),
+              followees: updateList(prev.followees),
+              message: updateList(prev.message),
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Failed to mark as seen:", err.message);
+      }
+    };
     return (
       <div className="lg:absolute right-0 mt-5 lg:w-80 fixed h-[20rem] overflow-y-auto w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
         <div className="px-4 py-4 b rounded-b-2xl">
@@ -144,7 +168,10 @@ const UserHeader = () => {
           {allNotifications.map((notification) => (
             <div
               key={`${notification.type}-${notification._id}`}
-              className="p-2 bg-input border border-gray my-2 rounded-md"
+              onClick={() => handleMarkAsSeen(notification)}
+              className={`p-2 cursor-pointer border border-gray my-2 rounded-md ${
+                notification.markAsSeen === "NO" ? "bg-red-50" : "bg-input"
+              }`}
             >
               <p className="text-secondary text-[13px] font-semibold">
                 {notification.title}
