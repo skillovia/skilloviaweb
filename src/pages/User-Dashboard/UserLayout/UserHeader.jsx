@@ -104,12 +104,14 @@ const UserHeader = () => {
   };
 
   const getTotalNotificationCount = () => {
-    return (
-      notifications.bookings.length +
-      notifications.followers.length +
-      notifications.followees.length +
-      notifications.message.length
-    );
+    const unseen = [
+      ...notifications.bookings,
+      ...notifications.followers,
+      ...notifications.followees,
+      ...notifications.message,
+    ].filter((n) => n.markAsSeen === "NO");
+
+    return unseen.length;
   };
 
   // Listen for profile updates from anywhere in the app
@@ -210,11 +212,11 @@ const UserHeader = () => {
 
           {/* Notification Bell */}
           <div className="relative">
-            <section  onClick={toggleNotifications} className="not bg-red border-2  h-8 w-8 lg:w-10 lg:h-10 rounded-full flex justify-center items-center border-secondary">
-              <Bell
-               
-                className="h-6 w-6 text-secondary cursor-pointer"
-              />
+            <section
+              onClick={toggleNotifications}
+              className="not bg-red border-2  h-8 w-8 lg:w-10 lg:h-10 rounded-full flex justify-center items-center border-secondary"
+            >
+              <Bell className="h-6 w-6 text-secondary cursor-pointer" />
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                 {getTotalNotificationCount()}
               </span>
