@@ -165,20 +165,22 @@ const UserHeader = () => {
       <div className="lg:absolute right-0 mt-5 lg:w-80 fixed h-[20rem] overflow-y-auto w-full bg-input border border-secondary md:rounded-lg py-2 z-50">
         <div className="px-4 py-4 b rounded-b-2xl">
           <h3 className="font-semibold">Notifications</h3>
-          {allNotifications.map((notification) => (
-            <div
-              key={`${notification.type}-${notification._id}`}
-              onClick={() => handleMarkAsSeen(notification)}
-              className={`p-2 cursor-pointer border border-gray my-2 rounded-md ${
-                notification.markAsSeen === "NO" ? "bg-red-50" : "bg-input"
-              }`}
-            >
-              <p className="text-secondary text-[13px] font-semibold">
-                {notification.title}
-              </p>
-              <p className="text-[12px]">{notification.description}</p>
-            </div>
-          ))}
+          {allNotifications
+            .filter((notification) => notification.markAsSeen === "NO")
+            .map((notification) => (
+              <div
+                key={`${notification.type}-${notification._id}`}
+                onClick={() => handleMarkAsSeen(notification)}
+                className={`p-2 cursor-pointer border border-gray my-2 rounded-md ${
+                  notification.markAsSeen === "NO" ? "bg-red-50" : "bg-input"
+                }`}
+              >
+                <p className="text-secondary text-[13px] font-semibold">
+                  {notification.title}
+                </p>
+                <p className="text-[12px]">{notification.description}</p>
+              </div>
+            ))}
         </div>
       </div>
     );
