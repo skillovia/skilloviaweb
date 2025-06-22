@@ -30,6 +30,7 @@ const ExploreSection = () => {
   const states = [
     { value: "aberdeen", label: "Aberdeen" },
     { value: "leeds", label: "Leeds" },
+    { value: "lagos", label: "Lagos" },
     { value: "england", label: "England" },
     { value: "armagh", label: "Armagh" },
     { value: "bangor", label: "Bangor" },
@@ -195,6 +196,66 @@ const ExploreSection = () => {
   // useEffect(() => {
   //   fetchProfile();
   // }, []);
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const accessToken = localStorage.getItem("accessToken");
+  //       if (!accessToken) throw new Error("Access token not found");
+
+  //       const decodedToken = jwtDecode(accessToken);
+  //       const user_id = decodedToken?.id;
+  //       if (!user_id) throw new Error("User ID not found");
+
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/users/profile/${user_id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) throw new Error("Failed to fetch profile");
+
+  //       const result = await response.json();
+  //       setProfileData({
+  //         ...result.data,
+  //         // photourl: ensureHttps(result.data.photourl),
+  //       });
+
+  //       // Try to get user's geolocation
+  //       navigator.geolocation.getCurrentPosition(
+  //         (pos) => {
+  //           const coords = {
+  //             lat: pos.coords.latitude,
+  //             lon: pos.coords.longitude,
+  //           };
+  //           setUserPosition(coords);
+  //         },
+  //         (error) => {
+  //           console.warn("⚠️ Geolocation failed:", error.message);
+
+  //           // Fallback to profile location if available
+  //           if (result.data?.location?.lat && result.data?.location?.lon) {
+  //             setUserPosition({
+  //               lat: result.data.location.lat,
+  //               lon: result.data.location.lon,
+  //             });
+  //           } else {
+  //             console.error("❌ No valid fallback coordinates in profile.");
+  //           }
+  //         }
+  //       );
+  //     } catch (err) {
+  //       console.error("Error fetching profile:", err.message);
+  //       setError(err.message);
+  //     } finally {
+  //       setProfileLoading(false);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, []);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -217,39 +278,62 @@ const ExploreSection = () => {
         if (!response.ok) throw new Error("Failed to fetch profile");
 
         const result = await response.json();
-        setProfileData({
-          ...result.data,
-          // photourl: ensureHttps(result.data.photourl),
-        });
+        setProfileData(result.data);
 
-        // Try to get user's geolocation
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const coords = {
-              lat: pos.coords.latitude,
-              lon: pos.coords.longitude,
-            };
-            setUserPosition(coords);
-          },
-          (error) => {
-            console.warn("⚠️ Geolocation failed:", error.message);
-
-            // Fallback to profile location if available
-            if (result.data?.location?.lat && result.data?.location?.lon) {
+        // Attempt geolocation
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
               setUserPosition({
-                lat: result.data.location.lat,
-                lon: result.data.location.lon,
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
               });
-            } else {
-              console.error("❌ No valid fallback coordinates in profile.");
-            }
-          }
-        );
+            },
+            (error) => {
+              console.warn("⚠️ Geolocation failed:", error.message);
+              fallbackToProfileLocation(result.data);
+            },
+            { enableHighAccuracy: true, timeout: 7000 }
+          );
+        } else {
+          console.warn("🧭 Geolocation not supported.");
+          fallbackToProfileLocation(result.data);
+        }
       } catch (err) {
-        console.error("Error fetching profile:", err.message);
+        console.error("❌ Error fetching profile:", err.message);
         setError(err.message);
       } finally {
         setProfileLoading(false);
+      }
+    };
+
+    const fallbackToProfileLocation = (profile) => {
+      if (profile?.lat && profile?.lon) {
+        setUserPosition({
+          latitude: parseFloat(profile.lat),
+          longitude: parseFloat(profile.lon),
+        });
+        console.log("📦 Used fallback lat/lon from profile");
+      } else if (profile?.location?.coordinates?.length === 2) {
+        const [rawLon, rawLat] = profile.location.coordinates;
+
+        const lat =
+          typeof rawLat === "object"
+            ? parseFloat(rawLat["$numberDouble"])
+            : parseFloat(rawLat);
+        const lon =
+          typeof rawLon === "object"
+            ? parseFloat(rawLon["$numberDouble"])
+            : parseFloat(rawLon);
+
+        setUserPosition({
+          latitude: lat,
+          longitude: lon,
+        });
+
+        console.log("📦 Used fallback location.coordinates from profile");
+      } else {
+        console.warn("⚠️ No fallback coordinates available in profile.");
       }
     };
 
