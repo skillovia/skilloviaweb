@@ -352,22 +352,22 @@ const ExploreSection = () => {
 
         lat =
           typeof rawLat === "object"
-            ? parseFloat(rawLat["$numberDouble"])
+            ? parseFloat(rawLat["$numberDouble"] || rawLat["$numberInt"])
             : parseFloat(rawLat);
         lon =
           typeof rawLon === "object"
-            ? parseFloat(rawLon["$numberDouble"])
+            ? parseFloat(rawLon["$numberDouble"] || rawLon["$numberInt"])
             : parseFloat(rawLon);
       }
 
-      if (lat && lon) {
+      if (lat !== 0 && lon !== 0 && !isNaN(lat) && !isNaN(lon)) {
         setUserPosition({
           latitude: lat,
           longitude: lon,
         });
         console.log("📦 Fallback to profile coordinates:", { lat, lon });
       } else {
-        console.warn("⚠️ No fallback coordinates available in profile.");
+        console.warn("⚠️ No valid fallback coordinates available in profile.");
       }
     };
 
