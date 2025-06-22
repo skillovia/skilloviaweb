@@ -307,31 +307,65 @@ const ExploreSection = () => {
       }
     };
 
+    // const fallbackToProfileLocation = (profile) => {
+    //   if (profile?.lat && profile?.lon) {
+    //     setUserPosition({
+    //       latitude: parseFloat(profile.lat),
+    //       longitude: parseFloat(profile.lon),
+    //     });
+    //     console.log("📦 Used fallback lat/lon from profile");
+    //   } else if (profile?.location?.coordinates?.length === 2) {
+    //     const [rawLon, rawLat] = profile.location.coordinates;
+
+    //     const lat =
+    //       typeof rawLat === "object"
+    //         ? parseFloat(rawLat["$numberDouble"])
+    //         : parseFloat(rawLat);
+    //     const lon =
+    //       typeof rawLon === "object"
+    //         ? parseFloat(rawLon["$numberDouble"])
+    //         : parseFloat(rawLon);
+
+    //     setUserPosition({
+    //       latitude: lat,
+    //       longitude: lon,
+    //     });
+
+    //     console.log("📦 Used fallback location.coordinates from profile");
+    //   } else {
+    //     console.warn("⚠️ No fallback coordinates available in profile.");
+    //   }
+    // };
     const fallbackToProfileLocation = (profile) => {
+      let lat = null;
+      let lon = null;
+
       if (profile?.lat && profile?.lon) {
-        setUserPosition({
-          latitude: parseFloat(profile.lat),
-          longitude: parseFloat(profile.lon),
-        });
-        console.log("📦 Used fallback lat/lon from profile");
-      } else if (profile?.location?.coordinates?.length === 2) {
+        lat = parseFloat(profile.lat);
+        lon = parseFloat(profile.lon);
+      } else if (
+        profile?.location?.coordinates &&
+        Array.isArray(profile.location.coordinates) &&
+        profile.location.coordinates.length === 2
+      ) {
         const [rawLon, rawLat] = profile.location.coordinates;
 
-        const lat =
+        lat =
           typeof rawLat === "object"
             ? parseFloat(rawLat["$numberDouble"])
             : parseFloat(rawLat);
-        const lon =
+        lon =
           typeof rawLon === "object"
             ? parseFloat(rawLon["$numberDouble"])
             : parseFloat(rawLon);
+      }
 
+      if (lat && lon) {
         setUserPosition({
           latitude: lat,
           longitude: lon,
         });
-
-        console.log("📦 Used fallback location.coordinates from profile");
+        console.log("📦 Fallback to profile coordinates:", { lat, lon });
       } else {
         console.warn("⚠️ No fallback coordinates available in profile.");
       }
