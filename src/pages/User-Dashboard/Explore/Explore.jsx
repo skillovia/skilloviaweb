@@ -30,7 +30,6 @@ const ExploreSection = () => {
   const states = [
     { value: "aberdeen", label: "Aberdeen" },
     { value: "leeds", label: "Leeds" },
-    { value: "lagos", label: "Lagos" },
     { value: "england", label: "England" },
     { value: "armagh", label: "Armagh" },
     { value: "bangor", label: "Bangor" },
