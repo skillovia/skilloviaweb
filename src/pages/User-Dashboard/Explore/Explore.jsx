@@ -30,6 +30,7 @@ const ExploreSection = () => {
   const states = [
     { value: "aberdeen", label: "Aberdeen" },
     { value: "leeds", label: "Leeds" },
+    { value: "england", label: "England" },
     { value: "armagh", label: "Armagh" },
     { value: "bangor", label: "Bangor" },
     { value: "bath", label: "Bath" },
@@ -358,24 +359,58 @@ const ExploreSection = () => {
     fetchLocation();
   }, [profileLoading, profileData, userPosition]);
 
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     setIsCategoriesLoading(true);
+  //     setCategoriesError("");
+
+  //     try {
+  //       const accessToken = localStorage.getItem("accessToken");
+
+  //       if (!accessToken) {
+  //         throw new Error("Authentication required");
+  //       }
+
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_BASE_URL}/admin/skills/get/published`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken}`,
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+
+  //       const data = await response.json();
+
+  //       if (data.status === "success") {
+  //         setCategories(data.data || []);
+  //       } else {
+  //         throw new Error(data.message || "Failed to fetch categories");
+  //       }
+  //     } catch (err) {
+  //       setCategoriesError(
+  //         "Unable to load categories. Please try again later."
+  //       );
+  //     } finally {
+  //       setIsCategoriesLoading(false);
+  //     }
+  //   };
+
+  //   fetchCategories();
+  // }, []);
   useEffect(() => {
     const fetchCategories = async () => {
       setIsCategoriesLoading(true);
       setCategoriesError("");
 
       try {
-        const accessToken = localStorage.getItem("accessToken");
-
-        if (!accessToken) {
-          throw new Error("Authentication required");
-        }
-
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/admin/skills/get/published`,
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
               "Content-Type": "application/json",
             },
           }
@@ -389,6 +424,7 @@ const ExploreSection = () => {
           throw new Error(data.message || "Failed to fetch categories");
         }
       } catch (err) {
+        console.error("Fetch error:", err);
         setCategoriesError(
           "Unable to load categories. Please try again later."
         );
