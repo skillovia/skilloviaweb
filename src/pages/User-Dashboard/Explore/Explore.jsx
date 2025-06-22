@@ -477,6 +477,50 @@ const ExploreSection = () => {
     fetchLocation();
   }, [profileLoading, profileData, userPosition]);
 
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const isFirstLogin = query.get("firstLogin");
+
+    if (isFirstLogin && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          const accessToken = localStorage.getItem("accessToken");
+          const userId = jwtDecode(accessToken)?.id;
+
+          if (!userId) return;
+
+          try {
+            await fetch(
+              `${import.meta.env.VITE_BASE_URL}/users/update/${userId}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                  lat: latitude,
+                  lon: longitude,
+                  locationName: "Auto-detected from Google login",
+                }),
+              }
+            );
+
+            console.log("📍 Saved browser location to profile.");
+            window.location.replace("/explore");
+          } catch (err) {
+            console.error("❌ Failed to save location:", err);
+          }
+        },
+        (err) => {
+          console.warn("⚠️ Could not get browser location:", err.message);
+        }
+      );
+    }
+  }, []);
+
   // useEffect(() => {
   //   const fetchCategories = async () => {
   //     setIsCategoriesLoading(true);
