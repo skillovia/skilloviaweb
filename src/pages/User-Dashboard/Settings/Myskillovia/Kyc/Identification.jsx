@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Upload, Trash2 } from 'lucide-react';
-import UserLayout from '../../../UserLayout/UserLayout';
-import BackButton from '../../../../../componets/Back';
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Upload, Trash2 } from "lucide-react";
+import UserLayout from "../../../UserLayout/UserLayout";
+import BackButton from "../../../../../componets/Back";
 
 // Helper function to convert ID type to API format
 const formatIdType = (type) => {
   const typeMap = {
-    'Residence permit': 'residence-permit',
-    'Driving license': 'driving-license',
-    'International passport': 'international-passport'
+    "Residence permit": "residence-permit",
+    "Driving license": "driving-license",
+    "International passport": "international-passport",
   };
-  return typeMap[type] || '';
+  return typeMap[type] || "";
 };
 
 // Helper function to convert API format to display format
 const formatDisplayType = (type) => {
   const displayMap = {
-    'residence-permit': 'Residence permit',
-    'driving-license': 'Driving license',
-    'international-passport': 'International passport'
+    "residence-permit": "Residence permit",
+    "driving-license": "Driving license",
+    "international-passport": "International passport",
   };
   return displayMap[type] || type;
 };
@@ -28,9 +28,9 @@ const Modal = ({ isOpen, onClose, onSelect }) => {
   if (!isOpen) return null;
 
   const idTypes = [
-    'Residence permit',
-    'Driving license',
-    'International passport'
+    "Residence permit",
+    "Driving license",
+    "International passport",
   ];
 
   return (
@@ -58,12 +58,12 @@ const Modal = ({ isOpen, onClose, onSelect }) => {
 };
 
 const Identification = () => {
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedType, setSelectedType] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingDocs, setFetchingDocs] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [identityDocs, setIdentityDocs] = useState([]);
   const [deleting, setDeleting] = useState(false);
@@ -75,35 +75,35 @@ const Identification = () => {
   const fetchIdentityDocs = async () => {
     try {
       setFetchingDocs(true);
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) throw new Error('Access token not found');
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/settings/kyc/get/identity`,
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch identity documents');
+        throw new Error("Failed to fetch identity documents");
       }
 
       const data = await response.json();
-      const formattedDocs = data.data.map(doc => ({
+      const formattedDocs = data.data.map((doc) => ({
         id: doc.id,
         fileUrl: doc.document_url,
         type: doc.kyc_id_type,
         createdAt: doc.created_at,
         approvalStatus: doc.approval_status,
-        kycMethod: doc.kyc_method
+        kycMethod: doc.kyc_method,
       }));
-      
+
       setIdentityDocs(formattedDocs);
     } catch (err) {
-      console.error('Error fetching identity documents:', err);
+      console.error("Error fetching identity documents:", err);
       setError(err.message);
     } finally {
       setFetchingDocs(false);
@@ -114,35 +114,35 @@ const Identification = () => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setError('');
+      setError("");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       setDeleting(true);
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) throw new Error('Access token not found');
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/settings/kyc/delete/identity/${id}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to delete identity document');
+        throw new Error("Failed to delete identity document");
       }
 
       await fetchIdentityDocs();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      console.error('Error deleting identity document:', err);
+      console.error("Error deleting identity document:", err);
       setError(err.message);
     } finally {
       setDeleting(false);
@@ -151,49 +151,49 @@ const Identification = () => {
 
   const handleSubmit = async () => {
     if (!selectedType) {
-      setError('Please select an ID type');
+      setError("Please select an ID type");
       return;
     }
     if (!file) {
-      setError('Please upload an ID document');
+      setError("Please upload an ID document");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setSuccess(false);
 
     try {
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) throw new Error('Access token not found');
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found");
 
       const formData = new FormData();
-      formData.append('type', formatIdType(selectedType));
-      formData.append('file', file);
+      formData.append("type", formatIdType(selectedType));
+      formData.append("file", file);
 
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/settings/kyc/upload/identity`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
           },
-          body: formData
+          body: formData,
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to upload ID');
+        throw new Error(errorData.message || "Failed to upload ID");
       }
 
       setSuccess(true);
       setFile(null);
-      setSelectedType('');
+      setSelectedType("");
       await fetchIdentityDocs();
     } catch (err) {
-      console.error('Error uploading ID:', err);
-      setError(err.message || 'Failed to upload ID. Please try again.');
+      console.error("Error uploading ID:", err);
+      setError(err.message || "Failed to upload ID. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -202,9 +202,9 @@ const Identification = () => {
   const getStatusBadgeClass = (status) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case 'approved':
+      case "approved":
         return `${baseClasses} bg-green-100 text-green-800`;
-      case 'rejected':
+      case "rejected":
         return `${baseClasses} bg-red-100 text-red-800`;
       default:
         return `${baseClasses} bg-yellow-100 text-yellow-800`;
@@ -217,14 +217,16 @@ const Identification = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <BackButton label='Kyc' />
+            <BackButton label="Kyc" />
           </div>
           <button
-            className={`bg-primary text-secondary font-semibold px-4 py-2 rounded-full ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-500'}`}
+            className={`bg-primary text-secondary font-semibold px-4 py-2 rounded-full ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-500"
+            }`}
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? 'Uploading...' : 'Save changes'}
+            {loading ? "Uploading..." : "Save changes"}
           </button>
         </div>
 
@@ -250,7 +252,7 @@ const Identification = () => {
               onClick={() => setIsModalOpen(true)}
               className="w-full p-3 text-left bg-input border border-gray rounded-md hover:bg-gray-50"
             >
-              {selectedType || 'Select option'}
+              {selectedType || "Select option"}
             </button>
           </div>
 
@@ -260,7 +262,9 @@ const Identification = () => {
               <div className="border-2 border-dashed border-gray rounded-md bg-input p-8 text-center bg-gray-50 hover:bg-gray-100">
                 <div className="flex flex-col items-center space-y-2">
                   <Upload className="w-8 h-8 text-gray-400" />
-                  <div className="text-sm text-gray-600">Click to upload image</div>
+                  <div className="text-sm text-gray-600">
+                    Click to upload image
+                  </div>
                   <div className="text-xs text-gray-400">SVG, PNG, or JPG</div>
                 </div>
                 <input
@@ -281,7 +285,9 @@ const Identification = () => {
 
         {/* Existing Documents Section */}
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Uploaded Identity Documents</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            Uploaded Identity Documents
+          </h2>
           {fetchingDocs ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -295,25 +301,30 @@ const Identification = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <img
-                    src={`${doc.fileUrl}`  }
-                   
+                      src={`${doc.fileUrl}`}
                       alt="Identity Document"
                       className="w-12 h-12 object-cover rounded"
                     />
                     <div>
-                      <div className="font-medium">{formatDisplayType(doc.type)}</div>
+                      <div className="font-medium">
+                        {formatDisplayType(doc.type)}
+                      </div>
                       <div className="text-sm text-gray-500">
-                        Uploaded on {new Date(doc.createdAt).toLocaleDateString()}
+                        Uploaded on{" "}
+                        {new Date(doc.createdAt).toLocaleDateString()}
                       </div>
                       <div className="mt-1">
-                        <span className={getStatusBadgeClass(doc.approvalStatus)}>
-                          {doc.approvalStatus.charAt(0).toUpperCase() + doc.approvalStatus.slice(1)}
+                        <span
+                          className={getStatusBadgeClass(doc.approvalStatus)}
+                        >
+                          {doc.approvalStatus.charAt(0).toUpperCase() +
+                            doc.approvalStatus.slice(1)}
                         </span>
                       </div>
                     </div>
                   </div>
                   <button
-                    onClick={() => handleDelete(doc.id)}
+                    onClick={() => handleDelete(doc._id)}
                     disabled={deleting}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                   >
