@@ -93,7 +93,7 @@ const Identification = () => {
 
       const data = await response.json();
       const formattedDocs = data.data.map((doc) => ({
-        id: doc.id,
+        id: doc._id,
         fileUrl: doc.document_url,
         type: doc.kyc_id_type,
         createdAt: doc.created_at,
@@ -324,8 +324,11 @@ const Identification = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleDelete(doc._id)}
-                    disabled={deleting}
+                    onClick={() => {
+                      console.log("Trying to delete ID:", doc._id || doc.id);
+                      handleDelete(doc._id || doc.id);
+                    }}
+                    // disabled={deleting}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                   >
                     <Trash2 className="w-5 h-5" />
